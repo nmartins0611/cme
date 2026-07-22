@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-904: WAF (Web Application Firewall)
+
+# Set to true to skip this control
+cme_904_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_904_custom_remediation: false
+

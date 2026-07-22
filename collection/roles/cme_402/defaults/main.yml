@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-402: FIPS 140-3 Mode
+
+# Set to true to skip this control
+cme_402_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_402_custom_remediation: false
+

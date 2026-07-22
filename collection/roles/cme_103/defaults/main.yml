@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-103: Stack Canaries (Stack Protector)
+
+# Set to true to skip this control
+cme_103_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_103_custom_remediation: false
+

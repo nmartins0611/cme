@@ -1,0 +1,25 @@
+---
+# CME-501: Read-Only Root Filesystem
+# Verification: Check mount options for root filesystem
+
+- name: "CME-501 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "mount | grep 'on / ' | grep 'ro,'"
+  register: cme_501_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-501 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_501_verify_0.stdout is search('ro,')"
+    fail_msg: "CME-501 FAILED — expected 'ro,'"
+    success_msg: "CME-501 PASSED — Read-Only Root Filesystem"
+  ignore_errors: true
+  register: cme_501_assert_0
+  when: ansible_os_family != 'Windows' and cme_501_verify_0 is not skipped
+
+- name: "CME-501 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-501', 'control_name': 'Read-Only Root Filesystem', 'tactic': 'Isolate', 'category': 'Filesystem Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_501_assert_0 is defined and cme_501_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_501_assert_0 is defined) | ternary(cme_501_assert_0.msg | default(''), 'not checked'))}] }}"

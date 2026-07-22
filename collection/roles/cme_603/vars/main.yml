@@ -1,0 +1,11 @@
+---
+cme_id: "CME-603"
+cme_control_name: "Unprivileged BPF Disabled"
+cme_tactic: "Harden"
+cme_category: "Syscall & BPF Controls"
+cme_category_id: "syscall-bpf-controls"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "PR", "from": "L", "to": "H", "rationale": "Unprivileged user cannot load BPF programs to exploit verifier bugs"}]
+cme_cwe_relationships: ["CWE-269", "CWE-119"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Ubuntu 24.04"]

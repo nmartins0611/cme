@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1310"
+cme_control_name: "File Upload Validation (Content Inspection and Extension Allowlist)"
+cme_tactic: "Harden"
+cme_category: "Application Input Validation"
+cme_category_id: "application-input-validation"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Attacker must bypass content-type inspection, extension allowlist, and storage isolation to execute an uploaded payload; simple extension renaming or MIME spoofing is insufficient"}, {"metric": "I", "from": "H", "to": "L", "rationale": "Uploaded files are confined to a non-executable storage directory with randomized names; the attacker cannot overwrite existing application files or place executable content in the web root"}]
+cme_cwe_relationships: ["CWE-434", "CWE-20", "CWE-641", "CWE-646", "CWE-1286"]
+cme_platforms: ["RHEL 9", "RHEL 10", "Ubuntu 24.04", "Windows Server 2019", "Windows Server 2022"]

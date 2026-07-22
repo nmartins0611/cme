@@ -1,0 +1,43 @@
+---
+# CME-701: Sandboxing / gVisor Runtime
+# Verification: Check container runtime class
+
+- name: "CME-701 | Run verification command (kubernetes)"
+  ansible.builtin.shell:
+    cmd: "kubectl get pod <pod> -o jsonpath='{.spec.runtimeClassName}'"
+  register: cme_701_verify_0
+  changed_when: false
+  failed_when: false
+  when: cme_kubernetes_host | default(false)
+
+- name: "CME-701 | Assert control is active (kubernetes)"
+  ansible.builtin.assert:
+    that:
+      - "cme_701_verify_0.stdout is search('gvisor')"
+    fail_msg: "CME-701 FAILED — expected 'gvisor'"
+    success_msg: "CME-701 PASSED — Sandboxing / gVisor Runtime"
+  ignore_errors: true
+  register: cme_701_assert_0
+  when: cme_kubernetes_host | default(false) and cme_701_verify_0 is not skipped
+
+- name: "CME-701 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "podman inspect <container> | grep runtime"
+  register: cme_701_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-701 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_701_verify_1.stdout is search('runsc|kata')"
+    fail_msg: "CME-701 FAILED — expected 'runsc|kata'"
+    success_msg: "CME-701 PASSED — Sandboxing / gVisor Runtime"
+  ignore_errors: true
+  register: cme_701_assert_1
+  when: ansible_os_family != 'Windows' and cme_701_verify_1 is not skipped
+
+- name: "CME-701 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-701', 'control_name': 'Sandboxing / gVisor Runtime', 'tactic': 'Isolate', 'category': 'Container Isolation', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_701_assert_0 is defined and cme_701_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_701_assert_0 is defined) | ternary(cme_701_assert_0.msg | default(''), 'not checked'))}] }}"

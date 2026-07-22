@@ -1,0 +1,61 @@
+---
+# CME-917: Worker Process Recycling (MaxConnectionsPerChild / max_requests)
+# Verification: Check that application server worker recycling is configured with a finite request limit
+
+- name: "CME-917 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep -i MaxConnectionsPerChild /etc/httpd/conf/*.conf /etc/httpd/conf.d/*.conf 2>/dev/null"
+  register: cme_917_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-917 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_917_verify_0.stdout is search('A positive integer value [(]not 0, which means unlimited[)]')"
+    fail_msg: "CME-917 FAILED — expected 'A positive integer value (not 0, which means unlimited)'"
+    success_msg: "CME-917 PASSED — Worker Process Recycling (MaxConnectionsPerChild / max_requests)"
+  ignore_errors: true
+  register: cme_917_assert_0
+  when: ansible_os_family != 'Windows' and cme_917_verify_0 is not skipped
+
+- name: "CME-917 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep pm.max_requests /etc/php-fpm.d/*.conf /etc/php/*/fpm/pool.d/*.conf 2>/dev/null"
+  register: cme_917_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-917 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_917_verify_1.stdout is search('A positive integer value [(]not 0[)]')"
+    fail_msg: "CME-917 FAILED — expected 'A positive integer value (not 0)'"
+    success_msg: "CME-917 PASSED — Worker Process Recycling (MaxConnectionsPerChild / max_requests)"
+  ignore_errors: true
+  register: cme_917_assert_1
+  when: ansible_os_family != 'Windows' and cme_917_verify_1 is not skipped
+
+- name: "CME-917 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep -E 'max.requests|max-requests' /etc/gunicorn/*.py /etc/gunicorn/*.conf 2>/dev/null"
+  register: cme_917_verify_2
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-917 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_917_verify_2.stdout is search('A positive integer value')"
+    fail_msg: "CME-917 FAILED — expected 'A positive integer value'"
+    success_msg: "CME-917 PASSED — Worker Process Recycling (MaxConnectionsPerChild / max_requests)"
+  ignore_errors: true
+  register: cme_917_assert_2
+  when: ansible_os_family != 'Windows' and cme_917_verify_2 is not skipped
+
+- name: "CME-917 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-917', 'control_name': 'Worker Process Recycling (MaxConnectionsPerChild / max_requests)', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_917_assert_0 is defined and cme_917_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_917_assert_0 is defined) | ternary(cme_917_assert_0.msg | default(''), 'not checked'))}] }}"

@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-906: Rate Limiting / Connection Throttling
+
+# Set to true to skip this control
+cme_906_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_906_custom_remediation: false
+

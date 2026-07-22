@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-1309: Script Engine Restriction (Sandbox / Disable)
+
+# Set to true to skip this control
+cme_1309_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_1309_custom_remediation: false
+

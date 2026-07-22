@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-803: Account Lockout Policy (pam_faillock)
+
+# Set to true to skip this control
+cme_803_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_803_custom_remediation: false
+

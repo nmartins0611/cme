@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-801: Multi-Factor Authentication (MFA)
+
+# Set to true to skip this control
+cme_801_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_801_custom_remediation: false
+

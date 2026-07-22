@@ -1,0 +1,61 @@
+---
+# CME-102: NX/XD Bit (Non-Executable Memory)
+# Verification: Check CPU supports NX bit and kernel has it enabled
+
+- name: "CME-102 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep -q nx /proc/cpuinfo && echo 'NX enabled'"
+  register: cme_102_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-102 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_102_verify_0.stdout is search('NX enabled')"
+    fail_msg: "CME-102 FAILED — expected 'NX enabled'"
+    success_msg: "CME-102 PASSED — NX/XD Bit (Non-Executable Memory)"
+  ignore_errors: true
+  register: cme_102_assert_0
+  when: ansible_os_family != 'Windows' and cme_102_verify_0 is not skipped
+
+- name: "CME-102 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "dmesg | grep -i 'NX.*protection'"
+  register: cme_102_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-102 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_102_verify_1.stdout is search('NX [(]Execute Disable[)] protection: active')"
+    fail_msg: "CME-102 FAILED — expected 'NX (Execute Disable) protection: active'"
+    success_msg: "CME-102 PASSED — NX/XD Bit (Non-Executable Memory)"
+  ignore_errors: true
+  register: cme_102_assert_1
+  when: ansible_os_family != 'Windows' and cme_102_verify_1 is not skipped
+
+- name: "CME-102 | Run verification command (windows)"
+  ansible.builtin.shell:
+    cmd: "(Get-CimInstance Win32_OperatingSystem).DataExecutionPrevention_SupportPolicy"
+  register: cme_102_verify_2
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'Windows'
+
+- name: "CME-102 | Assert control is active (windows)"
+  ansible.builtin.assert:
+    that:
+      - "cme_102_verify_2.stdout is search('3')"
+    fail_msg: "CME-102 FAILED — expected '3'"
+    success_msg: "CME-102 PASSED — NX/XD Bit (Non-Executable Memory)"
+  ignore_errors: true
+  register: cme_102_assert_2
+  when: ansible_os_family == 'Windows' and cme_102_verify_2 is not skipped
+
+- name: "CME-102 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-102', 'control_name': 'NX/XD Bit (Non-Executable Memory)', 'tactic': 'Harden', 'category': 'Kernel Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_102_assert_0 is defined and cme_102_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_102_assert_0 is defined) | ternary(cme_102_assert_0.msg | default(''), 'not checked'))}] }}"

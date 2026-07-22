@@ -1,0 +1,12 @@
+---
+# CME-1204: Service Watchdog and Automatic Restart (systemd WatchdogSec/Restart)
+
+- name: "CME-1204 | Ensure sshd is running and enabled"
+  ansible.builtin.systemd:
+    name: sshd
+    state: started
+    enabled: true
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1204 | Verify after remediation"
+  ansible.builtin.include_tasks: verify.yml

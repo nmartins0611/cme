@@ -1,0 +1,11 @@
+---
+cme_id: "CME-701"
+cme_control_name: "Sandboxing / gVisor Runtime"
+cme_tactic: "Isolate"
+cme_category: "Container Isolation"
+cme_category_id: "container-isolation"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "S", "from": "C", "to": "U", "rationale": "Container interacts with gVisor sentry, not host kernel; container escape requires breaking through gVisor first"}]
+cme_cwe_relationships: ["CWE-269", "CWE-119", "CWE-653"]
+cme_platforms: ["Kubernetes", "GKE"]

@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-206: Network Policy (Kubernetes)
+
+# Set to true to skip this control
+cme_206_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_206_custom_remediation: false
+

@@ -1,0 +1,43 @@
+---
+# CME-604: Unprivileged User Namespaces Disabled
+# Verification: Check user.max_user_namespaces sysctl
+
+- name: "CME-604 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "cat /proc/sys/user/max_user_namespaces"
+  register: cme_604_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-604 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_604_verify_0.stdout is search('0')"
+    fail_msg: "CME-604 FAILED — expected '0'"
+    success_msg: "CME-604 PASSED — Unprivileged User Namespaces Disabled"
+  ignore_errors: true
+  register: cme_604_assert_0
+  when: ansible_os_family != 'Windows' and cme_604_verify_0 is not skipped
+
+- name: "CME-604 | Run verification command (debian)"
+  ansible.builtin.shell:
+    cmd: "sysctl kernel.unprivileged_userns_clone 2>/dev/null"
+  register: cme_604_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_system == 'debian'
+
+- name: "CME-604 | Assert control is active (debian)"
+  ansible.builtin.assert:
+    that:
+      - "cme_604_verify_1.stdout is search('kernel.unprivileged_userns_clone = 0')"
+    fail_msg: "CME-604 FAILED — expected 'kernel.unprivileged_userns_clone = 0'"
+    success_msg: "CME-604 PASSED — Unprivileged User Namespaces Disabled"
+  ignore_errors: true
+  register: cme_604_assert_1
+  when: ansible_system == 'debian' and cme_604_verify_1 is not skipped
+
+- name: "CME-604 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-604', 'control_name': 'Unprivileged User Namespaces Disabled', 'tactic': 'Harden', 'category': 'Syscall & BPF Controls', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_604_assert_0 is defined and cme_604_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_604_assert_0 is defined) | ternary(cme_604_assert_0.msg | default(''), 'not checked'))}] }}"

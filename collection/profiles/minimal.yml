@@ -1,0 +1,28 @@
+---
+# Minimal profile — high-confidence kernel, MAC, and crypto controls
+controls:
+  - cme_101
+  - cme_102
+  - cme_103
+  - cme_104
+  - cme_105
+  - cme_106
+  - cme_107
+  - cme_108
+  - cme_109
+  - cme_110
+  - cme_111
+  - cme_112
+  - cme_114
+  - cme_116
+  - cme_117
+  - cme_118
+  - cme_301
+  - cme_302
+  - cme_304
+  - cme_401
+  - cme_402
+  - cme_403
+  - cme_405
+  - cme_406
+  - cme_407

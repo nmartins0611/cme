@@ -1,0 +1,43 @@
+---
+# CME-1101: Automated Patch Management (dnf-automatic)
+# Verification: Verify automatic updates are enabled
+
+- name: "CME-1101 | Run verification command (rhel)"
+  ansible.builtin.shell:
+    cmd: "systemctl is-active dnf-automatic-install.timer"
+  register: cme_1101_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-1101 | Assert control is active (rhel)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1101_verify_0.stdout is search('active')"
+    fail_msg: "CME-1101 FAILED — expected 'active'"
+    success_msg: "CME-1101 PASSED — Automated Patch Management (dnf-automatic)"
+  ignore_errors: true
+  register: cme_1101_assert_0
+  when: ansible_os_family == 'RedHat' and cme_1101_verify_0 is not skipped
+
+- name: "CME-1101 | Run verification command (rhel)"
+  ansible.builtin.shell:
+    cmd: "grep apply_updates /etc/dnf/automatic.conf"
+  register: cme_1101_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-1101 | Assert control is active (rhel)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1101_verify_1.stdout is search('apply_updates = yes')"
+    fail_msg: "CME-1101 FAILED — expected 'apply_updates = yes'"
+    success_msg: "CME-1101 PASSED — Automated Patch Management (dnf-automatic)"
+  ignore_errors: true
+  register: cme_1101_assert_1
+  when: ansible_os_family == 'RedHat' and cme_1101_verify_1 is not skipped
+
+- name: "CME-1101 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1101', 'control_name': 'Automated Patch Management (dnf-automatic)', 'tactic': 'Evict', 'category': 'Patch Management', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_1101_assert_0 is defined and cme_1101_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1101_assert_0 is defined) | ternary(cme_1101_assert_0.msg | default(''), 'not checked'))}] }}"

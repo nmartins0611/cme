@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1007"
+cme_control_name: "Application Configuration Drift Detection (IaC Enforcement)"
+cme_tactic: "Detect"
+cme_category: "Integrity Detection"
+cme_category_id: "integrity-detection"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Compensating control: unauthorized configuration changes are detected within the reconciliation interval and may be automatically reverted, requiring the attacker to re-exploit during each cycle or to compromise the IaC pipeline itself \u2014 significantly increasing attack complexity."}, {"metric": "I", "from": "H", "to": "L", "rationale": "Persistent configuration modifications are reverted to the declared baseline on each reconciliation cycle; integrity impact is limited to the window between drift introduction and the next reconciliation run."}]
+cme_cwe_relationships: ["CWE-266", "CWE-284", "CWE-1220", "CWE-16"]
+cme_platforms: ["any"]

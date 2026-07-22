@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-918: URL Path Authorization Enforcement (Forced Browsing Prevention)
+
+# Set to true to skip this control
+cme_918_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_918_custom_remediation: false
+

@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1313"
+cme_control_name: "CRLF / Line Injection Prevention (Newline Sanitization for Structured Formats)"
+cme_tactic: "Harden"
+cme_category: "Application Input Validation"
+cme_category_id: "application-input-validation"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Newline characters in user input are stripped or rejected before reaching format-sensitive contexts; attacker cannot break record boundaries in HTTP headers, config files, Git refs, or log entries"}, {"metric": "I", "from": "H", "to": "L", "rationale": "Cannot forge log entries, split HTTP responses, inject configuration directives, or manipulate Git refs via embedded newlines"}]
+cme_cwe_relationships: ["CWE-93", "CWE-113"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

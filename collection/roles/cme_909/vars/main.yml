@@ -1,0 +1,11 @@
+---
+cme_id: "CME-909"
+cme_control_name: "Default-Deny API Authorization Policy"
+cme_tactic: "Harden"
+cme_category: "Application Controls"
+cme_category_id: "application-controls"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "PR", "from": "N", "to": "L", "rationale": "Unauthenticated access to any endpoint is impossible under default-deny; every request must present valid credentials at minimum, eliminating the entire class of missing-authentication vulnerabilities (CWE-306) at the framework level."}, {"metric": "AC", "from": "L", "to": "H", "rationale": "An attacker must find an explicit authorization bypass or policy misconfiguration rather than simply discovering an unprotected endpoint; the framework ensures no endpoint is accidentally exposed without a deliberate policy decision."}]
+cme_cwe_relationships: ["CWE-306", "CWE-862", "CWE-1220", "CWE-551"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

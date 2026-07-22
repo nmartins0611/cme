@@ -1,0 +1,11 @@
+---
+cme_id: "CME-304"
+cme_control_name: "AppArmor (Enforcing Profile)"
+cme_tactic: "Harden"
+cme_category: "Mandatory Access Control"
+cme_category_id: "mandatory-access-control"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "S", "from": "C", "to": "U", "rationale": "Process confined to profile-defined resources"}, {"metric": "C", "from": "H", "to": "L", "rationale": "Cannot read files outside profile allowlist"}]
+cme_cwe_relationships: ["CWE-269", "CWE-284"]
+cme_platforms: ["Ubuntu 24.04", "SLES 15", "Debian 12"]

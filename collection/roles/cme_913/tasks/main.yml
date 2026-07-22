@@ -1,0 +1,11 @@
+---
+# CME-913: CSRF Protection (Anti-CSRF Token & SameSite Cookie Enforcement)
+# This control requires manual/context-specific remediation.
+# Running verification only.
+
+- name: "CME-913 | Set manual remediation required"
+  ansible.builtin.set_fact:
+    cme_913_manual_remediation_required: true
+
+- name: "CME-913 | Run verification"
+  ansible.builtin.include_tasks: verify.yml

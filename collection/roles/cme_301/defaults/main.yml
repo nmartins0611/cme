@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-301: SELinux (Enforcing Mode)
+
+# Set to true to skip this control
+cme_301_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_301_custom_remediation: false
+

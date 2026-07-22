@@ -1,0 +1,11 @@
+---
+# CME-1312: Argument Injection Prevention (Downstream Input Delimiter Sanitization)
+# This control requires manual/context-specific remediation.
+# Running verification only.
+
+- name: "CME-1312 | Set manual remediation required"
+  ansible.builtin.set_fact:
+    cme_1312_manual_remediation_required: true
+
+- name: "CME-1312 | Run verification"
+  ansible.builtin.include_tasks: verify.yml

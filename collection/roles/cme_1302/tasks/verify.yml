@@ -1,0 +1,75 @@
+---
+# CME-1302: Deserialization Allowlist (Safe Loading)
+# Verification: Verify deserialization uses safe loading or allowlist enforcement across all application languages
+
+- name: "CME-1302 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'yaml.safe_load\\|SafeLoader\\|json.loads' <app_source>/"
+  register: cme_1302_verify_0
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1302 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1302_verify_0.stdout is search('Safe deserialization calls present [(]not yaml.load without SafeLoader[)]')"
+    fail_msg: "CME-1302 FAILED — expected 'Safe deserialization calls present (not yaml.load without SafeLoader)'"
+    success_msg: "CME-1302 PASSED — Deserialization Allowlist (Safe Loading)"
+  ignore_errors: true
+  register: cme_1302_assert_0
+  when: cme_1302_verify_0 is not skipped
+
+- name: "CME-1302 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'yaml.load\\|pickle.load\\|marshal.load' <app_source>/ | grep -v safe_load"
+  register: cme_1302_verify_1
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1302 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1302_verify_1.stdout is search('No unsafe deserialization calls')"
+    fail_msg: "CME-1302 FAILED — expected 'No unsafe deserialization calls'"
+    success_msg: "CME-1302 PASSED — Deserialization Allowlist (Safe Loading)"
+  ignore_errors: true
+  register: cme_1302_assert_1
+  when: cme_1302_verify_1 is not skipped
+
+- name: "CME-1302 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'jdk.serialFilter\\|ObjectInputFilter\\|serialFilter' /etc/java/ /usr/lib/jvm/*/conf/ 2>/dev/null || java -XshowSettings 2>&1 | grep serialFilter"
+  register: cme_1302_verify_2
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1302 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1302_verify_2.stdout is search('JVM serialization filter configured with allowlist pattern [(]JEP 290[)]')"
+    fail_msg: "CME-1302 FAILED — expected 'JVM serialization filter configured with allowlist pattern (JEP 290)'"
+    success_msg: "CME-1302 PASSED — Deserialization Allowlist (Safe Loading)"
+  ignore_errors: true
+  register: cme_1302_assert_2
+  when: cme_1302_verify_2 is not skipped
+
+- name: "CME-1302 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'TypeNameHandling\\.None\\|TypeNameHandling\\.Auto\\|BinaryFormatter' <app_source>/ | grep -v None"
+  register: cme_1302_verify_3
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1302 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1302_verify_3.stdout is search('No unsafe TypeNameHandling settings [(]Auto/All/Objects/Arrays[)] or BinaryFormatter usage')"
+    fail_msg: "CME-1302 FAILED — expected 'No unsafe TypeNameHandling settings (Auto/All/Objects/Arrays) or BinaryFormatter usage'"
+    success_msg: "CME-1302 PASSED — Deserialization Allowlist (Safe Loading)"
+  ignore_errors: true
+  register: cme_1302_assert_3
+  when: cme_1302_verify_3 is not skipped
+
+- name: "CME-1302 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1302', 'control_name': 'Deserialization Allowlist (Safe Loading)', 'tactic': 'Harden', 'category': 'Application Input Validation', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_1302_assert_0 is defined and cme_1302_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1302_assert_0 is defined) | ternary(cme_1302_assert_0.msg | default(''), 'not checked'))}] }}"

@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1004"
+cme_control_name: "AIDE / File Integrity Monitoring"
+cme_tactic: "Detect"
+cme_category: "Integrity Detection"
+cme_category_id: "integrity-detection"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "Medium"
+cme_cvss_vector_impacts: [{"metric": "I", "from": "H", "to": "L", "rationale": "Compensating control: file modifications detected, alerting triggered"}]
+cme_cwe_relationships: ["CWE-345"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Ubuntu 24.04"]

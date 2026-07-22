@@ -1,0 +1,25 @@
+---
+# CME-703: Rootless Containers
+# Verification: Verify podman/docker running rootless
+
+- name: "CME-703 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "podman info | grep rootless"
+  register: cme_703_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-703 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_703_verify_0.stdout is search('rootless: true')"
+    fail_msg: "CME-703 FAILED — expected 'rootless: true'"
+    success_msg: "CME-703 PASSED — Rootless Containers"
+  ignore_errors: true
+  register: cme_703_assert_0
+  when: ansible_os_family != 'Windows' and cme_703_verify_0 is not skipped
+
+- name: "CME-703 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-703', 'control_name': 'Rootless Containers', 'tactic': 'Isolate', 'category': 'Container Isolation', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_703_assert_0 is defined and cme_703_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_703_assert_0 is defined) | ternary(cme_703_assert_0.msg | default(''), 'not checked'))}] }}"

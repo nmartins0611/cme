@@ -1,0 +1,9 @@
+---
+galaxy_info:
+  role_name: cme_403
+  author: CME Project
+  description: "CME-403: TLS 1.3 Enforcement"
+  license: Apache-2.0
+  min_ansible_version: "2.15"
+
+dependencies: []

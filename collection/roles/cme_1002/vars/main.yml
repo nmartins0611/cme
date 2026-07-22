@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1002"
+cme_control_name: "Audit Subsystem (auditd)"
+cme_tactic: "Detect"
+cme_category: "Runtime Detection"
+cme_category_id: "runtime-detection"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "Medium"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Compensating control: attacker actions are logged and may trigger alerting"}]
+cme_cwe_relationships: ["CWE-778"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Ubuntu 24.04"]

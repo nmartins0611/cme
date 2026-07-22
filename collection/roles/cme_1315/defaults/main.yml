@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-1315: Allowlist-Preferred Input Validation (Deny-by-Default Filtering)
+
+# Set to true to skip this control
+cme_1315_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_1315_custom_remediation: false
+

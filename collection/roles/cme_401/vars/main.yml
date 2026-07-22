@@ -1,0 +1,11 @@
+---
+cme_id: "CME-401"
+cme_control_name: "System-wide Crypto Policy (FUTURE)"
+cme_tactic: "Harden"
+cme_category: "Cryptographic Controls"
+cme_category_id: "cryptographic-controls"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Weak cipher downgrade attacks are impossible; only strong algorithms available"}]
+cme_cwe_relationships: ["CWE-327", "CWE-326", "CWE-757"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Fedora", "CentOS Stream"]

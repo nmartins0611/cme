@@ -1,0 +1,79 @@
+---
+# CME-912: HTTP Header Normalization and Request Smuggling Prevention
+# Verification: Verify that HTTP intermediaries enforce strict header parsing: reject requests with both Content-Length and Transfer-Encoding, reject duplicate Content-Length headers, and disable relaxed parsing modes
+
+- name: "CME-912 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep -i 'relaxed_header_parser' /etc/squid/squid.conf"
+  register: cme_912_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-912 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_912_verify_0.stdout is search('off')"
+    fail_msg: "CME-912 FAILED — expected 'off'"
+    success_msg: "CME-912 PASSED — HTTP Header Normalization and Request Smuggling Prevention"
+  ignore_errors: true
+  register: cme_912_assert_0
+  when: ansible_os_family != 'Windows' and cme_912_verify_0 is not skipped
+
+- name: "CME-912 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep 'http-request deny.*hdr_cnt(content-length)' /etc/haproxy/haproxy.cfg"
+  register: cme_912_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-912 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_912_verify_1.stdout is search('http-request deny')"
+    fail_msg: "CME-912 FAILED — expected 'http-request deny'"
+    success_msg: "CME-912 PASSED — HTTP Header Normalization and Request Smuggling Prevention"
+  ignore_errors: true
+  register: cme_912_assert_1
+  when: ansible_os_family != 'Windows' and cme_912_verify_1 is not skipped
+
+- name: "CME-912 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep -i 'HttpProtocolOptions' /etc/httpd/conf/httpd.conf"
+  register: cme_912_verify_2
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-912 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_912_verify_2.stdout is search('Strict')"
+    fail_msg: "CME-912 FAILED — expected 'Strict'"
+    success_msg: "CME-912 PASSED — HTTP Header Normalization and Request Smuggling Prevention"
+  ignore_errors: true
+  register: cme_912_assert_2
+  when: ansible_os_family != 'Windows' and cme_912_verify_2 is not skipped
+
+- name: "CME-912 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep -i 'ignore_invalid_headers' /etc/nginx/nginx.conf"
+  register: cme_912_verify_3
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-912 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_912_verify_3.stdout is search('on')"
+    fail_msg: "CME-912 FAILED — expected 'on'"
+    success_msg: "CME-912 PASSED — HTTP Header Normalization and Request Smuggling Prevention"
+  ignore_errors: true
+  register: cme_912_assert_3
+  when: ansible_os_family != 'Windows' and cme_912_verify_3 is not skipped
+
+- name: "CME-912 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-912', 'control_name': 'HTTP Header Normalization and Request Smuggling Prevention', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_912_assert_0 is defined and cme_912_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_912_assert_0 is defined) | ternary(cme_912_assert_0.msg | default(''), 'not checked'))}] }}"

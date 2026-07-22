@@ -1,0 +1,43 @@
+---
+# CME-405: DNSSEC Validation
+# Verification: Verify DNSSEC validation is enabled in resolver
+
+- name: "CME-405 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "resolvectl status | grep DNSSEC"
+  register: cme_405_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-405 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_405_verify_0.stdout is search('DNSSEC setting: yes')"
+    fail_msg: "CME-405 FAILED — expected 'DNSSEC setting: yes'"
+    success_msg: "CME-405 PASSED — DNSSEC Validation"
+  ignore_errors: true
+  register: cme_405_assert_0
+  when: ansible_os_family != 'Windows' and cme_405_verify_0 is not skipped
+
+- name: "CME-405 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep 'val-permissive-mode' /etc/unbound/unbound.conf"
+  register: cme_405_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-405 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_405_verify_1.stdout is search('val-permissive-mode: no')"
+    fail_msg: "CME-405 FAILED — expected 'val-permissive-mode: no'"
+    success_msg: "CME-405 PASSED — DNSSEC Validation"
+  ignore_errors: true
+  register: cme_405_assert_1
+  when: ansible_os_family != 'Windows' and cme_405_verify_1 is not skipped
+
+- name: "CME-405 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-405', 'control_name': 'DNSSEC Validation', 'tactic': 'Harden', 'category': 'Cryptographic Controls', 'control_layer': 'Network', 'confidence': 'High', 'status': ((cme_405_assert_0 is defined and cme_405_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_405_assert_0 is defined) | ternary(cme_405_assert_0.msg | default(''), 'not checked'))}] }}"

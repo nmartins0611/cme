@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-907: Application-Layer RBAC Enforcement
+
+# Set to true to skip this control
+cme_907_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_907_custom_remediation: false
+

@@ -1,0 +1,12 @@
+---
+# Tunable defaults for CME-110: KEXEC Restriction
+
+# Set to true to skip this control
+cme_110_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_110_custom_remediation: false
+
+# Desired value for kernel.kexec_load_disabled
+cme_110_kernel_kexec_load_disabled: "1"
+

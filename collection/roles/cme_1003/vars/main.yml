@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1003"
+cme_control_name: "Falco / eBPF Runtime Security"
+cme_tactic: "Detect"
+cme_category: "Runtime Detection"
+cme_category_id: "runtime-detection"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "Medium"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Compensating control: exploit post-exploitation behavior triggers alerts"}]
+cme_cwe_relationships: []
+cme_platforms: ["RHEL 9", "Kubernetes"]

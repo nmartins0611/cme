@@ -1,0 +1,11 @@
+---
+# CME-908: Object-Level Authorization Checks (IDOR Prevention)
+# This control requires manual/context-specific remediation.
+# Running verification only.
+
+- name: "CME-908 | Set manual remediation required"
+  ansible.builtin.set_fact:
+    cme_908_manual_remediation_required: true
+
+- name: "CME-908 | Run verification"
+  ansible.builtin.include_tasks: verify.yml

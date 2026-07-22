@@ -1,0 +1,12 @@
+---
+# Tunable defaults for CME-108: kptr_restrict (Kernel Pointer Restriction)
+
+# Set to true to skip this control
+cme_108_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_108_custom_remediation: false
+
+# Desired value for kernel.kptr_restrict
+cme_108_kernel_kptr_restrict: "1"
+

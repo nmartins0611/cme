@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-114: Process Resource Limits (ulimit/prlimit)
+
+# Set to true to skip this control
+cme_114_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_114_custom_remediation: false
+

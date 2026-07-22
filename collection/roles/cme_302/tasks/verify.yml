@@ -1,0 +1,25 @@
+---
+# CME-302: SELinux Confined User Mapping
+# Verification: Verify no regular users mapped to unconfined_u
+
+- name: "CME-302 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "semanage login -l | grep -v 'unconfined_u\\|Login Name'"
+  register: cme_302_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-302 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_302_verify_0.stdout is search('staff_u|user_u|guest_u')"
+    fail_msg: "CME-302 FAILED — expected 'staff_u|user_u|guest_u'"
+    success_msg: "CME-302 PASSED — SELinux Confined User Mapping"
+  ignore_errors: true
+  register: cme_302_assert_0
+  when: ansible_os_family == 'RedHat' and cme_302_verify_0 is not skipped
+
+- name: "CME-302 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-302', 'control_name': 'SELinux Confined User Mapping', 'tactic': 'Harden', 'category': 'Mandatory Access Control', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_302_assert_0 is defined and cme_302_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_302_assert_0 is defined) | ternary(cme_302_assert_0.msg | default(''), 'not checked'))}] }}"

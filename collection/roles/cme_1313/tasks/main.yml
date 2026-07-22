@@ -1,0 +1,11 @@
+---
+# CME-1313: CRLF / Line Injection Prevention (Newline Sanitization for Structured Formats)
+# This control requires manual/context-specific remediation.
+# Running verification only.
+
+- name: "CME-1313 | Set manual remediation required"
+  ansible.builtin.set_fact:
+    cme_1313_manual_remediation_required: true
+
+- name: "CME-1313 | Run verification"
+  ansible.builtin.include_tasks: verify.yml

@@ -1,0 +1,11 @@
+---
+# CME-1317: XML External Entity Prevention (Secure XML Parser Configuration)
+# This control requires manual/context-specific remediation.
+# Running verification only.
+
+- name: "CME-1317 | Set manual remediation required"
+  ansible.builtin.set_fact:
+    cme_1317_manual_remediation_required: true
+
+- name: "CME-1317 | Run verification"
+  ansible.builtin.include_tasks: verify.yml

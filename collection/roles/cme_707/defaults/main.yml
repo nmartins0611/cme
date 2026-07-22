@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-707: NoNewPrivileges
+
+# Set to true to skip this control
+cme_707_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_707_custom_remediation: false
+

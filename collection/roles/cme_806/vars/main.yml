@@ -1,0 +1,11 @@
+---
+cme_id: "CME-806"
+cme_control_name: "Kerberos Authentication (GSSAPI)"
+cme_tactic: "Harden"
+cme_category: "Credential Hardening"
+cme_category_id: "credential-hardening"
+cme_control_layer: "Identity"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Credential interception useless; tickets are time-limited and host-bound"}]
+cme_cwe_relationships: ["CWE-319", "CWE-287", "CWE-303"]
+cme_platforms: ["RHEL 9", "RHEL 8"]

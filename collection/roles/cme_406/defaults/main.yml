@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-406: Signed Package Enforcement (GPG)
+
+# Set to true to skip this control
+cme_406_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_406_custom_remediation: false
+

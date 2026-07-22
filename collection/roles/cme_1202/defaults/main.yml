@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-1202: Automated Backup with Integrity Verification
+
+# Set to true to skip this control
+cme_1202_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_1202_custom_remediation: false
+

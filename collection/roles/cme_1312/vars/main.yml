@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1312"
+cme_control_name: "Argument Injection Prevention (Downstream Input Delimiter Sanitization)"
+cme_tactic: "Harden"
+cme_category: "Application Input Validation"
+cme_category_id: "application-input-validation"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Delimiter characters in user input are neutralized before reaching the downstream tool's argument parser or input file format; attacker cannot inject option flags, break record boundaries, or introduce additional URIs"}, {"metric": "I", "from": "H", "to": "L", "rationale": "Cannot inject --option=value arguments to control downstream tool behavior such as file write destinations, execution targets, or configuration overrides"}, {"metric": "S", "from": "C", "to": "U", "rationale": "Downstream tool cannot be manipulated via injected arguments to affect resources outside its intended operational scope"}]
+cme_cwe_relationships: ["CWE-88", "CWE-74"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

@@ -1,0 +1,11 @@
+---
+cme_id: "CME-502"
+cme_control_name: "noexec on /tmp and /dev/shm"
+cme_tactic: "Harden"
+cme_category: "Filesystem Hardening"
+cme_category_id: "filesystem-hardening"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Attacker cannot execute payloads from common writable directories"}]
+cme_cwe_relationships: ["CWE-94", "CWE-427"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Ubuntu 24.04"]

@@ -1,0 +1,25 @@
+---
+# CME-114: Process Resource Limits (ulimit/prlimit)
+# Verification: Check that CPU time limits are set for processes
+
+- name: "CME-114 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "ulimit -t"
+  register: cme_114_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-114 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_114_verify_0.stdout is search('A finite value [(]not unlimited[)]')"
+    fail_msg: "CME-114 FAILED — expected 'A finite value (not unlimited)'"
+    success_msg: "CME-114 PASSED — Process Resource Limits (ulimit/prlimit)"
+  ignore_errors: true
+  register: cme_114_assert_0
+  when: ansible_os_family != 'Windows' and cme_114_verify_0 is not skipped
+
+- name: "CME-114 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-114', 'control_name': 'Process Resource Limits (ulimit/prlimit)', 'tactic': 'Harden', 'category': 'Kernel Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_114_assert_0 is defined and cme_114_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_114_assert_0 is defined) | ternary(cme_114_assert_0.msg | default(''), 'not checked'))}] }}"

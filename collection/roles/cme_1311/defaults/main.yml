@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-1311: Input Size and Quantity Bounds Enforcement
+
+# Set to true to skip this control
+cme_1311_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_1311_custom_remediation: false
+

@@ -1,0 +1,43 @@
+---
+# CME-1311: Input Size and Quantity Bounds Enforcement
+# Verification: Verify that the application enforces maximum size limits on user-supplied quantity fields and rejects values outside expected ranges
+
+- name: "CME-1311 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "curl -s -o /dev/null -w \"%{http_code}\" -H \"Content-Length: 999999999\" -d @/dev/null https://app/api/upload"
+  register: cme_1311_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1311 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1311_verify_0.stdout is search('413 [(]Payload Too Large[)]')"
+    fail_msg: "CME-1311 FAILED — expected '413 (Payload Too Large)'"
+    success_msg: "CME-1311 PASSED — Input Size and Quantity Bounds Enforcement"
+  ignore_errors: true
+  register: cme_1311_assert_0
+  when: ansible_os_family != 'Windows' and cme_1311_verify_0 is not skipped
+
+- name: "CME-1311 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep -r \"max_.*size\\|MAX_.*SIZE\\|max_.*length\\|MAX_.*LEN\\|max_.*count\\|MAX_.*COUNT\" /etc/nginx/nginx.conf /etc/httpd/conf/httpd.conf 2>/dev/null | head -5"
+  register: cme_1311_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1311 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1311_verify_1.stdout is search('configured size limits present')"
+    fail_msg: "CME-1311 FAILED — expected 'configured size limits present'"
+    success_msg: "CME-1311 PASSED — Input Size and Quantity Bounds Enforcement"
+  ignore_errors: true
+  register: cme_1311_assert_1
+  when: ansible_os_family != 'Windows' and cme_1311_verify_1 is not skipped
+
+- name: "CME-1311 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1311', 'control_name': 'Input Size and Quantity Bounds Enforcement', 'tactic': 'Harden', 'category': 'Application Input Validation', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_1311_assert_0 is defined and cme_1311_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1311_assert_0 is defined) | ternary(cme_1311_assert_0.msg | default(''), 'not checked'))}] }}"

@@ -1,0 +1,79 @@
+---
+# CME-118: Protected File Links (Kernel Symlink/Hardlink Protection)
+# Verification: Verify that all four protected file link sysctls are enabled. Check sysctl runtime values and persistence configuration.
+
+- name: "CME-118 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "sysctl fs.protected_symlinks"
+  register: cme_118_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-118 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_118_verify_0.stdout is search('fs.protected_symlinks = 1')"
+    fail_msg: "CME-118 FAILED — expected 'fs.protected_symlinks = 1'"
+    success_msg: "CME-118 PASSED — Protected File Links (Kernel Symlink/Hardlink Protection)"
+  ignore_errors: true
+  register: cme_118_assert_0
+  when: ansible_os_family != 'Windows' and cme_118_verify_0 is not skipped
+
+- name: "CME-118 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "sysctl fs.protected_hardlinks"
+  register: cme_118_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-118 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_118_verify_1.stdout is search('fs.protected_hardlinks = 1')"
+    fail_msg: "CME-118 FAILED — expected 'fs.protected_hardlinks = 1'"
+    success_msg: "CME-118 PASSED — Protected File Links (Kernel Symlink/Hardlink Protection)"
+  ignore_errors: true
+  register: cme_118_assert_1
+  when: ansible_os_family != 'Windows' and cme_118_verify_1 is not skipped
+
+- name: "CME-118 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "sysctl fs.protected_regular"
+  register: cme_118_verify_2
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-118 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_118_verify_2.stdout is search('fs.protected_regular = 2')"
+    fail_msg: "CME-118 FAILED — expected 'fs.protected_regular = 2'"
+    success_msg: "CME-118 PASSED — Protected File Links (Kernel Symlink/Hardlink Protection)"
+  ignore_errors: true
+  register: cme_118_assert_2
+  when: ansible_os_family != 'Windows' and cme_118_verify_2 is not skipped
+
+- name: "CME-118 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "sysctl fs.protected_fifos"
+  register: cme_118_verify_3
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-118 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_118_verify_3.stdout is search('fs.protected_fifos = 2')"
+    fail_msg: "CME-118 FAILED — expected 'fs.protected_fifos = 2'"
+    success_msg: "CME-118 PASSED — Protected File Links (Kernel Symlink/Hardlink Protection)"
+  ignore_errors: true
+  register: cme_118_assert_3
+  when: ansible_os_family != 'Windows' and cme_118_verify_3 is not skipped
+
+- name: "CME-118 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-118', 'control_name': 'Protected File Links (Kernel Symlink/Hardlink Protection)', 'tactic': 'Harden', 'category': 'Kernel Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_118_assert_0 is defined and cme_118_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_118_assert_0 is defined) | ternary(cme_118_assert_0.msg | default(''), 'not checked'))}] }}"

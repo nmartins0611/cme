@@ -1,0 +1,61 @@
+---
+# CME-407: Data-at-Rest Encryption (LUKS/dm-crypt / BitLocker)
+# Verification: Check for LUKS-encrypted volumes
+
+- name: "CME-407 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "lsblk -o NAME,TYPE,FSTYPE | grep crypt"
+  register: cme_407_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-407 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_407_verify_0.stdout is search('At least one crypt volume present')"
+    fail_msg: "CME-407 FAILED — expected 'At least one crypt volume present'"
+    success_msg: "CME-407 PASSED — Data-at-Rest Encryption (LUKS/dm-crypt / BitLocker)"
+  ignore_errors: true
+  register: cme_407_assert_0
+  when: ansible_os_family != 'Windows' and cme_407_verify_0 is not skipped
+
+- name: "CME-407 | Run verification command (windows)"
+  ansible.builtin.shell:
+    cmd: "(Get-BitLockerVolume -MountPoint 'C:').ProtectionStatus"
+  register: cme_407_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'Windows'
+
+- name: "CME-407 | Assert control is active (windows)"
+  ansible.builtin.assert:
+    that:
+      - "cme_407_verify_1.stdout is search('On')"
+    fail_msg: "CME-407 FAILED — expected 'On'"
+    success_msg: "CME-407 PASSED — Data-at-Rest Encryption (LUKS/dm-crypt / BitLocker)"
+  ignore_errors: true
+  register: cme_407_assert_1
+  when: ansible_os_family == 'Windows' and cme_407_verify_1 is not skipped
+
+- name: "CME-407 | Run verification command (windows)"
+  ansible.builtin.shell:
+    cmd: "(Get-BitLockerVolume -MountPoint 'C:').EncryptionMethod"
+  register: cme_407_verify_2
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'Windows'
+
+- name: "CME-407 | Assert control is active (windows)"
+  ansible.builtin.assert:
+    that:
+      - "cme_407_verify_2.stdout is search('XtsAes256')"
+    fail_msg: "CME-407 FAILED — expected 'XtsAes256'"
+    success_msg: "CME-407 PASSED — Data-at-Rest Encryption (LUKS/dm-crypt / BitLocker)"
+  ignore_errors: true
+  register: cme_407_assert_2
+  when: ansible_os_family == 'Windows' and cme_407_verify_2 is not skipped
+
+- name: "CME-407 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-407', 'control_name': 'Data-at-Rest Encryption (LUKS/dm-crypt / BitLocker)', 'tactic': 'Harden', 'category': 'Cryptographic Controls', 'control_layer': 'Data', 'confidence': 'High', 'status': ((cme_407_assert_0 is defined and cme_407_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_407_assert_0 is defined) | ternary(cme_407_assert_0.msg | default(''), 'not checked'))}] }}"

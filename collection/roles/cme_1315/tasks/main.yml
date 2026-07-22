@@ -1,0 +1,11 @@
+---
+# CME-1315: Allowlist-Preferred Input Validation (Deny-by-Default Filtering)
+# This control requires manual/context-specific remediation.
+# Running verification only.
+
+- name: "CME-1315 | Set manual remediation required"
+  ansible.builtin.set_fact:
+    cme_1315_manual_remediation_required: true
+
+- name: "CME-1315 | Run verification"
+  ansible.builtin.include_tasks: verify.yml

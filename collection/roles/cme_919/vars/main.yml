@@ -1,0 +1,11 @@
+---
+cme_id: "CME-919"
+cme_control_name: "JIT Compiler Hardening (JIT Restriction / V8 Sandbox)"
+cme_tactic: "Harden"
+cme_category: "Application Controls"
+cme_category_id: "application-controls"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "JIT disabling eliminates the type speculation attack surface entirely; V8 Sandbox requires the attacker to chain a sandbox escape after the type confusion, converting a single-step exploit into a multi-step chain that must defeat both the type system and the memory cage"}, {"metric": "S", "from": "C", "to": "U", "rationale": "V8 Sandbox confines the impact of type confusion to the sandbox boundary; the attacker cannot directly reach renderer process memory or OS resources without an additional escape primitive"}]
+cme_cwe_relationships: ["CWE-843", "CWE-119", "CWE-787"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

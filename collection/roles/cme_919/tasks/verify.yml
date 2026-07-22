@@ -1,0 +1,78 @@
+---
+# CME-919: JIT Compiler Hardening (JIT Restriction / V8 Sandbox)
+# Verification: Verify JIT hardening is enabled in browser or runtime configuration. Check for jitless mode, V8 Sandbox flags, or JIT disabling in Firefox preferences.
+
+- name: "CME-919 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep -r 'jitless\\|--js-flags.*--jitless' /etc/chromium/ /opt/google/chrome/ ~/.config/chromium/ 2>/dev/null"
+  register: cme_919_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-919 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_919_verify_0.stdout is search('--jitless flag present in Chromium launch configuration')"
+    fail_msg: "CME-919 FAILED — expected '--jitless flag present in Chromium launch configuration'"
+    success_msg: "CME-919 PASSED — JIT Compiler Hardening (JIT Restriction / V8 Sandbox)"
+  ignore_errors: true
+  register: cme_919_assert_0
+  when: ansible_os_family != 'Windows' and cme_919_verify_0 is not skipped
+
+- name: "CME-919 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep -r 'javascript.options.ion' /usr/lib64/firefox/defaults/pref/ ~/.mozilla/firefox/*/prefs.js 2>/dev/null"
+  register: cme_919_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-919 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_919_verify_1.stdout is search('javascript.options.ion set to false for JIT-disabled mode')"
+    fail_msg: "CME-919 FAILED — expected 'javascript.options.ion set to false for JIT-disabled mode'"
+    success_msg: "CME-919 PASSED — JIT Compiler Hardening (JIT Restriction / V8 Sandbox)"
+  ignore_errors: true
+  register: cme_919_assert_1
+  when: ansible_os_family != 'Windows' and cme_919_verify_1 is not skipped
+
+- name: "CME-919 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "node --v8-flags=--help 2>&1 | grep -i sandbox"
+  register: cme_919_verify_2
+  changed_when: false
+  failed_when: false
+
+- name: "CME-919 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_919_verify_2.stdout is search('V8 sandbox flags available in the Node.js runtime')"
+    fail_msg: "CME-919 FAILED — expected 'V8 sandbox flags available in the Node.js runtime'"
+    success_msg: "CME-919 PASSED — JIT Compiler Hardening (JIT Restriction / V8 Sandbox)"
+  ignore_errors: true
+  register: cme_919_assert_2
+  when: cme_919_verify_2 is not skipped
+
+- name: "CME-919 | Run verification command (windows)"
+  ansible.builtin.shell:
+    cmd: "reg query \"HKLM\\SOFTWARE\\Policies\\Google\\Chrome\" /v CommandLineFlagSecurityWarningsEnabled 2>nul"
+  register: cme_919_verify_3
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'Windows'
+
+- name: "CME-919 | Assert control is active (windows)"
+  ansible.builtin.assert:
+    that:
+      - "cme_919_verify_3.stdout is search('Chrome policy flags configured for JIT restriction')"
+    fail_msg: "CME-919 FAILED — expected 'Chrome policy flags configured for JIT restriction'"
+    success_msg: "CME-919 PASSED — JIT Compiler Hardening (JIT Restriction / V8 Sandbox)"
+  ignore_errors: true
+  register: cme_919_assert_3
+  when: ansible_os_family == 'Windows' and cme_919_verify_3 is not skipped
+
+- name: "CME-919 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-919', 'control_name': 'JIT Compiler Hardening (JIT Restriction / V8 Sandbox)', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_919_assert_0 is defined and cme_919_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_919_assert_0 is defined) | ternary(cme_919_assert_0.msg | default(''), 'not checked'))}] }}"

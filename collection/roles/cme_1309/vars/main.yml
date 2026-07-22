@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1309"
+cme_control_name: "Script Engine Restriction (Sandbox / Disable)"
+cme_tactic: "Harden"
+cme_category: "Application Input Validation"
+cme_category_id: "application-input-validation"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Direct code execution via the scripting engine is blocked; exploitation requires discovering a sandbox bypass or an unrestricted evaluation path, which demands vulnerability-specific research rather than trivial payload submission"}, {"metric": "I", "from": "H", "to": "L", "rationale": "Sandboxed script engine cannot invoke arbitrary system commands, modify files, or alter application state outside the permitted API surface; integrity impact is confined to the script's authorized scope"}, {"metric": "C", "from": "H", "to": "L", "rationale": "Script engine cannot read arbitrary files, access credentials, or exfiltrate data from the host; information disclosure is limited to data the script is explicitly permitted to access"}]
+cme_cwe_relationships: ["CWE-94", "CWE-95", "CWE-96", "CWE-917"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

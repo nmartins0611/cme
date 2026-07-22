@@ -1,0 +1,15 @@
+---
+# CME-1201: Immutable Infrastructure
+# Remediation strategy: generic (review and customize for your environment)
+# Verification method: Verify deployment pipeline builds from golden images
+
+- name: "CME-1201 | Remediation requires environment-specific configuration"
+  ansible.builtin.debug:
+    msg: >-
+      CME-1201 (Immutable Infrastructure) remediation depends on your
+      environment configuration. Override this role's tasks/main.yml
+      with site-specific remediation steps.
+  when: not (cme_1201_custom_remediation | default(false))
+
+- name: "CME-1201 | Verify current state"
+  ansible.builtin.include_tasks: verify.yml

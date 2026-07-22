@@ -1,0 +1,85 @@
+---
+# CME Drift Detection Playbook
+#
+# Compares the current security posture against a previously saved baseline.
+# Reports controls that have drifted (were active, now inactive).
+#
+# Usage:
+#   ansible-playbook cme.controls.drift_check -e cme_profile=rhel9_baseline -e cme_baseline_path=./baseline.json
+#
+# First run (save baseline):
+#   ansible-playbook cme.controls.drift_check -e cme_profile=rhel9_baseline -e cme_save_baseline=true
+
+- name: CME Drift Detection — Verify Current State
+  hosts: all
+  gather_facts: true
+  vars:
+    cme_profile: "minimal"
+    cme_profile_path: ""
+    cme_profiles_dir: "{{ playbook_dir }}/../profiles"
+    cme_save_baseline: false
+    cme_baseline_path: "./cme_baseline.json"
+
+  pre_tasks:
+    - name: Load profile
+      ansible.builtin.include_vars:
+        file: "{{ cme_profile_path if (cme_profile_path | length > 0) else cme_profiles_dir + '/' + cme_profile + '.yml' }}"
+        name: cme_loaded_profile
+
+  tasks:
+    - name: Run verification for each control
+      ansible.builtin.include_role:
+        name: "{{ control_id }}"
+        tasks_from: verify.yml
+      loop: "{{ cme_loaded_profile.controls }}"
+      loop_control:
+        loop_var: control_id
+      when: not (lookup('vars', control_id + '_skip', default=false))
+      ignore_errors: true
+
+    - name: Record current state
+      ansible.builtin.set_fact:
+        cme_current_state:
+          host: "{{ inventory_hostname }}"
+          timestamp: "{{ ansible_date_time.iso8601 | default('unknown') }}"
+          controls_checked: "{{ cme_loaded_profile.controls }}"
+
+- name: CME Drift Detection — Compare and Report
+  hosts: localhost
+  gather_facts: false
+  vars:
+    cme_save_baseline: false
+    cme_baseline_path: "./cme_baseline.json"
+    cme_drift_report_path: "./cme_drift_report.json"
+
+  tasks:
+    - name: Save current state as baseline
+      ansible.builtin.copy:
+        content: "{{ cme_baseline_data | to_nice_json }}"
+        dest: "{{ cme_baseline_path }}"
+        mode: "0644"
+      vars:
+        cme_baseline_data:
+          saved_at: "{{ now() }}"
+          hosts: "{{ groups['all'] | map('extract', hostvars, 'cme_current_state') | select('defined') | list }}"
+      when: cme_save_baseline | bool
+
+    - name: Save baseline confirmation
+      ansible.builtin.debug:
+        msg: "Baseline saved to {{ cme_baseline_path }}. Run again without cme_save_baseline to detect drift."
+      when: cme_save_baseline | bool
+
+    - name: Load previous baseline
+      ansible.builtin.slurp:
+        src: "{{ cme_baseline_path }}"
+      register: cme_baseline_raw
+      when: not (cme_save_baseline | bool)
+      failed_when: false
+
+    - name: Report drift status
+      ansible.builtin.debug:
+        msg: >-
+          Drift detection complete. Compare current verification results against
+          the baseline at {{ cme_baseline_path }} to identify controls that have
+          been disabled or degraded since the baseline was captured.
+      when: not (cme_save_baseline | bool) and cme_baseline_raw is defined

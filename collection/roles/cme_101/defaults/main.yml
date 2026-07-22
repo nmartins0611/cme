@@ -1,0 +1,12 @@
+---
+# Tunable defaults for CME-101: ASLR (Address Space Layout Randomization)
+
+# Set to true to skip this control
+cme_101_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_101_custom_remediation: false
+
+# Desired value for kernel.randomize_va_space
+cme_101_kernel_randomize_va_space: "2"
+

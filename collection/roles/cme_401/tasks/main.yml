@@ -1,0 +1,11 @@
+---
+# CME-401: System-wide Crypto Policy (FUTURE)
+
+- name: "CME-401 | Set system crypto policy"
+  ansible.builtin.command:
+    cmd: "update-crypto-policies --set {{ cme_401_crypto_policy | default('FUTURE') }}"
+  changed_when: true
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-401 | Verify after remediation"
+  ansible.builtin.include_tasks: verify.yml

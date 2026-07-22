@@ -1,0 +1,11 @@
+---
+cme_id: "CME-505"
+cme_control_name: "IMA/EVM (Integrity Measurement Architecture)"
+cme_tactic: "Harden"
+cme_category: "Filesystem Hardening"
+cme_category_id: "filesystem-hardening"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "Medium"
+cme_cvss_vector_impacts: [{"metric": "I", "from": "H", "to": "L", "rationale": "Modified binaries detected/blocked at execution time"}]
+cme_cwe_relationships: ["CWE-345", "CWE-494", "CWE-347"]
+cme_platforms: ["RHEL 9", "RHEL 8"]

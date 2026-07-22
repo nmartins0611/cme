@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  role_name: cme_507
+  author: CME Project
+  description: "CME-507: Secure Dynamic Linker Configuration (LD_PRELOAD/PATH Hardening)"
+  license: Apache-2.0
+  min_ansible_version: "2.15"
+  platforms:
+    - name: EL
+      versions:
+        - "8"
+        - "9"
+
+dependencies: []

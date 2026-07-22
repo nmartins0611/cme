@@ -1,0 +1,61 @@
+---
+# CME-1010: cgroup Memory Pressure Monitoring (memory.events / PSI)
+# Verification: Check that cgroup memory.events is accessible and PSI is enabled in the kernel
+
+- name: "CME-1010 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "cat /sys/fs/cgroup/system.slice/memory.events"
+  register: cme_1010_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1010 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1010_verify_0.stdout is search('Non-zero counters if pressure has occurred; file existence confirms cgroup v2 memory accounting is active')"
+    fail_msg: "CME-1010 FAILED — expected 'Non-zero counters if pressure has occurred; file existence confirms cgroup v2 memory accounting is active'"
+    success_msg: "CME-1010 PASSED — cgroup Memory Pressure Monitoring (memory.events / PSI)"
+  ignore_errors: true
+  register: cme_1010_assert_0
+  when: ansible_os_family != 'Windows' and cme_1010_verify_0 is not skipped
+
+- name: "CME-1010 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "cat /proc/pressure/memory"
+  register: cme_1010_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1010 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1010_verify_1.stdout is search('PSI metrics present [(]some/full avg10/avg60/avg300 values[)]; confirms CONFIG_PSI=y')"
+    fail_msg: "CME-1010 FAILED — expected 'PSI metrics present (some/full avg10/avg60/avg300 values); confirms CONFIG_PSI=y'"
+    success_msg: "CME-1010 PASSED — cgroup Memory Pressure Monitoring (memory.events / PSI)"
+  ignore_errors: true
+  register: cme_1010_assert_1
+  when: ansible_os_family != 'Windows' and cme_1010_verify_1 is not skipped
+
+- name: "CME-1010 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep -c CONFIG_PSI=y /boot/config-$(uname -r)"
+  register: cme_1010_verify_2
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1010 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1010_verify_2.stdout is search('1')"
+    fail_msg: "CME-1010 FAILED — expected '1'"
+    success_msg: "CME-1010 PASSED — cgroup Memory Pressure Monitoring (memory.events / PSI)"
+  ignore_errors: true
+  register: cme_1010_assert_2
+  when: ansible_os_family != 'Windows' and cme_1010_verify_2 is not skipped
+
+- name: "CME-1010 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1010', 'control_name': 'cgroup Memory Pressure Monitoring (memory.events / PSI)', 'tactic': 'Detect', 'category': 'Integrity Detection', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_1010_assert_0 is defined and cme_1010_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1010_assert_0 is defined) | ternary(cme_1010_assert_0.msg | default(''), 'not checked'))}] }}"

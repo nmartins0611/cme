@@ -1,0 +1,20 @@
+---
+# CME-304: AppArmor (Enforcing Profile)
+
+- name: "CME-304 | Ensure AppArmor is installed and enabled"
+  ansible.builtin.package:
+    name:
+      - apparmor
+      - apparmor-utils
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: "CME-304 | Enable AppArmor service"
+  ansible.builtin.systemd:
+    name: apparmor
+    state: started
+    enabled: true
+  when: ansible_os_family == 'Debian'
+
+- name: "CME-304 | Verify after remediation"
+  ansible.builtin.include_tasks: verify.yml

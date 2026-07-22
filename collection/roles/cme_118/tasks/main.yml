@@ -1,0 +1,41 @@
+---
+# CME-118: Protected File Links (Kernel Symlink/Hardlink Protection)
+
+- name: "CME-118 | Set fs.protected_symlinks"
+  ansible.posix.sysctl:
+    name: fs.protected_symlinks
+    value: "{{ cme_118_fs_protected_symlinks | default('1') }}"
+    state: present
+    sysctl_set: true
+    reload: true
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-118 | Set fs.protected_hardlinks"
+  ansible.posix.sysctl:
+    name: fs.protected_hardlinks
+    value: "{{ cme_118_fs_protected_hardlinks | default('1') }}"
+    state: present
+    sysctl_set: true
+    reload: true
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-118 | Set fs.protected_regular"
+  ansible.posix.sysctl:
+    name: fs.protected_regular
+    value: "{{ cme_118_fs_protected_regular | default('2') }}"
+    state: present
+    sysctl_set: true
+    reload: true
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-118 | Set fs.protected_fifos"
+  ansible.posix.sysctl:
+    name: fs.protected_fifos
+    value: "{{ cme_118_fs_protected_fifos | default('2') }}"
+    state: present
+    sysctl_set: true
+    reload: true
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-118 | Verify after remediation"
+  ansible.builtin.include_tasks: verify.yml

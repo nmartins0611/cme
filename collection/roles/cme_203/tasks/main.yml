@@ -1,0 +1,11 @@
+---
+# CME-203: Network Segmentation (VLANs/Subnets)
+# This control requires manual/context-specific remediation.
+# Running verification only.
+
+- name: "CME-203 | Set manual remediation required"
+  ansible.builtin.set_fact:
+    cme_203_manual_remediation_required: true
+
+- name: "CME-203 | Run verification"
+  ansible.builtin.include_tasks: verify.yml

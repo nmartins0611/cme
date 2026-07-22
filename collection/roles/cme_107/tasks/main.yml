@@ -1,0 +1,14 @@
+---
+# CME-107: Kernel Module Loading Restriction
+
+- name: "CME-107 | Set kernel.modules_disabled"
+  ansible.posix.sysctl:
+    name: kernel.modules_disabled
+    value: "{{ cme_107_kernel_modules_disabled | default('1') }}"
+    state: present
+    sysctl_set: true
+    reload: true
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-107 | Verify after remediation"
+  ansible.builtin.include_tasks: verify.yml

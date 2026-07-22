@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-508: Quoted Service Path Enforcement (Windows)
+
+# Set to true to skip this control
+cme_508_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_508_custom_remediation: false
+

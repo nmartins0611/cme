@@ -1,0 +1,43 @@
+---
+# CME-406: Signed Package Enforcement (GPG)
+# Verification: Verify gpgcheck enabled for all repos
+
+- name: "CME-406 | Run verification command (rhel)"
+  ansible.builtin.shell:
+    cmd: "grep -r 'gpgcheck' /etc/yum.repos.d/ | grep -v 'gpgcheck=1'"
+  register: cme_406_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-406 | Assert control is active (rhel)"
+  ansible.builtin.assert:
+    that:
+      - "cme_406_verify_0.stdout is search('')"
+    fail_msg: "CME-406 FAILED — expected ''"
+    success_msg: "CME-406 PASSED — Signed Package Enforcement (GPG)"
+  ignore_errors: true
+  register: cme_406_assert_0
+  when: ansible_os_family == 'RedHat' and cme_406_verify_0 is not skipped
+
+- name: "CME-406 | Run verification command (rhel)"
+  ansible.builtin.shell:
+    cmd: "rpm -qa gpg-pubkey"
+  register: cme_406_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-406 | Assert control is active (rhel)"
+  ansible.builtin.assert:
+    that:
+      - "cme_406_verify_1.stdout is search('gpg-pubkey')"
+    fail_msg: "CME-406 FAILED — expected 'gpg-pubkey'"
+    success_msg: "CME-406 PASSED — Signed Package Enforcement (GPG)"
+  ignore_errors: true
+  register: cme_406_assert_1
+  when: ansible_os_family == 'RedHat' and cme_406_verify_1 is not skipped
+
+- name: "CME-406 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-406', 'control_name': 'Signed Package Enforcement (GPG)', 'tactic': 'Harden', 'category': 'Cryptographic Controls', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_406_assert_0 is defined and cme_406_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_406_assert_0 is defined) | ternary(cme_406_assert_0.msg | default(''), 'not checked'))}] }}"

@@ -1,0 +1,43 @@
+---
+# CME-1310: File Upload Validation (Content Inspection and Extension Allowlist)
+# Verification: Verify that the application rejects uploads with disallowed extensions and mismatched content types, and that upload storage is outside the document root
+
+- name: "CME-1310 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "curl -s -o /dev/null -w \"%{http_code}\" -F \"file=@/tmp/test.php\" https://app/upload"
+  register: cme_1310_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1310 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1310_verify_0.stdout is search('400 or 403 [(]rejected[)]')"
+    fail_msg: "CME-1310 FAILED — expected '400 or 403 (rejected)'"
+    success_msg: "CME-1310 PASSED — File Upload Validation (Content Inspection and Extension Allowlist)"
+  ignore_errors: true
+  register: cme_1310_assert_0
+  when: ansible_os_family != 'Windows' and cme_1310_verify_0 is not skipped
+
+- name: "CME-1310 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "ls -la /var/www/html/uploads/ 2>/dev/null || echo \"no uploads in web root\""
+  register: cme_1310_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1310 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1310_verify_1.stdout is search('directory should not exist inside web root')"
+    fail_msg: "CME-1310 FAILED — expected 'directory should not exist inside web root'"
+    success_msg: "CME-1310 PASSED — File Upload Validation (Content Inspection and Extension Allowlist)"
+  ignore_errors: true
+  register: cme_1310_assert_1
+  when: ansible_os_family != 'Windows' and cme_1310_verify_1 is not skipped
+
+- name: "CME-1310 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1310', 'control_name': 'File Upload Validation (Content Inspection and Extension Allowlist)', 'tactic': 'Harden', 'category': 'Application Input Validation', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_1310_assert_0 is defined and cme_1310_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1310_assert_0 is defined) | ternary(cme_1310_assert_0.msg | default(''), 'not checked'))}] }}"

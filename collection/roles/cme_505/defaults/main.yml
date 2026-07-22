@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-505: IMA/EVM (Integrity Measurement Architecture)
+
+# Set to true to skip this control
+cme_505_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_505_custom_remediation: false
+

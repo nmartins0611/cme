@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1005"
+cme_control_name: "Runtime Memory Error Detection (KASAN/HWASan)"
+cme_tactic: "Detect"
+cme_category: "Runtime Detection"
+cme_category_id: "runtime-detection"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Runtime detection of memory corruption forces exploit authors to either avoid instrumented allocation paths or accept detection; exploitation complexity increases significantly as corrupted memory triggers immediate detection rather than enabling controlled code execution."}]
+cme_cwe_relationships: ["CWE-416", "CWE-131", "CWE-193", "CWE-476", "CWE-787", "CWE-125", "CWE-120"]
+cme_platforms: ["RHEL 9", "Ubuntu 24.04", "Fedora 40"]

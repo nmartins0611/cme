@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-912: HTTP Header Normalization and Request Smuggling Prevention
+
+# Set to true to skip this control
+cme_912_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_912_custom_remediation: false
+

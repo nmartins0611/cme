@@ -1,0 +1,15 @@
+---
+# CME-902: Disable Unused Network Services
+# Remediation strategy: generic (review and customize for your environment)
+# Verification method: List listening services and verify only necessary ones are active
+
+- name: "CME-902 | Remediation requires environment-specific configuration"
+  ansible.builtin.debug:
+    msg: >-
+      CME-902 (Disable Unused Network Services) remediation depends on your
+      environment configuration. Override this role's tasks/main.yml
+      with site-specific remediation steps.
+  when: not (cme_902_custom_remediation | default(false))
+
+- name: "CME-902 | Verify current state"
+  ansible.builtin.include_tasks: verify.yml

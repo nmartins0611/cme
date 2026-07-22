@@ -1,0 +1,15 @@
+---
+# CME-602: seccomp-bpf Profile (Container Default)
+# Remediation strategy: generic (review and customize for your environment)
+# Verification method: Verify container runtime has seccomp profile applied
+
+- name: "CME-602 | Remediation requires environment-specific configuration"
+  ansible.builtin.debug:
+    msg: >-
+      CME-602 (seccomp-bpf Profile (Container Default)) remediation depends on your
+      environment configuration. Override this role's tasks/main.yml
+      with site-specific remediation steps.
+  when: not (cme_602_custom_remediation | default(false))
+
+- name: "CME-602 | Verify current state"
+  ansible.builtin.include_tasks: verify.yml

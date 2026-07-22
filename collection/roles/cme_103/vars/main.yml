@@ -1,0 +1,11 @@
+---
+cme_id: "CME-103"
+cme_control_name: "Stack Canaries (Stack Protector)"
+cme_tactic: "Harden"
+cme_category: "Kernel Hardening"
+cme_category_id: "kernel-hardening"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Attacker must leak or guess canary value to exploit stack overflow"}]
+cme_cwe_relationships: ["CWE-121", "CWE-122", "CWE-120"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Ubuntu 24.04", "Fedora"]

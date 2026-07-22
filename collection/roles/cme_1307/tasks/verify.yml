@@ -1,0 +1,24 @@
+---
+# CME-1307: Command Injection Prevention (No Shell Invocation)
+# Verification: Verify no shell=True with user-controlled input; no os.system() or os.popen() calls
+
+- name: "CME-1307 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'shell=True\\|os.system\\|os.popen' <app_source>/"
+  register: cme_1307_verify_0
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1307 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_1307_verify_0.stdout is search('No shell invocations with user-controlled input')"
+    fail_msg: "CME-1307 FAILED — expected 'No shell invocations with user-controlled input'"
+    success_msg: "CME-1307 PASSED — Command Injection Prevention (No Shell Invocation)"
+  ignore_errors: true
+  register: cme_1307_assert_0
+  when: cme_1307_verify_0 is not skipped
+
+- name: "CME-1307 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1307', 'control_name': 'Command Injection Prevention (No Shell Invocation)', 'tactic': 'Harden', 'category': 'Application Input Validation', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_1307_assert_0 is defined and cme_1307_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1307_assert_0 is defined) | ternary(cme_1307_assert_0.msg | default(''), 'not checked'))}] }}"

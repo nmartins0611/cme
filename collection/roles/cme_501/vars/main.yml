@@ -1,0 +1,11 @@
+---
+cme_id: "CME-501"
+cme_control_name: "Read-Only Root Filesystem"
+cme_tactic: "Isolate"
+cme_category: "Filesystem Hardening"
+cme_category_id: "filesystem-hardening"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "I", "from": "H", "to": "L", "rationale": "Cannot persistently modify system files even with root access"}, {"metric": "A", "from": "H", "to": "L", "rationale": "System recovers original state on reboot"}]
+cme_cwe_relationships: ["CWE-284"]
+cme_platforms: ["RHEL 9", "Fedora CoreOS", "Container-optimized OS"]

@@ -1,0 +1,61 @@
+---
+# CME-508: Quoted Service Path Enforcement (Windows)
+# Verification: Enumerate all Windows services and scheduled tasks with unquoted paths containing spaces, and verify filesystem ACLs on path prefix directories
+
+- name: "CME-508 | Run verification command (windows)"
+  ansible.builtin.shell:
+    cmd: "Get-WmiObject win32_service | Where-Object { $_.PathName -notlike '\"*' -and $_.PathName -match '\\s' } | Select-Object Name, PathName"
+  register: cme_508_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'Windows'
+
+- name: "CME-508 | Assert control is active (windows)"
+  ansible.builtin.assert:
+    that:
+      - "cme_508_verify_0.stdout is search('No services returned [(]all paths properly quoted or space-free[)]')"
+    fail_msg: "CME-508 FAILED — expected 'No services returned (all paths properly quoted or space-free)'"
+    success_msg: "CME-508 PASSED — Quoted Service Path Enforcement (Windows)"
+  ignore_errors: true
+  register: cme_508_assert_0
+  when: ansible_os_family == 'Windows' and cme_508_verify_0 is not skipped
+
+- name: "CME-508 | Run verification command (windows)"
+  ansible.builtin.shell:
+    cmd: "wmic service get name,pathname | findstr /i /v \"\\\"\" | findstr /i \" \""
+  register: cme_508_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'Windows'
+
+- name: "CME-508 | Assert control is active (windows)"
+  ansible.builtin.assert:
+    that:
+      - "cme_508_verify_1.stdout is search('No output [(]no unquoted paths with spaces[)]')"
+    fail_msg: "CME-508 FAILED — expected 'No output (no unquoted paths with spaces)'"
+    success_msg: "CME-508 PASSED — Quoted Service Path Enforcement (Windows)"
+  ignore_errors: true
+  register: cme_508_assert_1
+  when: ansible_os_family == 'Windows' and cme_508_verify_1 is not skipped
+
+- name: "CME-508 | Run verification command (windows)"
+  ansible.builtin.shell:
+    cmd: "icacls \"C:\\Program Files\" | findstr /i \"BUILTIN\\\\Users.*W\""
+  register: cme_508_verify_2
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'Windows'
+
+- name: "CME-508 | Assert control is active (windows)"
+  ansible.builtin.assert:
+    that:
+      - "cme_508_verify_2.stdout is search('No write permissions for BUILTIN\\Users on path prefix directories')"
+    fail_msg: "CME-508 FAILED — expected 'No write permissions for BUILTIN\Users on path prefix directories'"
+    success_msg: "CME-508 PASSED — Quoted Service Path Enforcement (Windows)"
+  ignore_errors: true
+  register: cme_508_assert_2
+  when: ansible_os_family == 'Windows' and cme_508_verify_2 is not skipped
+
+- name: "CME-508 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-508', 'control_name': 'Quoted Service Path Enforcement (Windows)', 'tactic': 'Harden', 'category': 'Filesystem Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_508_assert_0 is defined and cme_508_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_508_assert_0 is defined) | ternary(cme_508_assert_0.msg | default(''), 'not checked'))}] }}"

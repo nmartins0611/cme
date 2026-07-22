@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-705: Dropped Linux Capabilities
+
+# Set to true to skip this control
+cme_705_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_705_custom_remediation: false
+

@@ -1,0 +1,21 @@
+---
+galaxy_info:
+  role_name: cme_1010
+  author: CME Project
+  description: "CME-1010: cgroup Memory Pressure Monitoring (memory.events / PSI)"
+  license: Apache-2.0
+  min_ansible_version: "2.15"
+  platforms:
+    - name: EL
+      versions:
+        - "8"
+        - "9"
+    - name: Ubuntu
+      versions:
+        - "22.04"
+        - "24.04"
+    - name: Fedora
+      versions:
+        - "all"
+
+dependencies: []

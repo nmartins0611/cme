@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1306"
+cme_control_name: "XSS Prevention (Context-Aware Output Encoding)"
+cme_tactic: "Harden"
+cme_category: "Application Input Validation"
+cme_category_id: "application-input-validation"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "XSS payloads are HTML-encoded and rendered as text, not executed"}, {"metric": "I", "from": "H", "to": "L", "rationale": "Cannot inject scripts to modify page behavior or steal session tokens"}]
+cme_cwe_relationships: ["CWE-79"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

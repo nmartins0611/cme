@@ -1,0 +1,11 @@
+---
+# CME-703: Rootless Containers
+# This control requires manual/context-specific remediation.
+# Running verification only.
+
+- name: "CME-703 | Set manual remediation required"
+  ansible.builtin.set_fact:
+    cme_703_manual_remediation_required: true
+
+- name: "CME-703 | Run verification"
+  ansible.builtin.include_tasks: verify.yml

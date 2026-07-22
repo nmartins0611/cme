@@ -1,0 +1,15 @@
+---
+# CME-504: dm-verity (Verified Boot)
+# Remediation strategy: generic (review and customize for your environment)
+# Verification method: Check dm-verity status on root device
+
+- name: "CME-504 | Remediation requires environment-specific configuration"
+  ansible.builtin.debug:
+    msg: >-
+      CME-504 (dm-verity (Verified Boot)) remediation depends on your
+      environment configuration. Override this role's tasks/main.yml
+      with site-specific remediation steps.
+  when: not (cme_504_custom_remediation | default(false))
+
+- name: "CME-504 | Verify current state"
+  ansible.builtin.include_tasks: verify.yml

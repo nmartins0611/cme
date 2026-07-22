@@ -1,0 +1,14 @@
+---
+# CME-603: Unprivileged BPF Disabled
+
+- name: "CME-603 | Set kernel.unprivileged_bpf_disabled"
+  ansible.posix.sysctl:
+    name: kernel.unprivileged_bpf_disabled
+    value: "{{ cme_603_kernel_unprivileged_bpf_disabled | default('1') }}"
+    state: present
+    sysctl_set: true
+    reload: true
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-603 | Verify after remediation"
+  ansible.builtin.include_tasks: verify.yml

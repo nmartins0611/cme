@@ -1,0 +1,11 @@
+---
+cme_id: "CME-302"
+cme_control_name: "SELinux Confined User Mapping"
+cme_tactic: "Harden"
+cme_category: "Mandatory Access Control"
+cme_category_id: "mandatory-access-control"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "PR", "from": "L", "to": "H", "rationale": "Compromised user account has significantly restricted capabilities"}]
+cme_cwe_relationships: ["CWE-269", "CWE-284"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Fedora"]

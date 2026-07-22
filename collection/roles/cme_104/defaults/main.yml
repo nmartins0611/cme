@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-104: KASLR (Kernel Address Space Layout Randomization)
+
+# Set to true to skip this control
+cme_104_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_104_custom_remediation: false
+

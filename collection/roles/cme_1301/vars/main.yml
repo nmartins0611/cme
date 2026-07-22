@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1301"
+cme_control_name: "Path Traversal Prevention (Canonicalization)"
+cme_tactic: "Harden"
+cme_category: "Application Input Validation"
+cme_category_id: "application-input-validation"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Traversal payloads (../, absolute paths) are rejected before reaching filesystem operations"}, {"metric": "C", "from": "H", "to": "L", "rationale": "File read confined to allowed directory; sensitive files outside base path are unreachable"}]
+cme_cwe_relationships: ["CWE-22", "CWE-23", "CWE-36", "CWE-73"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

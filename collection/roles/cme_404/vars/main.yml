@@ -1,0 +1,11 @@
+---
+cme_id: "CME-404"
+cme_control_name: "Certificate Pinning"
+cme_tactic: "Harden"
+cme_category: "Cryptographic Controls"
+cme_category_id: "cryptographic-controls"
+cme_control_layer: "Application"
+cme_confidence: "Medium"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "MitM requires compromising the specific pinned certificate, not just any CA"}]
+cme_cwe_relationships: ["CWE-295"]
+cme_platforms: ["Any"]

@@ -1,0 +1,11 @@
+---
+cme_id: "CME-507"
+cme_control_name: "Secure Dynamic Linker Configuration (LD_PRELOAD/PATH Hardening)"
+cme_tactic: "Harden"
+cme_category: "Filesystem Hardening"
+cme_category_id: "filesystem-hardening"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "Medium"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "With LD_PRELOAD and LD_LIBRARY_PATH cleared for services and library search paths restricted to trusted directories, the attacker cannot simply place a malicious shared library in a writable directory and have it loaded by a privileged process. Exploitation requires either modifying a trusted directory (which requires elevated privileges or a separate vulnerability), exploiting a service that explicitly loads libraries from untrusted paths (an application-level bug), or finding an alternative code injection vector beyond the hardened dynamic linker configuration."}]
+cme_cwe_relationships: ["CWE-426", "CWE-427"]
+cme_platforms: ["RHEL 8", "RHEL 9", "RHEL 10", "OpenShift 4"]

@@ -1,0 +1,11 @@
+---
+cme_id: "CME-504"
+cme_control_name: "dm-verity (Verified Boot)"
+cme_tactic: "Harden"
+cme_category: "Filesystem Hardening"
+cme_category_id: "filesystem-hardening"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "I", "from": "H", "to": "N", "rationale": "Any block-level modification is cryptographically detected and rejected"}]
+cme_cwe_relationships: ["CWE-345", "CWE-494", "CWE-347"]
+cme_platforms: ["RHEL 9", "Fedora CoreOS", "ChromeOS", "Android"]

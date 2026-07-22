@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-1203: Disaster Recovery / Multi-Region Failover
+
+# Set to true to skip this control
+cme_1203_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_1203_custom_remediation: false
+

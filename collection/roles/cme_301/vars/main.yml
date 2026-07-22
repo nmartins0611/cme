@@ -1,0 +1,11 @@
+---
+cme_id: "CME-301"
+cme_control_name: "SELinux (Enforcing Mode)"
+cme_tactic: "Harden"
+cme_category: "Mandatory Access Control"
+cme_category_id: "mandatory-access-control"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "S", "from": "C", "to": "U", "rationale": "Compromised process cannot escape its SELinux domain to affect other services"}, {"metric": "C", "from": "H", "to": "L", "rationale": "Process cannot read files outside its policy-allowed set"}, {"metric": "I", "from": "H", "to": "L", "rationale": "Process cannot modify files or resources outside its domain"}]
+cme_cwe_relationships: ["CWE-269", "CWE-284", "CWE-732", "CWE-653"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Fedora", "CentOS Stream"]

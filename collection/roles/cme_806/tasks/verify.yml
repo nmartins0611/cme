@@ -1,0 +1,43 @@
+---
+# CME-806: Kerberos Authentication (GSSAPI)
+# Verification: Check Kerberos authentication is configured
+
+- name: "CME-806 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "klist -k /etc/krb5.keytab 2>/dev/null | head -3"
+  register: cme_806_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-806 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_806_verify_0.stdout is search('keytab entries')"
+    fail_msg: "CME-806 FAILED — expected 'keytab entries'"
+    success_msg: "CME-806 PASSED — Kerberos Authentication (GSSAPI)"
+  ignore_errors: true
+  register: cme_806_assert_0
+  when: ansible_os_family != 'Windows' and cme_806_verify_0 is not skipped
+
+- name: "CME-806 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "sshd -T | grep gssapiauthentication"
+  register: cme_806_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-806 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_806_verify_1.stdout is search('gssapiauthentication yes')"
+    fail_msg: "CME-806 FAILED — expected 'gssapiauthentication yes'"
+    success_msg: "CME-806 PASSED — Kerberos Authentication (GSSAPI)"
+  ignore_errors: true
+  register: cme_806_assert_1
+  when: ansible_os_family != 'Windows' and cme_806_verify_1 is not skipped
+
+- name: "CME-806 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-806', 'control_name': 'Kerberos Authentication (GSSAPI)', 'tactic': 'Harden', 'category': 'Credential Hardening', 'control_layer': 'Identity', 'confidence': 'High', 'status': ((cme_806_assert_0 is defined and cme_806_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_806_assert_0 is defined) | ternary(cme_806_assert_0.msg | default(''), 'not checked'))}] }}"

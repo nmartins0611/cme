@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-807: Session Lifetime and Idle Timeout Enforcement
+
+# Set to true to skip this control
+cme_807_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_807_custom_remediation: false
+

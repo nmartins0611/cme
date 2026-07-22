@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-601: Kernel-Level Syscall Filtering (seccomp)
+
+# Set to true to skip this control
+cme_601_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_601_custom_remediation: false
+

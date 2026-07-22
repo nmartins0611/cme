@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-911: Fine-Grained Administrative Permission Scoping
+
+# Set to true to skip this control
+cme_911_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_911_custom_remediation: false
+

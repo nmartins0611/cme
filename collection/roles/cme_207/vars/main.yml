@@ -1,0 +1,11 @@
+---
+cme_id: "CME-207"
+cme_control_name: "DNS Rebinding Protection"
+cme_tactic: "Harden"
+cme_category: "Network Isolation"
+cme_category_id: "network-isolation"
+cme_control_layer: "Network"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AV", "from": "N", "to": "L", "rationale": "An attacker on the public internet cannot reach localhost-bound or private-network services via DNS rebinding. The DNS resolver or firewall blocks responses that would map a public domain to a private address, preventing the browser from connecting to internal services. Exploitation requires the attacker to be on the same local network or have direct access to the host."}]
+cme_cwe_relationships: ["CWE-346", "CWE-350"]
+cme_platforms: ["RHEL 8", "RHEL 9", "RHEL 10"]

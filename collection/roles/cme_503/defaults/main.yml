@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-503: nosuid on Non-Root Partitions
+
+# Set to true to skip this control
+cme_503_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_503_custom_remediation: false
+

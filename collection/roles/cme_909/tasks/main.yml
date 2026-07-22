@@ -1,0 +1,11 @@
+---
+# CME-909: Default-Deny API Authorization Policy
+# This control requires manual/context-specific remediation.
+# Running verification only.
+
+- name: "CME-909 | Set manual remediation required"
+  ansible.builtin.set_fact:
+    cme_909_manual_remediation_required: true
+
+- name: "CME-909 | Run verification"
+  ansible.builtin.include_tasks: verify.yml

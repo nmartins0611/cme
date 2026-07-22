@@ -1,0 +1,11 @@
+---
+# CME-205: Service Binding to Localhost
+# This control requires manual/context-specific remediation.
+# Running verification only.
+
+- name: "CME-205 | Set manual remediation required"
+  ansible.builtin.set_fact:
+    cme_205_manual_remediation_required: true
+
+- name: "CME-205 | Run verification"
+  ansible.builtin.include_tasks: verify.yml

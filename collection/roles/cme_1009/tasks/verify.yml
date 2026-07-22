@@ -1,0 +1,24 @@
+---
+# CME-1009: Privilege Assignment Monitoring (Role Grant Alerting)
+# Verification: Verify that a scheduled job or event-driven monitor tracks high-privilege role membership and alerts on unauthorized additions. Grant a test user a high-privilege role and confirm an alert fires within the expected interval.
+
+- name: "CME-1009 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "kcadm.sh get roles/realm-admin/users -r master --fields username"
+  register: cme_1009_verify_0
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1009 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_1009_verify_0.stdout is search('Lists all users with realm-admin role; compare against approved baseline')"
+    fail_msg: "CME-1009 FAILED — expected 'Lists all users with realm-admin role; compare against approved baseline'"
+    success_msg: "CME-1009 PASSED — Privilege Assignment Monitoring (Role Grant Alerting)"
+  ignore_errors: true
+  register: cme_1009_assert_0
+  when: cme_1009_verify_0 is not skipped
+
+- name: "CME-1009 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1009', 'control_name': 'Privilege Assignment Monitoring (Role Grant Alerting)', 'tactic': 'Detect', 'category': 'Runtime Detection', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_1009_assert_0 is defined and cme_1009_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1009_assert_0 is defined) | ternary(cme_1009_assert_0.msg | default(''), 'not checked'))}] }}"

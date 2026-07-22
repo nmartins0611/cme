@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-909: Default-Deny API Authorization Policy
+
+# Set to true to skip this control
+cme_909_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_909_custom_remediation: false
+

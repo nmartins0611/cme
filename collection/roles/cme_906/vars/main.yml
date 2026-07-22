@@ -1,0 +1,11 @@
+---
+cme_id: "CME-906"
+cme_control_name: "Rate Limiting / Connection Throttling"
+cme_tactic: "Harden"
+cme_category: "Application Controls"
+cme_category_id: "application-controls"
+cme_control_layer: "Network"
+cme_confidence: "Medium"
+cme_cvss_vector_impacts: [{"metric": "A", "from": "H", "to": "L", "rationale": "Single client cannot exhaust application resources"}, {"metric": "AC", "from": "L", "to": "H", "rationale": "Brute force attacks throttled to impractical speeds"}]
+cme_cwe_relationships: ["CWE-307", "CWE-400"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

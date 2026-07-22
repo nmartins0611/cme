@@ -1,0 +1,24 @@
+---
+# CME-911: Fine-Grained Administrative Permission Scoping
+# Verification: Verify that administrative roles are decomposed into atomic permissions and each admin account holds only the permissions required for their role. Attempt a cross-domain action (e.g., IdP admin trying to assign a realm-admin role) and confirm it is rejected.
+
+- name: "CME-911 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "kcadm.sh get ui-ext/brute-force/realms/master/admin-permissions"
+  register: cme_911_verify_0
+  changed_when: false
+  failed_when: false
+
+- name: "CME-911 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_911_verify_0.stdout is search('Shows fine-grained permission policies; no admin should hold permissions outside their designated scope')"
+    fail_msg: "CME-911 FAILED — expected 'Shows fine-grained permission policies; no admin should hold permissions outside their designated scope'"
+    success_msg: "CME-911 PASSED — Fine-Grained Administrative Permission Scoping"
+  ignore_errors: true
+  register: cme_911_assert_0
+  when: cme_911_verify_0 is not skipped
+
+- name: "CME-911 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-911', 'control_name': 'Fine-Grained Administrative Permission Scoping', 'tactic': 'Isolate', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_911_assert_0 is defined and cme_911_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_911_assert_0 is defined) | ternary(cme_911_assert_0.msg | default(''), 'not checked'))}] }}"

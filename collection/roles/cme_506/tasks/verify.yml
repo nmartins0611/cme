@@ -1,0 +1,25 @@
+---
+# CME-506: Landlock LSM (Filesystem Sandboxing)
+# Verification: Check if process has active Landlock restrictions
+
+- name: "CME-506 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "grep Landlock /proc/self/status"
+  register: cme_506_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-506 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_506_verify_0.stdout is search('Landlock')"
+    fail_msg: "CME-506 FAILED — expected 'Landlock'"
+    success_msg: "CME-506 PASSED — Landlock LSM (Filesystem Sandboxing)"
+  ignore_errors: true
+  register: cme_506_assert_0
+  when: ansible_os_family != 'Windows' and cme_506_verify_0 is not skipped
+
+- name: "CME-506 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-506', 'control_name': 'Landlock LSM (Filesystem Sandboxing)', 'tactic': 'Isolate', 'category': 'Filesystem Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_506_assert_0 is defined and cme_506_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_506_assert_0 is defined) | ternary(cme_506_assert_0.msg | default(''), 'not checked'))}] }}"

@@ -1,0 +1,58 @@
+---
+# CME-1309: Script Engine Restriction (Sandbox / Disable)
+# Verification: Verify script consoles are disabled or sandboxed, and expression language evaluation is restricted
+
+- name: "CME-1309 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:8080/jenkins/script --data 'script=println(1)'"
+  register: cme_1309_verify_0
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1309 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1309_verify_0.stdout is search('403 or 404 [(]Script Console disabled or access-restricted to administrators only[)]')"
+    fail_msg: "CME-1309 FAILED — expected '403 or 404 (Script Console disabled or access-restricted to administrators only)'"
+    success_msg: "CME-1309 PASSED — Script Engine Restriction (Sandbox / Disable)"
+  ignore_errors: true
+  register: cme_1309_assert_0
+  when: cme_1309_verify_0 is not skipped
+
+- name: "CME-1309 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'GroovySandbox\\|SecureGroovyScript\\|sandbox(true)' <app_source>/"
+  register: cme_1309_verify_1
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1309 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1309_verify_1.stdout is search('Groovy sandbox enforcement present in pipeline/script execution paths')"
+    fail_msg: "CME-1309 FAILED — expected 'Groovy sandbox enforcement present in pipeline/script execution paths'"
+    success_msg: "CME-1309 PASSED — Script Engine Restriction (Sandbox / Disable)"
+  ignore_errors: true
+  register: cme_1309_assert_1
+  when: cme_1309_verify_1 is not skipped
+
+- name: "CME-1309 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'SimpleEvaluationContext\\|StandardEvaluationContext' <app_source>/ | grep -c SimpleEvaluationContext"
+  register: cme_1309_verify_2
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1309 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1309_verify_2.stdout is search('SimpleEvaluationContext used instead of StandardEvaluationContext for user-controlled SpEL')"
+    fail_msg: "CME-1309 FAILED — expected 'SimpleEvaluationContext used instead of StandardEvaluationContext for user-controlled SpEL'"
+    success_msg: "CME-1309 PASSED — Script Engine Restriction (Sandbox / Disable)"
+  ignore_errors: true
+  register: cme_1309_assert_2
+  when: cme_1309_verify_2 is not skipped
+
+- name: "CME-1309 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1309', 'control_name': 'Script Engine Restriction (Sandbox / Disable)', 'tactic': 'Harden', 'category': 'Application Input Validation', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_1309_assert_0 is defined and cme_1309_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1309_assert_0 is defined) | ternary(cme_1309_assert_0.msg | default(''), 'not checked'))}] }}"

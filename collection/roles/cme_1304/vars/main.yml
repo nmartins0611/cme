@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1304"
+cme_control_name: "SSRF Prevention (Outbound Request Allowlist)"
+cme_tactic: "Harden"
+cme_category: "Application Input Validation"
+cme_category_id: "application-input-validation"
+cme_control_layer: "Application"
+cme_confidence: "Medium"
+cme_cvss_vector_impacts: [{"metric": "C", "from": "H", "to": "L", "rationale": "Cannot reach internal services, cloud metadata, or local files via SSRF"}, {"metric": "AC", "from": "L", "to": "H", "rationale": "Destination allowlist blocks common SSRF bypass techniques"}]
+cme_cwe_relationships: ["CWE-918"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

@@ -1,0 +1,9 @@
+---
+galaxy_info:
+  role_name: cme_701
+  author: CME Project
+  description: "CME-701: Sandboxing / gVisor Runtime"
+  license: Apache-2.0
+  min_ansible_version: "2.15"
+
+dependencies: []

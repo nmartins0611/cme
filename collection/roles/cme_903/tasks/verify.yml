@@ -1,0 +1,61 @@
+---
+# CME-903: Kernel Network Hardening (sysctl)
+# Verification: Check network hardening sysctls
+
+- name: "CME-903 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "sysctl net.ipv4.tcp_syncookies"
+  register: cme_903_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-903 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_903_verify_0.stdout is search('net.ipv4.tcp_syncookies = 1')"
+    fail_msg: "CME-903 FAILED — expected 'net.ipv4.tcp_syncookies = 1'"
+    success_msg: "CME-903 PASSED — Kernel Network Hardening (sysctl)"
+  ignore_errors: true
+  register: cme_903_assert_0
+  when: ansible_os_family != 'Windows' and cme_903_verify_0 is not skipped
+
+- name: "CME-903 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "sysctl net.ipv4.conf.all.accept_redirects"
+  register: cme_903_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-903 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_903_verify_1.stdout is search('net.ipv4.conf.all.accept_redirects = 0')"
+    fail_msg: "CME-903 FAILED — expected 'net.ipv4.conf.all.accept_redirects = 0'"
+    success_msg: "CME-903 PASSED — Kernel Network Hardening (sysctl)"
+  ignore_errors: true
+  register: cme_903_assert_1
+  when: ansible_os_family != 'Windows' and cme_903_verify_1 is not skipped
+
+- name: "CME-903 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "sysctl net.ipv4.conf.all.rp_filter"
+  register: cme_903_verify_2
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-903 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_903_verify_2.stdout is search('net.ipv4.conf.all.rp_filter = 1')"
+    fail_msg: "CME-903 FAILED — expected 'net.ipv4.conf.all.rp_filter = 1'"
+    success_msg: "CME-903 PASSED — Kernel Network Hardening (sysctl)"
+  ignore_errors: true
+  register: cme_903_assert_2
+  when: ansible_os_family != 'Windows' and cme_903_verify_2 is not skipped
+
+- name: "CME-903 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-903', 'control_name': 'Kernel Network Hardening (sysctl)', 'tactic': 'Harden', 'category': 'Protocol Hardening', 'control_layer': 'Network', 'confidence': 'High', 'status': ((cme_903_assert_0 is defined and cme_903_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_903_assert_0 is defined) | ternary(cme_903_assert_0.msg | default(''), 'not checked'))}] }}"

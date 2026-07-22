@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1314"
+cme_control_name: "Input Canonicalization Before Security Decision"
+cme_tactic: "Harden"
+cme_category: "Application Input Validation"
+cme_category_id: "application-input-validation"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "The attacker must find an input representation that survives full canonicalization while still bypassing the security check \u2014 encoding tricks (URL-encoding, Unicode homoglyphs, octal IP notation, mixed-case evasion) are neutralized before the security decision is made, requiring the attacker to discover a novel bypass that operates at the semantic level rather than the syntactic level"}]
+cme_cwe_relationships: ["CWE-184", "CWE-183", "CWE-20", "CWE-180", "CWE-1289"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

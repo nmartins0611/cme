@@ -1,0 +1,93 @@
+---
+# CME-807: Session Lifetime and Idle Timeout Enforcement
+# Verification: Verify that authenticated sessions have both absolute lifetime limits and idle timeouts configured, and that logout explicitly invalidates the server-side session
+
+- name: "CME-807 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'session-timeout\\|<session-config>' <app_source>/WEB-INF/web.xml"
+  register: cme_807_verify_0
+  changed_when: false
+  failed_when: false
+
+- name: "CME-807 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_807_verify_0.stdout is search('session-timeout set to 30 or less [(]minutes[)]')"
+    fail_msg: "CME-807 FAILED — expected 'session-timeout set to 30 or less (minutes)'"
+    success_msg: "CME-807 PASSED — Session Lifetime and Idle Timeout Enforcement"
+  ignore_errors: true
+  register: cme_807_assert_0
+  when: cme_807_verify_0 is not skipped
+
+- name: "CME-807 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'SESSION_COOKIE_AGE\\|SESSION_EXPIRE_AT_BROWSER_CLOSE\\|SESSION_IDLE_TIMEOUT' <app_source>/settings.py"
+  register: cme_807_verify_1
+  changed_when: false
+  failed_when: false
+
+- name: "CME-807 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_807_verify_1.stdout is search('SESSION_COOKIE_AGE set to 1800 or less [(]seconds[)]; SESSION_EXPIRE_AT_BROWSER_CLOSE = True')"
+    fail_msg: "CME-807 FAILED — expected 'SESSION_COOKIE_AGE set to 1800 or less (seconds); SESSION_EXPIRE_AT_BROWSER_CLOSE = True'"
+    success_msg: "CME-807 PASSED — Session Lifetime and Idle Timeout Enforcement"
+  ignore_errors: true
+  register: cme_807_assert_1
+  when: cme_807_verify_1 is not skipped
+
+- name: "CME-807 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'expire_after\\|session_length\\|timeout.*session' <app_source>/config/"
+  register: cme_807_verify_2
+  changed_when: false
+  failed_when: false
+
+- name: "CME-807 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_807_verify_2.stdout is search('Session expiration configured [(]e.g., expire_after: 30.minutes[)]')"
+    fail_msg: "CME-807 FAILED — expected 'Session expiration configured (e.g., expire_after: 30.minutes)'"
+    success_msg: "CME-807 PASSED — Session Lifetime and Idle Timeout Enforcement"
+  ignore_errors: true
+  register: cme_807_assert_2
+  when: cme_807_verify_2 is not skipped
+
+- name: "CME-807 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'session.invalidate\\|request.session.flush\\|session.destroy\\|Session.Abandon' <app_source>/"
+  register: cme_807_verify_3
+  changed_when: false
+  failed_when: false
+
+- name: "CME-807 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_807_verify_3.stdout is search('Server-side session invalidation present in logout handler')"
+    fail_msg: "CME-807 FAILED — expected 'Server-side session invalidation present in logout handler'"
+    success_msg: "CME-807 PASSED — Session Lifetime and Idle Timeout Enforcement"
+  ignore_errors: true
+  register: cme_807_assert_3
+  when: cme_807_verify_3 is not skipped
+
+- name: "CME-807 | Run verification command (windows)"
+  ansible.builtin.shell:
+    cmd: "Get-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name InactivityTimeoutSecs -ErrorAction SilentlyContinue | Select-Object InactivityTimeoutSecs"
+  register: cme_807_verify_4
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'Windows'
+
+- name: "CME-807 | Assert control is active (windows)"
+  ansible.builtin.assert:
+    that:
+      - "cme_807_verify_4.stdout is search('InactivityTimeoutSecs set to 900 or less [(]15 minutes[)]')"
+    fail_msg: "CME-807 FAILED — expected 'InactivityTimeoutSecs set to 900 or less (15 minutes)'"
+    success_msg: "CME-807 PASSED — Session Lifetime and Idle Timeout Enforcement"
+  ignore_errors: true
+  register: cme_807_assert_4
+  when: ansible_os_family == 'Windows' and cme_807_verify_4 is not skipped
+
+- name: "CME-807 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-807', 'control_name': 'Session Lifetime and Idle Timeout Enforcement', 'tactic': 'Harden', 'category': 'Credential Hardening', 'control_layer': 'Identity', 'confidence': 'High', 'status': ((cme_807_assert_0 is defined and cme_807_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_807_assert_0 is defined) | ternary(cme_807_assert_0.msg | default(''), 'not checked'))}] }}"

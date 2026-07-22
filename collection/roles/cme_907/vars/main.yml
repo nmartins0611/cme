@@ -1,0 +1,11 @@
+---
+cme_id: "CME-907"
+cme_control_name: "Application-Layer RBAC Enforcement"
+cme_tactic: "Harden"
+cme_category: "Application Controls"
+cme_category_id: "application-controls"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "PR", "from": "L", "to": "H", "rationale": "An attacker with any authenticated session is blocked from privileged operations; exploitation requires compromise of a specifically privileged role. The mechanism is the per-endpoint role verification gate that rejects requests from insufficiently privileged callers before business logic executes."}, {"metric": "I", "from": "H", "to": "L", "rationale": "Write operations are confined to the caller's authorized scope; modification of resources outside the caller's role permissions is rejected before execution, limiting integrity impact to the attacker's own authorized data."}]
+cme_cwe_relationships: ["CWE-266", "CWE-1220", "CWE-862", "CWE-863", "CWE-285"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

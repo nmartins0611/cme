@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-1010: cgroup Memory Pressure Monitoring (memory.events / PSI)
+
+# Set to true to skip this control
+cme_1010_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_1010_custom_remediation: false
+

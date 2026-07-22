@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-204: IPsec / WireGuard (Encrypted Transport)
+
+# Set to true to skip this control
+cme_204_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_204_custom_remediation: false
+

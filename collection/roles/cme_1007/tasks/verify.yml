@@ -1,0 +1,41 @@
+---
+# CME-1007: Application Configuration Drift Detection (IaC Enforcement)
+# Verification: Verify that application configuration is managed via IaC and that drift detection runs on a schedule. Introduce a test configuration change via the application admin API and confirm it is detected or reverted within the expected interval.
+
+- name: "CME-1007 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "terraform plan -detailed-exitcode"
+  register: cme_1007_verify_0
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1007 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1007_verify_0.stdout is search('Exit code 2 indicates drift detected between live state and IaC definition')"
+    fail_msg: "CME-1007 FAILED — expected 'Exit code 2 indicates drift detected between live state and IaC definition'"
+    success_msg: "CME-1007 PASSED — Application Configuration Drift Detection (IaC Enforcement)"
+  ignore_errors: true
+  register: cme_1007_assert_0
+  when: cme_1007_verify_0 is not skipped
+
+- name: "CME-1007 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "ansible-playbook site.yml --check --diff"
+  register: cme_1007_verify_1
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1007 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1007_verify_1.stdout is search('Reports changes that would be made to reconcile drift')"
+    fail_msg: "CME-1007 FAILED — expected 'Reports changes that would be made to reconcile drift'"
+    success_msg: "CME-1007 PASSED — Application Configuration Drift Detection (IaC Enforcement)"
+  ignore_errors: true
+  register: cme_1007_assert_1
+  when: cme_1007_verify_1 is not skipped
+
+- name: "CME-1007 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1007', 'control_name': 'Application Configuration Drift Detection (IaC Enforcement)', 'tactic': 'Detect', 'category': 'Integrity Detection', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_1007_assert_0 is defined and cme_1007_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1007_assert_0 is defined) | ternary(cme_1007_assert_0.msg | default(''), 'not checked'))}] }}"

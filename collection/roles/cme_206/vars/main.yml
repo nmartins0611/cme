@@ -1,0 +1,11 @@
+---
+cme_id: "CME-206"
+cme_control_name: "Network Policy (Kubernetes)"
+cme_tactic: "Isolate"
+cme_category: "Network Isolation"
+cme_category_id: "network-isolation"
+cme_control_layer: "Network"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AV", "from": "N", "to": "A", "rationale": "Pod only reachable from explicitly allowed sources"}, {"metric": "S", "from": "C", "to": "U", "rationale": "Compromised pod cannot reach arbitrary cluster services"}]
+cme_cwe_relationships: ["CWE-284", "CWE-668"]
+cme_platforms: ["Kubernetes", "OpenShift"]

@@ -1,0 +1,11 @@
+---
+cme_id: "CME-902"
+cme_control_name: "Disable Unused Network Services"
+cme_tactic: "Harden"
+cme_category: "Protocol Hardening"
+cme_category_id: "protocol-hardening"
+cme_control_layer: "Network"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AV", "from": "N", "to": "L", "rationale": "Fewer network-accessible services means fewer remote attack vectors"}]
+cme_cwe_relationships: ["CWE-284", "CWE-668"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Ubuntu 24.04", "Windows 10", "Windows 11", "Windows Server 2022"]

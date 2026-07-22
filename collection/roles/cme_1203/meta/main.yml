@@ -1,0 +1,9 @@
+---
+galaxy_info:
+  role_name: cme_1203
+  author: CME Project
+  description: "CME-1203: Disaster Recovery / Multi-Region Failover"
+  license: Apache-2.0
+  min_ansible_version: "2.15"
+
+dependencies: []

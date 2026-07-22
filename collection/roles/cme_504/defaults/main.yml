@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-504: dm-verity (Verified Boot)
+
+# Set to true to skip this control
+cme_504_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_504_custom_remediation: false
+

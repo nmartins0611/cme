@@ -1,0 +1,25 @@
+---
+# CME-109: Kernel Lockdown Mode
+# Verification: Check lockdown LSM state
+
+- name: "CME-109 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "cat /sys/kernel/security/lockdown"
+  register: cme_109_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-109 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_109_verify_0.stdout is search('[integrity]')"
+    fail_msg: "CME-109 FAILED — expected '[integrity]'"
+    success_msg: "CME-109 PASSED — Kernel Lockdown Mode"
+  ignore_errors: true
+  register: cme_109_assert_0
+  when: ansible_os_family != 'Windows' and cme_109_verify_0 is not skipped
+
+- name: "CME-109 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-109', 'control_name': 'Kernel Lockdown Mode', 'tactic': 'Harden', 'category': 'Kernel Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_109_assert_0 is defined and cme_109_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_109_assert_0 is defined) | ternary(cme_109_assert_0.msg | default(''), 'not checked'))}] }}"

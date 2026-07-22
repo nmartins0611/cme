@@ -1,0 +1,43 @@
+---
+# CME-503: nosuid on Non-Root Partitions
+# Verification: Check nosuid on non-root partitions
+
+- name: "CME-503 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "mount | grep '/tmp' | grep nosuid"
+  register: cme_503_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-503 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_503_verify_0.stdout is search('nosuid')"
+    fail_msg: "CME-503 FAILED — expected 'nosuid'"
+    success_msg: "CME-503 PASSED — nosuid on Non-Root Partitions"
+  ignore_errors: true
+  register: cme_503_assert_0
+  when: ansible_os_family != 'Windows' and cme_503_verify_0 is not skipped
+
+- name: "CME-503 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "mount | grep '/home' | grep nosuid"
+  register: cme_503_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-503 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_503_verify_1.stdout is search('nosuid')"
+    fail_msg: "CME-503 FAILED — expected 'nosuid'"
+    success_msg: "CME-503 PASSED — nosuid on Non-Root Partitions"
+  ignore_errors: true
+  register: cme_503_assert_1
+  when: ansible_os_family != 'Windows' and cme_503_verify_1 is not skipped
+
+- name: "CME-503 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-503', 'control_name': 'nosuid on Non-Root Partitions', 'tactic': 'Harden', 'category': 'Filesystem Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_503_assert_0 is defined and cme_503_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_503_assert_0 is defined) | ternary(cme_503_assert_0.msg | default(''), 'not checked'))}] }}"

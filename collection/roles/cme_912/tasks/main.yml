@@ -1,0 +1,11 @@
+---
+# CME-912: HTTP Header Normalization and Request Smuggling Prevention
+# This control requires manual/context-specific remediation.
+# Running verification only.
+
+- name: "CME-912 | Set manual remediation required"
+  ansible.builtin.set_fact:
+    cme_912_manual_remediation_required: true
+
+- name: "CME-912 | Run verification"
+  ansible.builtin.include_tasks: verify.yml

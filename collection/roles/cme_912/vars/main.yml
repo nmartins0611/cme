@@ -1,0 +1,11 @@
+---
+cme_id: "CME-912"
+cme_control_name: "HTTP Header Normalization and Request Smuggling Prevention"
+cme_tactic: "Harden"
+cme_category: "Application Controls"
+cme_category_id: "application-controls"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Strict header normalization closes the standard CL/TE and duplicate-CL desync vectors, forcing the attacker to discover novel parser-specific bypass techniques to achieve smuggling"}, {"metric": "I", "from": "H", "to": "L", "rationale": "Preventing request smuggling eliminates the primary integrity impact: cache poisoning and request injection into other users sessions"}]
+cme_cwe_relationships: ["CWE-444", "CWE-113", "CWE-436"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Any Linux with HTTP proxy/LB"]

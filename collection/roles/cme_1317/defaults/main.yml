@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-1317: XML External Entity Prevention (Secure XML Parser Configuration)
+
+# Set to true to skip this control
+cme_1317_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_1317_custom_remediation: false
+

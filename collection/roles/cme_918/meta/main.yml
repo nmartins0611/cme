@@ -1,0 +1,13 @@
+---
+galaxy_info:
+  role_name: cme_918
+  author: CME Project
+  description: "CME-918: URL Path Authorization Enforcement (Forced Browsing Prevention)"
+  license: Apache-2.0
+  min_ansible_version: "2.15"
+  platforms:
+    - name: Windows
+      versions:
+        - "all"
+
+dependencies: []

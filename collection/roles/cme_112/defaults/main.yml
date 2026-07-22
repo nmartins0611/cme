@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-112: RELRO and PIE (Full)
+
+# Set to true to skip this control
+cme_112_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_112_custom_remediation: false
+

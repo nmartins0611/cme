@@ -1,0 +1,15 @@
+---
+# CME-903: Kernel Network Hardening (sysctl)
+# Remediation strategy: generic (review and customize for your environment)
+# Verification method: Check network hardening sysctls
+
+- name: "CME-903 | Remediation requires environment-specific configuration"
+  ansible.builtin.debug:
+    msg: >-
+      CME-903 (Kernel Network Hardening (sysctl)) remediation depends on your
+      environment configuration. Override this role's tasks/main.yml
+      with site-specific remediation steps.
+  when: not (cme_903_custom_remediation | default(false))
+
+- name: "CME-903 | Verify current state"
+  ansible.builtin.include_tasks: verify.yml

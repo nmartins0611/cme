@@ -1,0 +1,11 @@
+---
+cme_id: "CME-707"
+cme_control_name: "NoNewPrivileges"
+cme_tactic: "Isolate"
+cme_category: "Privilege Isolation"
+cme_category_id: "privilege-isolation"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "PR", "from": "L", "to": "H", "rationale": "Cannot use SUID binaries or file capabilities to escalate"}]
+cme_cwe_relationships: ["CWE-269", "CWE-250"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Ubuntu 24.04", "Kubernetes"]

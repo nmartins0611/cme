@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-507: Secure Dynamic Linker Configuration (LD_PRELOAD/PATH Hardening)
+
+# Set to true to skip this control
+cme_507_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_507_custom_remediation: false
+

@@ -1,0 +1,11 @@
+---
+cme_id: "CME-205"
+cme_control_name: "Service Binding to Localhost"
+cme_tactic: "Isolate"
+cme_category: "Network Isolation"
+cme_category_id: "network-isolation"
+cme_control_layer: "Network"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AV", "from": "N", "to": "L", "rationale": "Service not reachable from network; requires local access"}]
+cme_cwe_relationships: ["CWE-284", "CWE-668"]
+cme_platforms: ["Any"]

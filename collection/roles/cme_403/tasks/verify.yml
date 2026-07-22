@@ -1,0 +1,42 @@
+---
+# CME-403: TLS 1.3 Enforcement
+# Verification: Verify minimum TLS version is 1.3
+
+- name: "CME-403 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "openssl s_client -connect localhost:443 -tls1_2 </dev/null 2>&1 | grep 'handshake failure'"
+  register: cme_403_verify_0
+  changed_when: false
+  failed_when: false
+
+- name: "CME-403 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_403_verify_0.stdout is search('handshake failure')"
+    fail_msg: "CME-403 FAILED — expected 'handshake failure'"
+    success_msg: "CME-403 PASSED — TLS 1.3 Enforcement"
+  ignore_errors: true
+  register: cme_403_assert_0
+  when: cme_403_verify_0 is not skipped
+
+- name: "CME-403 | Run verification command (windows)"
+  ansible.builtin.shell:
+    cmd: "[Net.ServicePointManager]::SecurityProtocol -band [Net.SecurityProtocolType]::Tls13"
+  register: cme_403_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'Windows'
+
+- name: "CME-403 | Assert control is active (windows)"
+  ansible.builtin.assert:
+    that:
+      - "cme_403_verify_1.stdout is search('Tls13')"
+    fail_msg: "CME-403 FAILED — expected 'Tls13'"
+    success_msg: "CME-403 PASSED — TLS 1.3 Enforcement"
+  ignore_errors: true
+  register: cme_403_assert_1
+  when: ansible_os_family == 'Windows' and cme_403_verify_1 is not skipped
+
+- name: "CME-403 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-403', 'control_name': 'TLS 1.3 Enforcement', 'tactic': 'Harden', 'category': 'Cryptographic Controls', 'control_layer': 'Network', 'confidence': 'High', 'status': ((cme_403_assert_0 is defined and cme_403_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_403_assert_0 is defined) | ternary(cme_403_assert_0.msg | default(''), 'not checked'))}] }}"

@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-1302: Deserialization Allowlist (Safe Loading)
+
+# Set to true to skip this control
+cme_1302_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_1302_custom_remediation: false
+

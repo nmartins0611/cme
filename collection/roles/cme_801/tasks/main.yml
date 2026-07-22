@@ -1,0 +1,15 @@
+---
+# CME-801: Multi-Factor Authentication (MFA)
+# Remediation strategy: generic (review and customize for your environment)
+# Verification method: Verify MFA enforcement in PAM or IdP
+
+- name: "CME-801 | Remediation requires environment-specific configuration"
+  ansible.builtin.debug:
+    msg: >-
+      CME-801 (Multi-Factor Authentication (MFA)) remediation depends on your
+      environment configuration. Override this role's tasks/main.yml
+      with site-specific remediation steps.
+  when: not (cme_801_custom_remediation | default(false))
+
+- name: "CME-801 | Verify current state"
+  ansible.builtin.include_tasks: verify.yml

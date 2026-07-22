@@ -1,0 +1,41 @@
+---
+# CME-913: CSRF Protection (Anti-CSRF Token & SameSite Cookie Enforcement)
+# Verification: Check that the application framework's CSRF middleware is enabled and that session cookies carry the SameSite attribute
+
+- name: "CME-913 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'csrf\\|CsrfViewMiddleware\\|csrf_protect\\|@csrf_exempt\\|antiforgery\\|ValidateAntiForgeryToken\\|csrftoken' <app_source>/"
+  register: cme_913_verify_0
+  changed_when: false
+  failed_when: false
+
+- name: "CME-913 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_913_verify_0.stdout is search('CSRF middleware or token generation present in application code')"
+    fail_msg: "CME-913 FAILED — expected 'CSRF middleware or token generation present in application code'"
+    success_msg: "CME-913 PASSED — CSRF Protection (Anti-CSRF Token & SameSite Cookie Enforcement)"
+  ignore_errors: true
+  register: cme_913_assert_0
+  when: cme_913_verify_0 is not skipped
+
+- name: "CME-913 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "curl -sI http://localhost:8080/login | grep -i 'set-cookie.*samesite'"
+  register: cme_913_verify_1
+  changed_when: false
+  failed_when: false
+
+- name: "CME-913 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_913_verify_1.stdout is search('SameSite=Strict or SameSite=Lax')"
+    fail_msg: "CME-913 FAILED — expected 'SameSite=Strict or SameSite=Lax'"
+    success_msg: "CME-913 PASSED — CSRF Protection (Anti-CSRF Token & SameSite Cookie Enforcement)"
+  ignore_errors: true
+  register: cme_913_assert_1
+  when: cme_913_verify_1 is not skipped
+
+- name: "CME-913 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-913', 'control_name': 'CSRF Protection (Anti-CSRF Token & SameSite Cookie Enforcement)', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_913_assert_0 is defined and cme_913_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_913_assert_0 is defined) | ternary(cme_913_assert_0.msg | default(''), 'not checked'))}] }}"

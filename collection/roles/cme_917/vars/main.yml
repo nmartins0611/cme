@@ -1,0 +1,11 @@
+---
+cme_id: "CME-917"
+cme_control_name: "Worker Process Recycling (MaxConnectionsPerChild / max_requests)"
+cme_tactic: "Harden"
+cme_category: "Application Controls"
+cme_category_id: "application-controls"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "A", "from": "H", "to": "L", "rationale": "Per-request memory leaks are bounded by the worker lifecycle; each worker is recycled after a fixed number of requests, releasing accumulated leaked memory before it can cause resource exhaustion. The application experiences brief per-worker restart latency rather than system-wide memory starvation."}]
+cme_cwe_relationships: ["CWE-772", "CWE-401"]
+cme_platforms: ["RHEL 9", "RHEL 10", "Ubuntu 24.04", "Fedora", "Windows Server 2019", "Windows Server 2022"]

@@ -1,0 +1,24 @@
+---
+# CME-904: WAF (Web Application Firewall)
+# Verification: Verify WAF is in enforcement mode with rules loaded
+
+- name: "CME-904 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "curl -s -o /dev/null -w '%{http_code}' 'http://target/?q=<script>alert(1)</script>'"
+  register: cme_904_verify_0
+  changed_when: false
+  failed_when: false
+
+- name: "CME-904 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_904_verify_0.stdout is search('403')"
+    fail_msg: "CME-904 FAILED — expected '403'"
+    success_msg: "CME-904 PASSED — WAF (Web Application Firewall)"
+  ignore_errors: true
+  register: cme_904_assert_0
+  when: cme_904_verify_0 is not skipped
+
+- name: "CME-904 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-904', 'control_name': 'WAF (Web Application Firewall)', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'Medium', 'status': ((cme_904_assert_0 is defined and cme_904_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_904_assert_0 is defined) | ternary(cme_904_assert_0.msg | default(''), 'not checked'))}] }}"

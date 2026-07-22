@@ -1,0 +1,11 @@
+---
+cme_id: "CME-113"
+cme_control_name: "Control Flow Integrity (CFI / Shadow Call Stack)"
+cme_tactic: "Harden"
+cme_category: "Kernel Hardening"
+cme_category_id: "kernel-hardening"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "Medium"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "ROP/JOP gadget chains are detected and blocked at runtime"}]
+cme_cwe_relationships: ["CWE-119", "CWE-120", "CWE-787", "CWE-416", "CWE-843"]
+cme_platforms: ["RHEL 9", "Ubuntu 24.04", "Windows 10", "Windows 11", "Windows Server 2022"]

@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1009"
+cme_control_name: "Privilege Assignment Monitoring (Role Grant Alerting)"
+cme_tactic: "Detect"
+cme_category: "Runtime Detection"
+cme_category_id: "runtime-detection"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Compensating control: unauthorized privilege grants are detected by outcome monitoring regardless of the escalation mechanism, forcing the attacker to also evade the membership audit or accept detection within the monitoring interval."}, {"metric": "C", "from": "H", "to": "L", "rationale": "The window during which the attacker holds escalated privileges \u2014 and can access confidential resources \u2014 is bounded by the monitoring interval; detection triggers revocation of the unauthorized grant."}]
+cme_cwe_relationships: ["CWE-266", "CWE-269", "CWE-284"]
+cme_platforms: ["any"]

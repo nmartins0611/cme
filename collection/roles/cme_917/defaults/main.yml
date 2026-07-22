@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-917: Worker Process Recycling (MaxConnectionsPerChild / max_requests)
+
+# Set to true to skip this control
+cme_917_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_917_custom_remediation: false
+

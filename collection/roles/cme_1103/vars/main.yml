@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1103"
+cme_control_name: "Automated Container Image Rebuilds"
+cme_tactic: "Evict"
+cme_category: "Patch Management"
+cme_category_id: "patch-management"
+cme_control_layer: "Application"
+cme_confidence: "Medium"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Temporal: vulnerable container images replaced within pipeline cycle time"}]
+cme_cwe_relationships: []
+cme_platforms: ["Kubernetes", "OpenShift"]

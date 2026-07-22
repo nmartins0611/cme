@@ -1,0 +1,11 @@
+---
+cme_id: "CME-202"
+cme_control_name: "Host-Based Firewall (firewalld/nftables)"
+cme_tactic: "Isolate"
+cme_category: "Network Isolation"
+cme_category_id: "network-isolation"
+cme_control_layer: "Network"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AV", "from": "N", "to": "A", "rationale": "Service only reachable from adjacent/authorized networks"}, {"metric": "S", "from": "C", "to": "U", "rationale": "Firewall prevents lateral movement to other services"}]
+cme_cwe_relationships: ["CWE-284"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Fedora", "SLES 15"]

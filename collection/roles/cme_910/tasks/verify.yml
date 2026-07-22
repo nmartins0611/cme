@@ -1,0 +1,41 @@
+---
+# CME-910: Role Separation / Duty Segregation
+# Verification: Inspect application role definitions for single-responsibility scoping; verify that no role can modify its own permission grants; test that token scopes are operation-bounded
+
+- name: "CME-910 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'role.*scope\\|mutual_exclu\\|incompatible_roles\\|role_separation\\|segregat' <app_source>/"
+  register: cme_910_verify_0
+  changed_when: false
+  failed_when: false
+
+- name: "CME-910 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_910_verify_0.stdout is search('Role definitions with explicit scope boundaries or mutual exclusion constraints')"
+    fail_msg: "CME-910 FAILED — expected 'Role definitions with explicit scope boundaries or mutual exclusion constraints'"
+    success_msg: "CME-910 PASSED — Role Separation / Duty Segregation"
+  ignore_errors: true
+  register: cme_910_assert_0
+  when: cme_910_verify_0 is not skipped
+
+- name: "CME-910 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'self.*role\\|own.*permission\\|grant.*self\\|assign.*self' <app_source>/"
+  register: cme_910_verify_1
+  changed_when: false
+  failed_when: false
+
+- name: "CME-910 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_910_verify_1.stdout is search('No code paths allowing a role to modify its own scope or grant itself new roles')"
+    fail_msg: "CME-910 FAILED — expected 'No code paths allowing a role to modify its own scope or grant itself new roles'"
+    success_msg: "CME-910 PASSED — Role Separation / Duty Segregation"
+  ignore_errors: true
+  register: cme_910_assert_1
+  when: cme_910_verify_1 is not skipped
+
+- name: "CME-910 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-910', 'control_name': 'Role Separation / Duty Segregation', 'tactic': 'Isolate', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_910_assert_0 is defined and cme_910_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_910_assert_0 is defined) | ternary(cme_910_assert_0.msg | default(''), 'not checked'))}] }}"

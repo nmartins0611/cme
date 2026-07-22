@@ -1,0 +1,13 @@
+---
+# CME-1202: Automated Backup with Integrity Verification
+# Verification method: Verify backup schedule and last successful restore test
+# No machine-executable verification commands defined.
+
+- name: "CME-1202 | No automated verification available"
+  ansible.builtin.debug:
+    msg: "Manual verification required: Verify backup schedule and last successful restore test"
+  changed_when: false
+
+- name: "CME-1202 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1202', 'control_name': 'Automated Backup with Integrity Verification', 'tactic': 'Restore', 'category': 'Recovery Controls', 'control_layer': 'Data', 'confidence': 'Medium', 'status': skipped, 'detail': No automated verification}] }}"

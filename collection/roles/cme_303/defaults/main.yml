@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-303: SELinux Booleans (Restrictive)
+
+# Set to true to skip this control
+cme_303_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_303_custom_remediation: false
+

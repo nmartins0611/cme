@@ -1,0 +1,15 @@
+---
+# CME-407: Data-at-Rest Encryption (LUKS/dm-crypt / BitLocker)
+# Remediation strategy: generic (review and customize for your environment)
+# Verification method: Check for LUKS-encrypted volumes
+
+- name: "CME-407 | Remediation requires environment-specific configuration"
+  ansible.builtin.debug:
+    msg: >-
+      CME-407 (Data-at-Rest Encryption (LUKS/dm-crypt / BitLocker)) remediation depends on your
+      environment configuration. Override this role's tasks/main.yml
+      with site-specific remediation steps.
+  when: not (cme_407_custom_remediation | default(false))
+
+- name: "CME-407 | Verify current state"
+  ansible.builtin.include_tasks: verify.yml

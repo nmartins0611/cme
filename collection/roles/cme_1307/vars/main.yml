@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1307"
+cme_control_name: "Command Injection Prevention (No Shell Invocation)"
+cme_tactic: "Harden"
+cme_category: "Application Input Validation"
+cme_category_id: "application-input-validation"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Shell metacharacters in user input have no effect; arguments passed as array not string"}, {"metric": "I", "from": "H", "to": "L", "rationale": "Cannot execute arbitrary system commands via injection"}, {"metric": "S", "from": "C", "to": "U", "rationale": "Application cannot be leveraged to run commands on the host OS"}]
+cme_cwe_relationships: ["CWE-78", "CWE-77"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

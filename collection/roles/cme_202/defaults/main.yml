@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-202: Host-Based Firewall (firewalld/nftables)
+
+# Set to true to skip this control
+cme_202_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_202_custom_remediation: false
+

@@ -1,0 +1,23 @@
+---
+# CME-604: Unprivileged User Namespaces Disabled
+
+- name: "CME-604 | Set user.max_user_namespaces"
+  ansible.posix.sysctl:
+    name: user.max_user_namespaces
+    value: "{{ cme_604_user_max_user_namespaces | default('0') }}"
+    state: present
+    sysctl_set: true
+    reload: true
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-604 | Set kernel.unprivileged_userns_clone"
+  ansible.posix.sysctl:
+    name: kernel.unprivileged_userns_clone
+    value: "{{ cme_604_kernel_unprivileged_userns_clone | default('0') }}"
+    state: present
+    sysctl_set: true
+    reload: true
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-604 | Verify after remediation"
+  ansible.builtin.include_tasks: verify.yml

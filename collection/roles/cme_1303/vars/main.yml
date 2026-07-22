@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1303"
+cme_control_name: "Application-Level Filesystem Access Confinement"
+cme_tactic: "Isolate"
+cme_category: "Application Input Validation"
+cme_category_id: "application-input-validation"
+cme_control_layer: "Application"
+cme_confidence: "Medium"
+cme_cvss_vector_impacts: [{"metric": "C", "from": "H", "to": "L", "rationale": "File operations confined to application data directory; system files unreachable"}, {"metric": "S", "from": "C", "to": "U", "rationale": "Application cannot access files belonging to other services or the host OS"}]
+cme_cwe_relationships: ["CWE-22", "CWE-73", "CWE-284"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

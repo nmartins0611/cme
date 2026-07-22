@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  role_name: cme_1004
+  author: CME Project
+  description: "CME-1004: AIDE / File Integrity Monitoring"
+  license: Apache-2.0
+  min_ansible_version: "2.15"
+  platforms:
+    - name: EL
+      versions:
+        - "8"
+        - "9"
+    - name: Ubuntu
+      versions:
+        - "22.04"
+        - "24.04"
+
+dependencies: []

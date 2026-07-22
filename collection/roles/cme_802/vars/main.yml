@@ -1,0 +1,11 @@
+---
+cme_id: "CME-802"
+cme_control_name: "Password Quality Enforcement (pwquality)"
+cme_tactic: "Harden"
+cme_category: "Credential Hardening"
+cme_category_id: "credential-hardening"
+cme_control_layer: "Identity"
+cme_confidence: "Medium"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Password brute force requires significantly more time/resources"}]
+cme_cwe_relationships: ["CWE-521"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Ubuntu 24.04", "Windows 10", "Windows 11", "Windows Server 2022"]

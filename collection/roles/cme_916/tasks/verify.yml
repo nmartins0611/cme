@@ -1,0 +1,60 @@
+---
+# CME-916: SameSite Cookie Attribute Enforcement
+# Verification: Verify that all Set-Cookie response headers include SameSite=Lax or SameSite=Strict. Check web server or reverse proxy configuration for cookie attribute enforcement directives.
+
+- name: "CME-916 | Run verification command (rhel)"
+  ansible.builtin.shell:
+    cmd: "grep -rE \"Header.*(edit|always set).*Set-Cookie.*SameSite\" /etc/httpd/conf.d/"
+  register: cme_916_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-916 | Assert control is active (rhel)"
+  ansible.builtin.assert:
+    that:
+      - "cme_916_verify_0.stdout is search('SameSite enforcement directive present')"
+    fail_msg: "CME-916 FAILED — expected 'SameSite enforcement directive present'"
+    success_msg: "CME-916 PASSED — SameSite Cookie Attribute Enforcement"
+  ignore_errors: true
+  register: cme_916_assert_0
+  when: ansible_os_family == 'RedHat' and cme_916_verify_0 is not skipped
+
+- name: "CME-916 | Run verification command (rhel)"
+  ansible.builtin.shell:
+    cmd: "grep -rE \"proxy_cookie_flags|proxy_cookie_path.*SameSite\" /etc/nginx/"
+  register: cme_916_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-916 | Assert control is active (rhel)"
+  ansible.builtin.assert:
+    that:
+      - "cme_916_verify_1.stdout is search('SameSite cookie flag directives present')"
+    fail_msg: "CME-916 FAILED — expected 'SameSite cookie flag directives present'"
+    success_msg: "CME-916 PASSED — SameSite Cookie Attribute Enforcement"
+  ignore_errors: true
+  register: cme_916_assert_1
+  when: ansible_os_family == 'RedHat' and cme_916_verify_1 is not skipped
+
+- name: "CME-916 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "curl -sI https://your-app/ | grep -i \"set-cookie\" | grep -i \"samesite\""
+  register: cme_916_verify_2
+  changed_when: false
+  failed_when: false
+
+- name: "CME-916 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_916_verify_2.stdout is search('SameSite=Lax or SameSite=Strict on all Set-Cookie headers')"
+    fail_msg: "CME-916 FAILED — expected 'SameSite=Lax or SameSite=Strict on all Set-Cookie headers'"
+    success_msg: "CME-916 PASSED — SameSite Cookie Attribute Enforcement"
+  ignore_errors: true
+  register: cme_916_assert_2
+  when: cme_916_verify_2 is not skipped
+
+- name: "CME-916 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-916', 'control_name': 'SameSite Cookie Attribute Enforcement', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_916_assert_0 is defined and cme_916_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_916_assert_0 is defined) | ternary(cme_916_assert_0.msg | default(''), 'not checked'))}] }}"

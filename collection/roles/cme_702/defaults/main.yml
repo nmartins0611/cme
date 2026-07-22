@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-702: Linux Namespaces (User, PID, Network, Mount)
+
+# Set to true to skip this control
+cme_702_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_702_custom_remediation: false
+

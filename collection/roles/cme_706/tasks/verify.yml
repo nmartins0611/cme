@@ -1,0 +1,25 @@
+---
+# CME-706: Pod Security Standards (Restricted)
+# Verification: Check namespace PSS enforcement label
+
+- name: "CME-706 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "kubectl get namespace <ns> -o jsonpath='{.metadata.labels.pod-security\\.kubernetes\\.io/enforce}'"
+  register: cme_706_verify_0
+  changed_when: false
+  failed_when: false
+  when: cme_kubernetes_host | default(false)
+
+- name: "CME-706 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_706_verify_0.stdout is search('restricted')"
+    fail_msg: "CME-706 FAILED — expected 'restricted'"
+    success_msg: "CME-706 PASSED — Pod Security Standards (Restricted)"
+  ignore_errors: true
+  register: cme_706_assert_0
+  when: cme_kubernetes_host | default(false) and cme_706_verify_0 is not skipped
+
+- name: "CME-706 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-706', 'control_name': 'Pod Security Standards (Restricted)', 'tactic': 'Isolate', 'category': 'Container Isolation', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_706_assert_0 is defined and cme_706_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_706_assert_0 is defined) | ternary(cme_706_assert_0.msg | default(''), 'not checked'))}] }}"

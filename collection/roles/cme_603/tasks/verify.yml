@@ -1,0 +1,25 @@
+---
+# CME-603: Unprivileged BPF Disabled
+# Verification: Check unprivileged_bpf_disabled sysctl
+
+- name: "CME-603 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "cat /proc/sys/kernel/unprivileged_bpf_disabled"
+  register: cme_603_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-603 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_603_verify_0.stdout is search('1')"
+    fail_msg: "CME-603 FAILED — expected '1'"
+    success_msg: "CME-603 PASSED — Unprivileged BPF Disabled"
+  ignore_errors: true
+  register: cme_603_assert_0
+  when: ansible_os_family != 'Windows' and cme_603_verify_0 is not skipped
+
+- name: "CME-603 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-603', 'control_name': 'Unprivileged BPF Disabled', 'tactic': 'Harden', 'category': 'Syscall & BPF Controls', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_603_assert_0 is defined and cme_603_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_603_assert_0 is defined) | ternary(cme_603_assert_0.msg | default(''), 'not checked'))}] }}"

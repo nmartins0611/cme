@@ -1,0 +1,15 @@
+---
+# CME-403: TLS 1.3 Enforcement
+# Remediation strategy: generic (review and customize for your environment)
+# Verification method: Verify minimum TLS version is 1.3
+
+- name: "CME-403 | Remediation requires environment-specific configuration"
+  ansible.builtin.debug:
+    msg: >-
+      CME-403 (TLS 1.3 Enforcement) remediation depends on your
+      environment configuration. Override this role's tasks/main.yml
+      with site-specific remediation steps.
+  when: not (cme_403_custom_remediation | default(false))
+
+- name: "CME-403 | Verify current state"
+  ansible.builtin.include_tasks: verify.yml

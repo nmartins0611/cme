@@ -1,0 +1,43 @@
+---
+# CME-301: SELinux (Enforcing Mode)
+# Verification: Verify SELinux is in enforcing mode
+
+- name: "CME-301 | Run verification command (rhel)"
+  ansible.builtin.shell:
+    cmd: "getenforce"
+  register: cme_301_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-301 | Assert control is active (rhel)"
+  ansible.builtin.assert:
+    that:
+      - "cme_301_verify_0.stdout is search('Enforcing')"
+    fail_msg: "CME-301 FAILED — expected 'Enforcing'"
+    success_msg: "CME-301 PASSED — SELinux (Enforcing Mode)"
+  ignore_errors: true
+  register: cme_301_assert_0
+  when: ansible_os_family == 'RedHat' and cme_301_verify_0 is not skipped
+
+- name: "CME-301 | Run verification command (rhel)"
+  ansible.builtin.shell:
+    cmd: "sestatus | grep 'Current mode'"
+  register: cme_301_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-301 | Assert control is active (rhel)"
+  ansible.builtin.assert:
+    that:
+      - "cme_301_verify_1.stdout is search('Current mode:                   enforcing')"
+    fail_msg: "CME-301 FAILED — expected 'Current mode:                   enforcing'"
+    success_msg: "CME-301 PASSED — SELinux (Enforcing Mode)"
+  ignore_errors: true
+  register: cme_301_assert_1
+  when: ansible_os_family == 'RedHat' and cme_301_verify_1 is not skipped
+
+- name: "CME-301 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-301', 'control_name': 'SELinux (Enforcing Mode)', 'tactic': 'Harden', 'category': 'Mandatory Access Control', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_301_assert_0 is defined and cme_301_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_301_assert_0 is defined) | ternary(cme_301_assert_0.msg | default(''), 'not checked'))}] }}"

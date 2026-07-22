@@ -1,0 +1,78 @@
+---
+# CME-915: Cross-Origin Request Restriction (Reverse Proxy Origin Enforcement)
+# Verification: Check reverse proxy configuration for Origin/Referer header validation on state-changing requests. The proxy should reject requests with an Origin not in the trusted allowlist.
+
+- name: "CME-915 | Run verification command (rhel)"
+  ansible.builtin.shell:
+    cmd: "grep -rE \"valid_referers|map.*\\$http_origin\" /etc/nginx/"
+  register: cme_915_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-915 | Assert control is active (rhel)"
+  ansible.builtin.assert:
+    that:
+      - "cme_915_verify_0.stdout is search('Origin validation directives present')"
+    fail_msg: "CME-915 FAILED — expected 'Origin validation directives present'"
+    success_msg: "CME-915 PASSED — Cross-Origin Request Restriction (Reverse Proxy Origin Enforcement)"
+  ignore_errors: true
+  register: cme_915_assert_0
+  when: ansible_os_family == 'RedHat' and cme_915_verify_0 is not skipped
+
+- name: "CME-915 | Run verification command (rhel)"
+  ansible.builtin.shell:
+    cmd: "grep -rE \"Require expr.*HTTP_ORIGIN|SetEnvIf Origin\" /etc/httpd/conf.d/"
+  register: cme_915_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-915 | Assert control is active (rhel)"
+  ansible.builtin.assert:
+    that:
+      - "cme_915_verify_1.stdout is search('Origin validation rules present')"
+    fail_msg: "CME-915 FAILED — expected 'Origin validation rules present'"
+    success_msg: "CME-915 PASSED — Cross-Origin Request Restriction (Reverse Proxy Origin Enforcement)"
+  ignore_errors: true
+  register: cme_915_assert_1
+  when: ansible_os_family == 'RedHat' and cme_915_verify_1 is not skipped
+
+- name: "CME-915 | Run verification command (rhel)"
+  ansible.builtin.shell:
+    cmd: "grep -rE \"hdr\\(Origin\\)|req\\.hdr\\(Origin\\)\" /etc/haproxy/"
+  register: cme_915_verify_2
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-915 | Assert control is active (rhel)"
+  ansible.builtin.assert:
+    that:
+      - "cme_915_verify_2.stdout is search('Origin ACL rules present')"
+    fail_msg: "CME-915 FAILED — expected 'Origin ACL rules present'"
+    success_msg: "CME-915 PASSED — Cross-Origin Request Restriction (Reverse Proxy Origin Enforcement)"
+  ignore_errors: true
+  register: cme_915_assert_2
+  when: ansible_os_family == 'RedHat' and cme_915_verify_2 is not skipped
+
+- name: "CME-915 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "curl -s -o /dev/null -w \"%{http_code}\" -X POST -H \"Origin: https://evil.example.com\" https://your-app/api/endpoint"
+  register: cme_915_verify_3
+  changed_when: false
+  failed_when: false
+
+- name: "CME-915 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_915_verify_3.stdout is search('403')"
+    fail_msg: "CME-915 FAILED — expected '403'"
+    success_msg: "CME-915 PASSED — Cross-Origin Request Restriction (Reverse Proxy Origin Enforcement)"
+  ignore_errors: true
+  register: cme_915_assert_3
+  when: cme_915_verify_3 is not skipped
+
+- name: "CME-915 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-915', 'control_name': 'Cross-Origin Request Restriction (Reverse Proxy Origin Enforcement)', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_915_assert_0 is defined and cme_915_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_915_assert_0 is defined) | ternary(cme_915_assert_0.msg | default(''), 'not checked'))}] }}"

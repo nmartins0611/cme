@@ -1,0 +1,78 @@
+---
+# CME-918: URL Path Authorization Enforcement (Forced Browsing Prevention)
+# Verification: Verify that the web server or reverse proxy enforces URL-pattern-based authorization on restricted paths, and that unauthenticated requests to administrative or internal endpoints are denied
+
+- name: "CME-918 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep -rn '<Location\\|<Directory\\|Require valid-user\\|Require group\\|AuthType' /etc/httpd/conf.d/ /etc/httpd/conf/httpd.conf"
+  register: cme_918_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-918 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_918_verify_0.stdout is search('Authorization directives present on administrative and restricted URL paths [(]e.g., /admin, /console, /debug[)]')"
+    fail_msg: "CME-918 FAILED — expected 'Authorization directives present on administrative and restricted URL paths (e.g., /admin, /console, /debug)'"
+    success_msg: "CME-918 PASSED — URL Path Authorization Enforcement (Forced Browsing Prevention)"
+  ignore_errors: true
+  register: cme_918_assert_0
+  when: ansible_os_family != 'Windows' and cme_918_verify_0 is not skipped
+
+- name: "CME-918 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'location.*/admin\\|location.*/console\\|deny all\\|auth_basic\\|auth_request' /etc/nginx/conf.d/ /etc/nginx/nginx.conf"
+  register: cme_918_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-918 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_918_verify_1.stdout is search('Restricted location blocks with authentication or deny directives for administrative paths')"
+    fail_msg: "CME-918 FAILED — expected 'Restricted location blocks with authentication or deny directives for administrative paths'"
+    success_msg: "CME-918 PASSED — URL Path Authorization Enforcement (Forced Browsing Prevention)"
+  ignore_errors: true
+  register: cme_918_assert_1
+  when: ansible_os_family != 'Windows' and cme_918_verify_1 is not skipped
+
+- name: "CME-918 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/admin/"
+  register: cme_918_verify_2
+  changed_when: false
+  failed_when: false
+
+- name: "CME-918 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_918_verify_2.stdout is search('401 or 403 [(]access denied without valid credentials[)]')"
+    fail_msg: "CME-918 FAILED — expected '401 or 403 (access denied without valid credentials)'"
+    success_msg: "CME-918 PASSED — URL Path Authorization Enforcement (Forced Browsing Prevention)"
+  ignore_errors: true
+  register: cme_918_assert_2
+  when: cme_918_verify_2 is not skipped
+
+- name: "CME-918 | Run verification command (windows)"
+  ansible.builtin.shell:
+    cmd: "Get-WebConfigurationProperty -Filter '/system.webServer/security/authorization' -PSPath 'IIS:\\Sites\\Default Web Site\\admin' -Name 'collection' | Format-Table"
+  register: cme_918_verify_3
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'Windows'
+
+- name: "CME-918 | Assert control is active (windows)"
+  ansible.builtin.assert:
+    that:
+      - "cme_918_verify_3.stdout is search('URL Authorization rules restricting access to administrative paths to specific roles')"
+    fail_msg: "CME-918 FAILED — expected 'URL Authorization rules restricting access to administrative paths to specific roles'"
+    success_msg: "CME-918 PASSED — URL Path Authorization Enforcement (Forced Browsing Prevention)"
+  ignore_errors: true
+  register: cme_918_assert_3
+  when: ansible_os_family == 'Windows' and cme_918_verify_3 is not skipped
+
+- name: "CME-918 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-918', 'control_name': 'URL Path Authorization Enforcement (Forced Browsing Prevention)', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_918_assert_0 is defined and cme_918_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_918_assert_0 is defined) | ternary(cme_918_assert_0.msg | default(''), 'not checked'))}] }}"

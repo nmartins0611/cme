@@ -1,0 +1,41 @@
+---
+# CME-1314: Input Canonicalization Before Security Decision
+# Verification: Review application source code for canonicalization/normalization calls that execute before security-relevant comparisons (allowlist checks, denylist checks, policy evaluations). Verify that the canonicalized form — not the raw input — is used in all subsequent security decisions.
+
+- name: "CME-1314 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'urllib.parse\\|urlparse\\|URL.parse\\|new URL\\|InetAddress.getByName\\|normalize\\|canonicalize\\|realpath\\|resolve' <app_source>/"
+  register: cme_1314_verify_0
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1314 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1314_verify_0.stdout is search('Canonicalization calls present before security-relevant comparisons')"
+    fail_msg: "CME-1314 FAILED — expected 'Canonicalization calls present before security-relevant comparisons'"
+    success_msg: "CME-1314 PASSED — Input Canonicalization Before Security Decision"
+  ignore_errors: true
+  register: cme_1314_assert_0
+  when: cme_1314_verify_0 is not skipped
+
+- name: "CME-1314 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'allowlist\\|blocklist\\|denylist\\|whitelist\\|blacklist' <app_source>/ | head -20"
+  register: cme_1314_verify_1
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1314 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1314_verify_1.stdout is search('Security list checks should reference canonicalized/normalized values, not raw input')"
+    fail_msg: "CME-1314 FAILED — expected 'Security list checks should reference canonicalized/normalized values, not raw input'"
+    success_msg: "CME-1314 PASSED — Input Canonicalization Before Security Decision"
+  ignore_errors: true
+  register: cme_1314_assert_1
+  when: cme_1314_verify_1 is not skipped
+
+- name: "CME-1314 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1314', 'control_name': 'Input Canonicalization Before Security Decision', 'tactic': 'Harden', 'category': 'Application Input Validation', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_1314_assert_0 is defined and cme_1314_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1314_assert_0 is defined) | ternary(cme_1314_assert_0.msg | default(''), 'not checked'))}] }}"

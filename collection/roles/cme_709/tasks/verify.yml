@@ -1,0 +1,25 @@
+---
+# CME-709: systemd Service Sandboxing (PrivateDevices, PrivateTmp, ProtectSystem)
+# Verification: Check systemd unit for sandbox directives
+
+- name: "CME-709 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "systemctl show <service> -p ProtectSystem,PrivateTmp,PrivateDevices,ProtectHome"
+  register: cme_709_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-709 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_709_verify_0.stdout is search('ProtectSystem=strict')"
+    fail_msg: "CME-709 FAILED — expected 'ProtectSystem=strict'"
+    success_msg: "CME-709 PASSED — systemd Service Sandboxing (PrivateDevices, PrivateTmp, ProtectSystem)"
+  ignore_errors: true
+  register: cme_709_assert_0
+  when: ansible_os_family != 'Windows' and cme_709_verify_0 is not skipped
+
+- name: "CME-709 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-709', 'control_name': 'systemd Service Sandboxing (PrivateDevices, PrivateTmp, ProtectSystem)', 'tactic': 'Isolate', 'category': 'Privilege Isolation', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_709_assert_0 is defined and cme_709_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_709_assert_0 is defined) | ternary(cme_709_assert_0.msg | default(''), 'not checked'))}] }}"

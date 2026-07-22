@@ -1,0 +1,15 @@
+---
+# CME-102: NX/XD Bit (Non-Executable Memory)
+# Remediation strategy: generic (review and customize for your environment)
+# Verification method: Check CPU supports NX bit and kernel has it enabled
+
+- name: "CME-102 | Remediation requires environment-specific configuration"
+  ansible.builtin.debug:
+    msg: >-
+      CME-102 (NX/XD Bit (Non-Executable Memory)) remediation depends on your
+      environment configuration. Override this role's tasks/main.yml
+      with site-specific remediation steps.
+  when: not (cme_102_custom_remediation | default(false))
+
+- name: "CME-102 | Verify current state"
+  ansible.builtin.include_tasks: verify.yml

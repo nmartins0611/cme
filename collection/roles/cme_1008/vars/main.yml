@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1008"
+cme_control_name: "Application Admin Event Logging (SIEM Integration)"
+cme_tactic: "Detect"
+cme_category: "Runtime Detection"
+cme_category_id: "runtime-detection"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Compensating control: administrative actions are logged with application-domain context and forwarded to a SIEM in real time; the attacker must evade application-level audit logging or accept near-immediate detection, significantly increasing attack complexity."}]
+cme_cwe_relationships: ["CWE-266", "CWE-269", "CWE-284", "CWE-778"]
+cme_platforms: ["any"]

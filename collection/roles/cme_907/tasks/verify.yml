@@ -1,0 +1,41 @@
+---
+# CME-907: Application-Layer RBAC Enforcement
+# Verification: Inspect application source for role-based authorization checks on privileged endpoints; test that unprivileged authenticated users receive 403 on admin endpoints
+
+- name: "CME-907 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn '@require_role\\|@permission_required\\|authorize!\\|has_permission\\|check_permission\\|rbac\\|@roles_required' <app_source>/"
+  register: cme_907_verify_0
+  changed_when: false
+  failed_when: false
+
+- name: "CME-907 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_907_verify_0.stdout is search('Authorization decorators or middleware present on privileged endpoint handlers')"
+    fail_msg: "CME-907 FAILED — expected 'Authorization decorators or middleware present on privileged endpoint handlers'"
+    success_msg: "CME-907 PASSED — Application-Layer RBAC Enforcement"
+  ignore_errors: true
+  register: cme_907_assert_0
+  when: cme_907_verify_0 is not skipped
+
+- name: "CME-907 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "curl -s -o /dev/null -w '%{http_code}' -H 'Authorization: Bearer <unprivileged_token>' http://localhost:8080/api/v1/admin/users"
+  register: cme_907_verify_1
+  changed_when: false
+  failed_when: false
+
+- name: "CME-907 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_907_verify_1.stdout is search('403')"
+    fail_msg: "CME-907 FAILED — expected '403'"
+    success_msg: "CME-907 PASSED — Application-Layer RBAC Enforcement"
+  ignore_errors: true
+  register: cme_907_assert_1
+  when: cme_907_verify_1 is not skipped
+
+- name: "CME-907 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-907', 'control_name': 'Application-Layer RBAC Enforcement', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_907_assert_0 is defined and cme_907_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_907_assert_0 is defined) | ternary(cme_907_assert_0.msg | default(''), 'not checked'))}] }}"

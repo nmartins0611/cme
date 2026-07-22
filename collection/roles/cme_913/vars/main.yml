@@ -1,0 +1,11 @@
+---
+cme_id: "CME-913"
+cme_control_name: "CSRF Protection (Anti-CSRF Token & SameSite Cookie Enforcement)"
+cme_tactic: "Harden"
+cme_category: "Application Controls"
+cme_category_id: "application-controls"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "The anti-CSRF token is a per-session or per-request cryptographic random value that the attacker cannot predict or obtain cross-origin (blocked by same-origin policy). Exploitation now requires a separate vulnerability (XSS, subdomain takeover) to extract the token, transforming a trivial cross-site form submission into a multi-step attack chain."}]
+cme_cwe_relationships: ["CWE-940", "CWE-352"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

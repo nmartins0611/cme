@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-1201: Immutable Infrastructure
+
+# Set to true to skip this control
+cme_1201_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_1201_custom_remediation: false
+

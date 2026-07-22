@@ -1,0 +1,15 @@
+---
+# CME-501: Read-Only Root Filesystem
+# Remediation strategy: generic (review and customize for your environment)
+# Verification method: Check mount options for root filesystem
+
+- name: "CME-501 | Remediation requires environment-specific configuration"
+  ansible.builtin.debug:
+    msg: >-
+      CME-501 (Read-Only Root Filesystem) remediation depends on your
+      environment configuration. Override this role's tasks/main.yml
+      with site-specific remediation steps.
+  when: not (cme_501_custom_remediation | default(false))
+
+- name: "CME-501 | Verify current state"
+  ansible.builtin.include_tasks: verify.yml

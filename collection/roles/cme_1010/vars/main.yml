@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1010"
+cme_control_name: "cgroup Memory Pressure Monitoring (memory.events / PSI)"
+cme_tactic: "Detect"
+cme_category: "Integrity Detection"
+cme_category_id: "integrity-detection"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Compensating control: cgroup memory pressure events (memory.events oom_kill/high counters and PSI stall metrics) provide deterministic early warning of resource leaks before system-wide exhaustion occurs, enabling operators to identify and remediate leaking processes within the monitoring interval \u2014 the attacker must exhaust resources faster than the monitoring and response cycle to achieve sustained denial of service."}]
+cme_cwe_relationships: ["CWE-772", "CWE-401", "CWE-400", "CWE-770"]
+cme_platforms: ["RHEL 9", "RHEL 10", "Ubuntu 24.04", "Fedora", "Kubernetes"]

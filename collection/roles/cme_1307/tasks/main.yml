@@ -1,0 +1,11 @@
+---
+# CME-1307: Command Injection Prevention (No Shell Invocation)
+# This control requires manual/context-specific remediation.
+# Running verification only.
+
+- name: "CME-1307 | Set manual remediation required"
+  ansible.builtin.set_fact:
+    cme_1307_manual_remediation_required: true
+
+- name: "CME-1307 | Run verification"
+  ansible.builtin.include_tasks: verify.yml

@@ -1,0 +1,11 @@
+---
+cme_id: "CME-111"
+cme_control_name: "Secure Boot (UEFI)"
+cme_tactic: "Harden"
+cme_category: "Kernel Hardening"
+cme_category_id: "kernel-hardening"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "I", "from": "H", "to": "L", "rationale": "Cannot persist malicious bootloader or kernel modifications"}, {"metric": "AC", "from": "L", "to": "H", "rationale": "Must bypass cryptographic verification chain"}]
+cme_cwe_relationships: ["CWE-345", "CWE-494", "CWE-269", "CWE-347"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Ubuntu 24.04", "SLES 15", "Windows 10", "Windows 11", "Windows Server 2022"]

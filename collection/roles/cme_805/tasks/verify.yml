@@ -1,0 +1,43 @@
+---
+# CME-805: Credential Rotation Policy
+# Verification: Check password aging and secret rotation policies
+
+- name: "CME-805 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "chage -l <user> | grep 'Maximum'"
+  register: cme_805_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-805 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_805_verify_0.stdout is search('Maximum number of days between password change : 90')"
+    fail_msg: "CME-805 FAILED — expected 'Maximum number of days between password change : 90'"
+    success_msg: "CME-805 PASSED — Credential Rotation Policy"
+  ignore_errors: true
+  register: cme_805_assert_0
+  when: ansible_os_family != 'Windows' and cme_805_verify_0 is not skipped
+
+- name: "CME-805 | Run verification command (windows)"
+  ansible.builtin.shell:
+    cmd: "net accounts | Select-String 'Maximum password age'"
+  register: cme_805_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'Windows'
+
+- name: "CME-805 | Assert control is active (windows)"
+  ansible.builtin.assert:
+    that:
+      - "cme_805_verify_1.stdout is search('Maximum password age [(]days[)]              90')"
+    fail_msg: "CME-805 FAILED — expected 'Maximum password age (days)              90'"
+    success_msg: "CME-805 PASSED — Credential Rotation Policy"
+  ignore_errors: true
+  register: cme_805_assert_1
+  when: ansible_os_family == 'Windows' and cme_805_verify_1 is not skipped
+
+- name: "CME-805 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-805', 'control_name': 'Credential Rotation Policy', 'tactic': 'Harden', 'category': 'Credential Hardening', 'control_layer': 'Identity', 'confidence': 'Medium', 'status': ((cme_805_assert_0 is defined and cme_805_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_805_assert_0 is defined) | ternary(cme_805_assert_0.msg | default(''), 'not checked'))}] }}"

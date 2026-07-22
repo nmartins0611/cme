@@ -1,0 +1,15 @@
+---
+# CME-807: Session Lifetime and Idle Timeout Enforcement
+# Remediation strategy: generic (review and customize for your environment)
+# Verification method: Verify that authenticated sessions have both absolute lifetime limits and idle timeouts configured, and that logout explicitly invalidates the server-side session
+
+- name: "CME-807 | Remediation requires environment-specific configuration"
+  ansible.builtin.debug:
+    msg: >-
+      CME-807 (Session Lifetime and Idle Timeout Enforcement) remediation depends on your
+      environment configuration. Override this role's tasks/main.yml
+      with site-specific remediation steps.
+  when: not (cme_807_custom_remediation | default(false))
+
+- name: "CME-807 | Verify current state"
+  ansible.builtin.include_tasks: verify.yml

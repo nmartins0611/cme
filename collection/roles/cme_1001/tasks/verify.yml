@@ -1,0 +1,61 @@
+---
+# CME-1001: EDR Agent (Endpoint Detection & Response)
+# Verification: Verify EDR agent is running and connected to management console
+
+- name: "CME-1001 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "systemctl is-active falcon-sensor 2>/dev/null || systemctl is-active mdatp 2>/dev/null"
+  register: cme_1001_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1001 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1001_verify_0.stdout is search('active')"
+    fail_msg: "CME-1001 FAILED — expected 'active'"
+    success_msg: "CME-1001 PASSED — EDR Agent (Endpoint Detection & Response)"
+  ignore_errors: true
+  register: cme_1001_assert_0
+  when: ansible_os_family != 'Windows' and cme_1001_verify_0 is not skipped
+
+- name: "CME-1001 | Run verification command (windows)"
+  ansible.builtin.shell:
+    cmd: "Get-Service 'Sense' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Status"
+  register: cme_1001_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'Windows'
+
+- name: "CME-1001 | Assert control is active (windows)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1001_verify_1.stdout is search('Running')"
+    fail_msg: "CME-1001 FAILED — expected 'Running'"
+    success_msg: "CME-1001 PASSED — EDR Agent (Endpoint Detection & Response)"
+  ignore_errors: true
+  register: cme_1001_assert_1
+  when: ansible_os_family == 'Windows' and cme_1001_verify_1 is not skipped
+
+- name: "CME-1001 | Run verification command (windows)"
+  ansible.builtin.shell:
+    cmd: "(Get-MpComputerStatus).RealTimeProtectionEnabled"
+  register: cme_1001_verify_2
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'Windows'
+
+- name: "CME-1001 | Assert control is active (windows)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1001_verify_2.stdout is search('True')"
+    fail_msg: "CME-1001 FAILED — expected 'True'"
+    success_msg: "CME-1001 PASSED — EDR Agent (Endpoint Detection & Response)"
+  ignore_errors: true
+  register: cme_1001_assert_2
+  when: ansible_os_family == 'Windows' and cme_1001_verify_2 is not skipped
+
+- name: "CME-1001 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1001', 'control_name': 'EDR Agent (Endpoint Detection & Response)', 'tactic': 'Detect', 'category': 'Runtime Detection', 'control_layer': 'Application', 'confidence': 'Medium', 'status': ((cme_1001_assert_0 is defined and cme_1001_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1001_assert_0 is defined) | ternary(cme_1001_assert_0.msg | default(''), 'not checked'))}] }}"

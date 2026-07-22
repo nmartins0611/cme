@@ -1,0 +1,61 @@
+---
+# CME-116: FORTIFY_SOURCE (Buffer Overflow Detection)
+# Verification: Check that system packages are compiled with _FORTIFY_SOURCE=2 or higher
+
+- name: "CME-116 | Run verification command (rhel)"
+  ansible.builtin.shell:
+    cmd: "rpm -q --queryformat \"%{OPTFLAGS}\" redhat-rpm-config 2>/dev/null | grep -o \"_FORTIFY_SOURCE=[0-9]\""
+  register: cme_116_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-116 | Assert control is active (rhel)"
+  ansible.builtin.assert:
+    that:
+      - "cme_116_verify_0.stdout is search('_FORTIFY_SOURCE=2')"
+    fail_msg: "CME-116 FAILED — expected '_FORTIFY_SOURCE=2'"
+    success_msg: "CME-116 PASSED — FORTIFY_SOURCE (Buffer Overflow Detection)"
+  ignore_errors: true
+  register: cme_116_assert_0
+  when: ansible_os_family == 'RedHat' and cme_116_verify_0 is not skipped
+
+- name: "CME-116 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "readelf -s /usr/bin/ls | grep -c __.*_chk"
+  register: cme_116_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-116 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_116_verify_1.stdout is search('non-zero count indicates fortified functions')"
+    fail_msg: "CME-116 FAILED — expected 'non-zero count indicates fortified functions'"
+    success_msg: "CME-116 PASSED — FORTIFY_SOURCE (Buffer Overflow Detection)"
+  ignore_errors: true
+  register: cme_116_assert_1
+  when: ansible_os_family != 'Windows' and cme_116_verify_1 is not skipped
+
+- name: "CME-116 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "objdump -d /usr/bin/coreutils 2>/dev/null | grep -c __memcpy_chk || objdump -d /usr/bin/ls | grep -c __memcpy_chk"
+  register: cme_116_verify_2
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-116 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_116_verify_2.stdout is search('non-zero count')"
+    fail_msg: "CME-116 FAILED — expected 'non-zero count'"
+    success_msg: "CME-116 PASSED — FORTIFY_SOURCE (Buffer Overflow Detection)"
+  ignore_errors: true
+  register: cme_116_assert_2
+  when: ansible_os_family != 'Windows' and cme_116_verify_2 is not skipped
+
+- name: "CME-116 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-116', 'control_name': 'FORTIFY_SOURCE (Buffer Overflow Detection)', 'tactic': 'Harden', 'category': 'Kernel Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_116_assert_0 is defined and cme_116_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_116_assert_0 is defined) | ternary(cme_116_assert_0.msg | default(''), 'not checked'))}] }}"

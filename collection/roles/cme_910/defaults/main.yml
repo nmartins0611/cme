@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-910: Role Separation / Duty Segregation
+
+# Set to true to skip this control
+cme_910_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_910_custom_remediation: false
+

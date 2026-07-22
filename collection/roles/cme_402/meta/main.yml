@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  role_name: cme_402
+  author: CME Project
+  description: "CME-402: FIPS 140-3 Mode"
+  license: Apache-2.0
+  min_ansible_version: "2.15"
+  platforms:
+    - name: EL
+      versions:
+        - "8"
+        - "9"
+
+dependencies: []

@@ -1,0 +1,25 @@
+---
+# CME-204: IPsec / WireGuard (Encrypted Transport)
+# Verification: Verify IPsec or WireGuard tunnels are established
+
+- name: "CME-204 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "ipsec status 2>/dev/null || wg show 2>/dev/null"
+  register: cme_204_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-204 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_204_verify_0.stdout is search('established|interface')"
+    fail_msg: "CME-204 FAILED — expected 'established|interface'"
+    success_msg: "CME-204 PASSED — IPsec / WireGuard (Encrypted Transport)"
+  ignore_errors: true
+  register: cme_204_assert_0
+  when: ansible_os_family != 'Windows' and cme_204_verify_0 is not skipped
+
+- name: "CME-204 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-204', 'control_name': 'IPsec / WireGuard (Encrypted Transport)', 'tactic': 'Isolate', 'category': 'Network Isolation', 'control_layer': 'Network', 'confidence': 'High', 'status': ((cme_204_assert_0 is defined and cme_204_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_204_assert_0 is defined) | ternary(cme_204_assert_0.msg | default(''), 'not checked'))}] }}"

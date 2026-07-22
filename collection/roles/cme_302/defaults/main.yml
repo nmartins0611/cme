@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-302: SELinux Confined User Mapping
+
+# Set to true to skip this control
+cme_302_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_302_custom_remediation: false
+

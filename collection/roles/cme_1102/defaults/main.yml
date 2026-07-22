@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-1102: Live Kernel Patching (kpatch/livepatch)
+
+# Set to true to skip this control
+cme_1102_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_1102_custom_remediation: false
+

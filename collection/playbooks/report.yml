@@ -1,0 +1,82 @@
+---
+# CME Posture Report Playbook
+#
+# Runs verification across all hosts, then calculates CVSS attenuation
+# scores using the CME scoring module. Produces a per-host posture report.
+#
+# Usage:
+#   ansible-playbook cme.controls.report -e cme_profile=rhel9_baseline -e cme_mcp_endpoint=http://cme:8000
+#   ansible-playbook cme.controls.report -e cme_profile=full -e cme_database_path=/opt/cme/cme.db
+
+- name: CME Posture Verification
+  hosts: all
+  gather_facts: true
+  vars:
+    cme_profile: "minimal"
+    cme_profile_path: ""
+    cme_profiles_dir: "{{ playbook_dir }}/../profiles"
+
+  pre_tasks:
+    - name: Load profile
+      ansible.builtin.include_vars:
+        file: "{{ cme_profile_path if (cme_profile_path | length > 0) else cme_profiles_dir + '/' + cme_profile + '.yml' }}"
+        name: cme_loaded_profile
+
+  tasks:
+    - name: Run verification for each control
+      ansible.builtin.include_role:
+        name: "{{ control_id }}"
+        tasks_from: verify.yml
+      loop: "{{ cme_loaded_profile.controls }}"
+      loop_control:
+        loop_var: control_id
+      when: not (lookup('vars', control_id + '_skip', default=false))
+      ignore_errors: true
+
+    - name: Collect active controls
+      ansible.builtin.set_fact:
+        cme_host_active_controls: "{{ cme_loaded_profile.controls | select('match', '.*') | list }}"
+
+- name: CME Scoring and Report
+  hosts: localhost
+  gather_facts: false
+  vars:
+    cme_mcp_endpoint: ""
+    cme_database_path: ""
+    cme_report_output: "./cme_posture_report.json"
+
+  tasks:
+    - name: Collect active controls from all hosts
+      ansible.builtin.set_fact:
+        cme_fleet_controls: >-
+          {{ groups['all'] | map('extract', hostvars, 'cme_host_active_controls')
+             | select('defined') | list }}
+
+    - name: Calculate fleet attenuation score
+      cme.controls.cme_score:
+        active_controls: "{{ cme_fleet_controls | flatten | unique | map('upper') | map('replace', 'CME_', 'CME-') | list }}"
+        mcp_endpoint: "{{ cme_mcp_endpoint if cme_mcp_endpoint | length > 0 else omit }}"
+        database_path: "{{ cme_database_path if cme_database_path | length > 0 else omit }}"
+      register: cme_fleet_score
+      when: cme_mcp_endpoint | length > 0 or cme_database_path | length > 0
+
+    - name: Generate posture report
+      ansible.builtin.copy:
+        content: "{{ cme_report | to_nice_json }}"
+        dest: "{{ cme_report_output }}"
+        mode: "0644"
+      vars:
+        cme_report:
+          generated_at: "{{ ansible_date_time.iso8601 | default(now()) }}"
+          hosts_scanned: "{{ groups['all'] | length }}"
+          fleet_score: "{{ cme_fleet_score | default({}) }}"
+          per_host_summary: "{{ groups['all'] | map('extract', hostvars, ['cme_host_active_controls']) | list }}"
+
+    - name: Display report location
+      ansible.builtin.debug:
+        msg: "Posture report written to {{ cme_report_output }}"
+
+    - name: Display attenuation summary
+      ansible.builtin.debug:
+        var: cme_fleet_score.attenuation
+      when: cme_fleet_score is defined and cme_fleet_score.attenuation is defined

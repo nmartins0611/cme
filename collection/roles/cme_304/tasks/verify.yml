@@ -1,0 +1,25 @@
+---
+# CME-304: AppArmor (Enforcing Profile)
+# Verification: Check AppArmor status and profile enforcement
+
+- name: "CME-304 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "aa-status --enforced 2>/dev/null | head -5"
+  register: cme_304_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_system == 'debian'
+
+- name: "CME-304 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_304_verify_0.stdout is search('profiles are in enforce mode')"
+    fail_msg: "CME-304 FAILED — expected 'profiles are in enforce mode'"
+    success_msg: "CME-304 PASSED — AppArmor (Enforcing Profile)"
+  ignore_errors: true
+  register: cme_304_assert_0
+  when: ansible_system == 'debian' and cme_304_verify_0 is not skipped
+
+- name: "CME-304 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-304', 'control_name': 'AppArmor (Enforcing Profile)', 'tactic': 'Harden', 'category': 'Mandatory Access Control', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_304_assert_0 is defined and cme_304_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_304_assert_0 is defined) | ternary(cme_304_assert_0.msg | default(''), 'not checked'))}] }}"

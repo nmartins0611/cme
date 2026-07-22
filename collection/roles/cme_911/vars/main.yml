@@ -1,0 +1,11 @@
+---
+cme_id: "CME-911"
+cme_control_name: "Fine-Grained Administrative Permission Scoping"
+cme_tactic: "Isolate"
+cme_category: "Application Controls"
+cme_category_id: "application-controls"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "C", "from": "H", "to": "L", "rationale": "A compromised administrative account can only access resources within its scoped permission set; data outside the administrator is designated domain is inaccessible, limiting confidentiality impact to the attacker is authorized scope."}, {"metric": "I", "from": "H", "to": "L", "rationale": "Write operations are confined to the administrator is scoped permission domain; cross-domain modifications \u2014 such as an IdP admin assigning realm-level roles \u2014 are rejected by the fine-grained permission model, limiting integrity impact to the attacker is authorized scope."}]
+cme_cwe_relationships: ["CWE-266", "CWE-269", "CWE-250", "CWE-1220"]
+cme_platforms: ["any", "Windows Server 2019", "Windows Server 2022"]

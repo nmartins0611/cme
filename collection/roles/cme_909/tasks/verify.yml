@@ -1,0 +1,41 @@
+---
+# CME-909: Default-Deny API Authorization Policy
+# Verification: Verify that unauthenticated requests to non-public endpoints are rejected; inspect framework configuration for default-deny authorization policy
+
+- name: "CME-909 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/api/v1/admin/users"
+  register: cme_909_verify_0
+  changed_when: false
+  failed_when: false
+
+- name: "CME-909 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_909_verify_0.stdout is search('401 or 403 without credentials')"
+    fail_msg: "CME-909 FAILED — expected '401 or 403 without credentials'"
+    success_msg: "CME-909 PASSED — Default-Deny API Authorization Policy"
+  ignore_errors: true
+  register: cme_909_assert_0
+  when: cme_909_verify_0 is not skipped
+
+- name: "CME-909 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'default.*deny\\|require_auth\\|authenticate!\\|@login_required\\|IsAuthenticated\\|authorize.*default' <app_source>/"
+  register: cme_909_verify_1
+  changed_when: false
+  failed_when: false
+
+- name: "CME-909 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_909_verify_1.stdout is search('Global authentication/authorization middleware configured with deny-by-default')"
+    fail_msg: "CME-909 FAILED — expected 'Global authentication/authorization middleware configured with deny-by-default'"
+    success_msg: "CME-909 PASSED — Default-Deny API Authorization Policy"
+  ignore_errors: true
+  register: cme_909_assert_1
+  when: cme_909_verify_1 is not skipped
+
+- name: "CME-909 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-909', 'control_name': 'Default-Deny API Authorization Policy', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_909_assert_0 is defined and cme_909_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_909_assert_0 is defined) | ternary(cme_909_assert_0.msg | default(''), 'not checked'))}] }}"

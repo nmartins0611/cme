@@ -1,0 +1,11 @@
+---
+cme_id: "CME-803"
+cme_control_name: "Account Lockout Policy (pam_faillock)"
+cme_tactic: "Harden"
+cme_category: "Credential Hardening"
+cme_category_id: "credential-hardening"
+cme_control_layer: "Identity"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Brute force limited to N attempts before lockout"}]
+cme_cwe_relationships: ["CWE-307"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Windows 10", "Windows 11", "Windows Server 2022"]

@@ -1,0 +1,11 @@
+---
+cme_id: "CME-904"
+cme_control_name: "WAF (Web Application Firewall)"
+cme_tactic: "Harden"
+cme_category: "Application Controls"
+cme_category_id: "application-controls"
+cme_control_layer: "Application"
+cme_confidence: "Medium"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Common exploit payloads are detected and blocked at the HTTP layer"}]
+cme_cwe_relationships: ["CWE-79", "CWE-89", "CWE-94", "CWE-22"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

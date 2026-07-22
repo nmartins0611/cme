@@ -1,0 +1,11 @@
+---
+cme_id: "CME-703"
+cme_control_name: "Rootless Containers"
+cme_tactic: "Isolate"
+cme_category: "Container Isolation"
+cme_category_id: "container-isolation"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "S", "from": "C", "to": "U", "rationale": "Container escape lands as unprivileged host user, not root"}, {"metric": "PR", "from": "L", "to": "H", "rationale": "Even root inside container is unprivileged on host"}]
+cme_cwe_relationships: ["CWE-269", "CWE-250"]
+cme_platforms: ["RHEL 9", "Fedora", "Ubuntu 24.04"]

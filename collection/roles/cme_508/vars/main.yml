@@ -1,0 +1,11 @@
+---
+cme_id: "CME-508"
+cme_control_name: "Quoted Service Path Enforcement (Windows)"
+cme_tactic: "Harden"
+cme_category: "Filesystem Hardening"
+cme_category_id: "filesystem-hardening"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Service paths are properly quoted so Windows does not attempt intermediate path resolution; the attacker must find a different privilege escalation vector since the unquoted path interception technique is eliminated"}, {"metric": "PR", "from": "L", "to": "H", "rationale": "With filesystem ACLs preventing writes to path prefix directories (C:\\, C:\\Program Files\\), low-privileged users cannot place interception binaries even if an unquoted path remains"}]
+cme_cwe_relationships: ["CWE-428", "CWE-426"]
+cme_platforms: ["Windows 10", "Windows 11", "Windows Server 2019", "Windows Server 2022"]

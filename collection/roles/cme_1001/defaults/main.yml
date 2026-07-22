@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-1001: EDR Agent (Endpoint Detection & Response)
+
+# Set to true to skip this control
+cme_1001_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_1001_custom_remediation: false
+

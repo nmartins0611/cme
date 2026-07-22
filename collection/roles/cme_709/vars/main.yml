@@ -1,0 +1,11 @@
+---
+cme_id: "CME-709"
+cme_control_name: "systemd Service Sandboxing (PrivateDevices, PrivateTmp, ProtectSystem)"
+cme_tactic: "Isolate"
+cme_category: "Privilege Isolation"
+cme_category_id: "privilege-isolation"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "S", "from": "C", "to": "U", "rationale": "Service isolated from host filesystem, devices, and user data"}, {"metric": "C", "from": "H", "to": "L", "rationale": "Cannot access user home directories or arbitrary devices"}, {"metric": "I", "from": "H", "to": "L", "rationale": "Cannot modify system files outside designated directories"}]
+cme_cwe_relationships: ["CWE-269", "CWE-284", "CWE-367", "CWE-362"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Ubuntu 24.04", "Fedora"]

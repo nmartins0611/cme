@@ -1,0 +1,13 @@
+---
+galaxy_info:
+  role_name: cme_919
+  author: CME Project
+  description: "CME-919: JIT Compiler Hardening (JIT Restriction / V8 Sandbox)"
+  license: Apache-2.0
+  min_ansible_version: "2.15"
+  platforms:
+    - name: Windows
+      versions:
+        - "all"
+
+dependencies: []

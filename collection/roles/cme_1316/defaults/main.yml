@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-1316: Algorithmic Complexity Safeguards (Pattern/Regex Execution Limits)
+
+# Set to true to skip this control
+cme_1316_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_1316_custom_remediation: false
+

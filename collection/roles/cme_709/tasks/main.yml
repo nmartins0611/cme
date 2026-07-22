@@ -1,0 +1,15 @@
+---
+# CME-709: systemd Service Sandboxing (PrivateDevices, PrivateTmp, ProtectSystem)
+# Remediation strategy: generic (review and customize for your environment)
+# Verification method: Check systemd unit for sandbox directives
+
+- name: "CME-709 | Remediation requires environment-specific configuration"
+  ansible.builtin.debug:
+    msg: >-
+      CME-709 (systemd Service Sandboxing (PrivateDevices, PrivateTmp, ProtectSystem)) remediation depends on your
+      environment configuration. Override this role's tasks/main.yml
+      with site-specific remediation steps.
+  when: not (cme_709_custom_remediation | default(false))
+
+- name: "CME-709 | Verify current state"
+  ansible.builtin.include_tasks: verify.yml

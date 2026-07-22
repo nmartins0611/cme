@@ -1,0 +1,11 @@
+---
+cme_id: "CME-204"
+cme_control_name: "IPsec / WireGuard (Encrypted Transport)"
+cme_tactic: "Isolate"
+cme_category: "Network Isolation"
+cme_category_id: "network-isolation"
+cme_control_layer: "Network"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Network-level MitM requires breaking cryptographic tunnel"}, {"metric": "C", "from": "H", "to": "L", "rationale": "Encrypted transit prevents passive eavesdropping"}]
+cme_cwe_relationships: ["CWE-319", "CWE-300", "CWE-311"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Ubuntu 24.04"]

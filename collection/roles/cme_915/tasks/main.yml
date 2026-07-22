@@ -1,0 +1,11 @@
+---
+# CME-915: Cross-Origin Request Restriction (Reverse Proxy Origin Enforcement)
+# This control requires manual/context-specific remediation.
+# Running verification only.
+
+- name: "CME-915 | Set manual remediation required"
+  ansible.builtin.set_fact:
+    cme_915_manual_remediation_required: true
+
+- name: "CME-915 | Run verification"
+  ansible.builtin.include_tasks: verify.yml

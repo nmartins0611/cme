@@ -1,0 +1,43 @@
+---
+# CME-402: FIPS 140-3 Mode
+# Verification: Verify FIPS mode is enabled
+
+- name: "CME-402 | Run verification command (rhel)"
+  ansible.builtin.shell:
+    cmd: "fips-mode-setup --check"
+  register: cme_402_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-402 | Assert control is active (rhel)"
+  ansible.builtin.assert:
+    that:
+      - "cme_402_verify_0.stdout is search('FIPS mode is enabled')"
+    fail_msg: "CME-402 FAILED — expected 'FIPS mode is enabled'"
+    success_msg: "CME-402 PASSED — FIPS 140-3 Mode"
+  ignore_errors: true
+  register: cme_402_assert_0
+  when: ansible_os_family == 'RedHat' and cme_402_verify_0 is not skipped
+
+- name: "CME-402 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "cat /proc/sys/crypto/fips_enabled"
+  register: cme_402_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-402 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_402_verify_1.stdout is search('1')"
+    fail_msg: "CME-402 FAILED — expected '1'"
+    success_msg: "CME-402 PASSED — FIPS 140-3 Mode"
+  ignore_errors: true
+  register: cme_402_assert_1
+  when: ansible_os_family != 'Windows' and cme_402_verify_1 is not skipped
+
+- name: "CME-402 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-402', 'control_name': 'FIPS 140-3 Mode', 'tactic': 'Harden', 'category': 'Cryptographic Controls', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_402_assert_0 is defined and cme_402_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_402_assert_0 is defined) | ternary(cme_402_assert_0.msg | default(''), 'not checked'))}] }}"

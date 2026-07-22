@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1316"
+cme_control_name: "Algorithmic Complexity Safeguards (Pattern/Regex Execution Limits)"
+cme_tactic: "Harden"
+cme_category: "Application Input Validation"
+cme_category_id: "application-input-validation"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "A", "from": "H", "to": "L", "rationale": "Computational budgets (step limits, timeouts) and safe engine guarantees cap the worst-case execution time of any single pattern operation. The attacker can still trigger the vulnerable code path, but the operation is terminated or completes in bounded time, preventing sustained resource exhaustion and event-loop blocking"}]
+cme_cwe_relationships: ["CWE-1333", "CWE-407", "CWE-405", "CWE-834", "CWE-730"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

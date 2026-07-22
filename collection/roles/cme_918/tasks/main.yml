@@ -1,0 +1,11 @@
+---
+# CME-918: URL Path Authorization Enforcement (Forced Browsing Prevention)
+# This control requires manual/context-specific remediation.
+# Running verification only.
+
+- name: "CME-918 | Set manual remediation required"
+  ansible.builtin.set_fact:
+    cme_918_manual_remediation_required: true
+
+- name: "CME-918 | Run verification"
+  ansible.builtin.include_tasks: verify.yml

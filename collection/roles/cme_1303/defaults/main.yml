@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-1303: Application-Level Filesystem Access Confinement
+
+# Set to true to skip this control
+cme_1303_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_1303_custom_remediation: false
+

@@ -1,0 +1,13 @@
+---
+# CME-404: Certificate Pinning
+# Verification method: Application-specific: check for pin configuration in app config or HTTP headers
+# No machine-executable verification commands defined.
+
+- name: "CME-404 | No automated verification available"
+  ansible.builtin.debug:
+    msg: "Manual verification required: Application-specific: check for pin configuration in app config or HTTP headers"
+  changed_when: false
+
+- name: "CME-404 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-404', 'control_name': 'Certificate Pinning', 'tactic': 'Harden', 'category': 'Cryptographic Controls', 'control_layer': 'Application', 'confidence': 'Medium', 'status': skipped, 'detail': No automated verification}] }}"

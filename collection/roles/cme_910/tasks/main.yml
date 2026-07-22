@@ -1,0 +1,11 @@
+---
+# CME-910: Role Separation / Duty Segregation
+# This control requires manual/context-specific remediation.
+# Running verification only.
+
+- name: "CME-910 | Set manual remediation required"
+  ansible.builtin.set_fact:
+    cme_910_manual_remediation_required: true
+
+- name: "CME-910 | Run verification"
+  ansible.builtin.include_tasks: verify.yml

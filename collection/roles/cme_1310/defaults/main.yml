@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-1310: File Upload Validation (Content Inspection and Extension Allowlist)
+
+# Set to true to skip this control
+cme_1310_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_1310_custom_remediation: false
+

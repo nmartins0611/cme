@@ -1,0 +1,11 @@
+---
+cme_id: "CME-908"
+cme_control_name: "Object-Level Authorization Checks (IDOR Prevention)"
+cme_tactic: "Harden"
+cme_category: "Application Controls"
+cme_category_id: "application-controls"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Exploitation requires not only discovering valid object identifiers but also bypassing the ownership verification logic; simply enumerating IDs is no longer sufficient for unauthorized access because the authorization layer rejects requests where the caller is not the resource owner."}, {"metric": "C", "from": "H", "to": "L", "rationale": "Data exposure is confined to objects the caller owns or is explicitly authorized for; bulk enumeration of other users' data is blocked at the authorization layer before any data is returned."}]
+cme_cwe_relationships: ["CWE-639", "CWE-284"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

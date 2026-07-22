@@ -1,0 +1,12 @@
+---
+# Tunable defaults for CME-107: Kernel Module Loading Restriction
+
+# Set to true to skip this control
+cme_107_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_107_custom_remediation: false
+
+# Desired value for kernel.modules_disabled
+cme_107_kernel_modules_disabled: "1"
+

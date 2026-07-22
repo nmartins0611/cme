@@ -1,0 +1,11 @@
+---
+cme_id: "CME-905"
+cme_control_name: "Content Security Policy (CSP) Headers"
+cme_tactic: "Harden"
+cme_category: "Application Controls"
+cme_category_id: "application-controls"
+cme_control_layer: "Application"
+cme_confidence: "Medium"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "XSS payloads blocked by browser CSP enforcement; script sources restricted"}]
+cme_cwe_relationships: ["CWE-79"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

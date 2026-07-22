@@ -1,0 +1,76 @@
+---
+# CME Verification + HTML Report Playbook
+#
+# Runs verification across all hosts and generates a per-host HTML report.
+#
+# Usage:
+#   ansible-playbook cme.controls.verify_report -i inventory.yml -e cme_profile=minimal
+#   ansible-playbook cme.controls.verify_report -i inventory.yml -e cme_profile=rhel9_baseline -e cme_report_dir=/tmp
+
+- name: CME Compliance Verification and Report
+  hosts: all
+  gather_facts: true
+  vars:
+    cme_profile: "minimal"
+    cme_profile_path: ""
+    cme_profiles_dir: "{{ playbook_dir }}/../profiles"
+    cme_report_dir: "{{ playbook_dir }}/../../reports"
+    cme_results: []
+
+  pre_tasks:
+    - name: Load profile from file path
+      ansible.builtin.include_vars:
+        file: "{{ cme_profile_path }}"
+        name: cme_loaded_profile
+      when: cme_profile_path | length > 0
+
+    - name: Load profile from profiles directory
+      ansible.builtin.include_vars:
+        file: "{{ cme_profiles_dir }}/{{ cme_profile }}.yml"
+        name: cme_loaded_profile
+      when: cme_profile_path | length == 0
+
+    - name: Display profile being verified
+      ansible.builtin.debug:
+        msg: "Verifying {{ cme_loaded_profile.controls | length }} controls from profile '{{ cme_profile }}'"
+
+  tasks:
+    - name: Run verification for each control in profile
+      ansible.builtin.include_role:
+        name: "{{ control_id }}"
+        tasks_from: verify.yml
+      loop: "{{ cme_loaded_profile.controls }}"
+      loop_control:
+        loop_var: control_id
+      when: not (lookup('vars', control_id + '_skip', default=false))
+      ignore_errors: true
+
+  post_tasks:
+    - name: Ensure report directory exists
+      ansible.builtin.file:
+        path: "{{ cme_report_dir }}"
+        state: directory
+        mode: "0755"
+      delegate_to: localhost
+      become: false
+      run_once: true
+
+    - name: Generate HTML report
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/../templates/verify_report.html.j2"
+        dest: "{{ cme_report_dir }}/cme_report_{{ inventory_hostname }}.html"
+        mode: "0644"
+      delegate_to: localhost
+      become: false
+
+    - name: Display report location
+      ansible.builtin.debug:
+        msg: "HTML report: {{ cme_report_dir }}/cme_report_{{ inventory_hostname }}.html"
+
+    - name: Display summary
+      ansible.builtin.debug:
+        msg: >-
+          {{ inventory_hostname }}: {{ cme_results | selectattr('status', 'equalto', 'passed') | list | length }} passed,
+          {{ cme_results | selectattr('status', 'equalto', 'failed') | list | length }} failed,
+          {{ cme_results | selectattr('status', 'equalto', 'skipped') | list | length }} skipped
+          out of {{ cme_results | length }} controls

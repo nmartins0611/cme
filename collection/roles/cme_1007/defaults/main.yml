@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-1007: Application Configuration Drift Detection (IaC Enforcement)
+
+# Set to true to skip this control
+cme_1007_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_1007_custom_remediation: false
+

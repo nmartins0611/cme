@@ -1,0 +1,25 @@
+---
+# CME-303: SELinux Booleans (Restrictive)
+# Verification: Check key SELinux booleans are set to restrictive values
+
+- name: "CME-303 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "getsebool httpd_can_network_connect"
+  register: cme_303_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-303 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_303_verify_0.stdout is search('httpd_can_network_connect --> off')"
+    fail_msg: "CME-303 FAILED — expected 'httpd_can_network_connect --> off'"
+    success_msg: "CME-303 PASSED — SELinux Booleans (Restrictive)"
+  ignore_errors: true
+  register: cme_303_assert_0
+  when: ansible_os_family == 'RedHat' and cme_303_verify_0 is not skipped
+
+- name: "CME-303 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-303', 'control_name': 'SELinux Booleans (Restrictive)', 'tactic': 'Harden', 'category': 'Mandatory Access Control', 'control_layer': 'OS/Kernel', 'confidence': 'Medium', 'status': ((cme_303_assert_0 is defined and cme_303_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_303_assert_0 is defined) | ternary(cme_303_assert_0.msg | default(''), 'not checked'))}] }}"

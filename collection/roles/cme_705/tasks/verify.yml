@@ -1,0 +1,43 @@
+---
+# CME-705: Dropped Linux Capabilities
+# Verification: Check effective capabilities of running process
+
+- name: "CME-705 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep CapEff /proc/<pid>/status"
+  register: cme_705_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-705 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_705_verify_0.stdout is search('0000000000000000 or minimal set')"
+    fail_msg: "CME-705 FAILED — expected '0000000000000000 or minimal set'"
+    success_msg: "CME-705 PASSED — Dropped Linux Capabilities"
+  ignore_errors: true
+  register: cme_705_assert_0
+  when: ansible_os_family != 'Windows' and cme_705_verify_0 is not skipped
+
+- name: "CME-705 | Run verification command (kubernetes)"
+  ansible.builtin.shell:
+    cmd: "kubectl get pod <pod> -o jsonpath='{.spec.containers[0].securityContext.capabilities.drop}'"
+  register: cme_705_verify_1
+  changed_when: false
+  failed_when: false
+  when: cme_kubernetes_host | default(false)
+
+- name: "CME-705 | Assert control is active (kubernetes)"
+  ansible.builtin.assert:
+    that:
+      - "cme_705_verify_1.stdout is search('ALL')"
+    fail_msg: "CME-705 FAILED — expected 'ALL'"
+    success_msg: "CME-705 PASSED — Dropped Linux Capabilities"
+  ignore_errors: true
+  register: cme_705_assert_1
+  when: cme_kubernetes_host | default(false) and cme_705_verify_1 is not skipped
+
+- name: "CME-705 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-705', 'control_name': 'Dropped Linux Capabilities', 'tactic': 'Isolate', 'category': 'Container Isolation', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_705_assert_0 is defined and cme_705_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_705_assert_0 is defined) | ternary(cme_705_assert_0.msg | default(''), 'not checked'))}] }}"

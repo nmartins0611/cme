@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-905: Content Security Policy (CSP) Headers
+
+# Set to true to skip this control
+cme_905_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_905_custom_remediation: false
+

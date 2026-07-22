@@ -1,0 +1,34 @@
+---
+namespace: cme
+name: controls
+version: 1.0.0
+readme: README.md
+authors:
+  - CME Project <https://github.com/nmartins0611/cme>
+description: >-
+  Compliance-as-code Ansible Collection for the Common Mitigation Enumeration (CME)
+  taxonomy. Provides roles to verify and remediate 118 defensive security controls
+  with deterministic CVSS vector attenuation scoring.
+license:
+  - Apache-2.0
+license_file: ""
+tags:
+  - security
+  - compliance
+  - hardening
+  - cvss
+  - cme
+  - vulnerability
+  - remediation
+  - linux
+  - rhel
+dependencies:
+  ansible.posix: ">=1.5.0"
+  community.general: ">=7.0.0"
+repository: https://github.com/nmartins0611/cme
+documentation: https://github.com/nmartins0611/cme/tree/main/collection
+homepage: https://github.com/nmartins0611/cme
+issues: https://github.com/nmartins0611/cme/issues
+build_ignore:
+  - "*.tar.gz"
+  - tests/output

@@ -1,0 +1,11 @@
+---
+cme_id: "CME-503"
+cme_control_name: "nosuid on Non-Root Partitions"
+cme_tactic: "Harden"
+cme_category: "Filesystem Hardening"
+cme_category_id: "filesystem-hardening"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "PR", "from": "L", "to": "H", "rationale": "Cannot deploy SUID binaries to escalate privileges from these partitions"}]
+cme_cwe_relationships: ["CWE-269"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Ubuntu 24.04"]

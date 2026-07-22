@@ -1,0 +1,12 @@
+---
+# Tunable defaults for CME-603: Unprivileged BPF Disabled
+
+# Set to true to skip this control
+cme_603_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_603_custom_remediation: false
+
+# Desired value for kernel.unprivileged_bpf_disabled
+cme_603_kernel_unprivileged_bpf_disabled: "1"
+

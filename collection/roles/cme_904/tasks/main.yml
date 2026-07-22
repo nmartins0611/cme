@@ -1,0 +1,11 @@
+---
+# CME-904: WAF (Web Application Firewall)
+# This control requires manual/context-specific remediation.
+# Running verification only.
+
+- name: "CME-904 | Set manual remediation required"
+  ansible.builtin.set_fact:
+    cme_904_manual_remediation_required: true
+
+- name: "CME-904 | Run verification"
+  ansible.builtin.include_tasks: verify.yml

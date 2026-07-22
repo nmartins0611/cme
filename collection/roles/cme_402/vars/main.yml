@@ -1,0 +1,11 @@
+---
+cme_id: "CME-402"
+cme_control_name: "FIPS 140-3 Mode"
+cme_tactic: "Harden"
+cme_category: "Cryptographic Controls"
+cme_category_id: "cryptographic-controls"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "All crypto operations use validated, audited implementations"}]
+cme_cwe_relationships: ["CWE-327", "CWE-326", "CWE-328"]
+cme_platforms: ["RHEL 9", "RHEL 8"]

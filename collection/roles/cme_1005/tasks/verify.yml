@@ -1,0 +1,25 @@
+---
+# CME-1005: Runtime Memory Error Detection (KASAN/HWASan)
+# Verification: Check if KASAN is enabled in kernel config
+
+- name: "CME-1005 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "grep CONFIG_KASAN=y /boot/config-$(uname -r)"
+  register: cme_1005_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1005 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_1005_verify_0.stdout is search('CONFIG_KASAN=y')"
+    fail_msg: "CME-1005 FAILED — expected 'CONFIG_KASAN=y'"
+    success_msg: "CME-1005 PASSED — Runtime Memory Error Detection (KASAN/HWASan)"
+  ignore_errors: true
+  register: cme_1005_assert_0
+  when: ansible_os_family != 'Windows' and cme_1005_verify_0 is not skipped
+
+- name: "CME-1005 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1005', 'control_name': 'Runtime Memory Error Detection (KASAN/HWASan)', 'tactic': 'Detect', 'category': 'Runtime Detection', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_1005_assert_0 is defined and cme_1005_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1005_assert_0 is defined) | ternary(cme_1005_assert_0.msg | default(''), 'not checked'))}] }}"

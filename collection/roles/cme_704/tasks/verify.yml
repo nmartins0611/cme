@@ -1,0 +1,43 @@
+---
+# CME-704: cgroups v2 Resource Limits
+# Verification: Check cgroup v2 is mounted and limits are set
+
+- name: "CME-704 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "mount | grep cgroup2"
+  register: cme_704_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-704 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_704_verify_0.stdout is search('cgroup2')"
+    fail_msg: "CME-704 FAILED — expected 'cgroup2'"
+    success_msg: "CME-704 PASSED — cgroups v2 Resource Limits"
+  ignore_errors: true
+  register: cme_704_assert_0
+  when: ansible_os_family != 'Windows' and cme_704_verify_0 is not skipped
+
+- name: "CME-704 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "cat /sys/fs/cgroup/<slice>/memory.max"
+  register: cme_704_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-704 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_704_verify_1.stdout is search('numeric limit')"
+    fail_msg: "CME-704 FAILED — expected 'numeric limit'"
+    success_msg: "CME-704 PASSED — cgroups v2 Resource Limits"
+  ignore_errors: true
+  register: cme_704_assert_1
+  when: ansible_os_family != 'Windows' and cme_704_verify_1 is not skipped
+
+- name: "CME-704 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-704', 'control_name': 'cgroups v2 Resource Limits', 'tactic': 'Isolate', 'category': 'Container Isolation', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_704_assert_0 is defined and cme_704_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_704_assert_0 is defined) | ternary(cme_704_assert_0.msg | default(''), 'not checked'))}] }}"

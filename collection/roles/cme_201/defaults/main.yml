@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-201: Zero Trust Gateway / Identity-Aware Proxy
+
+# Set to true to skip this control
+cme_201_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_201_custom_remediation: false
+

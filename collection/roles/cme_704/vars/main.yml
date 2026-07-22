@@ -1,0 +1,11 @@
+---
+cme_id: "CME-704"
+cme_control_name: "cgroups v2 Resource Limits"
+cme_tactic: "Isolate"
+cme_category: "Container Isolation"
+cme_category_id: "container-isolation"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "A", "from": "H", "to": "L", "rationale": "Process cannot exhaust host resources; OOM killer scoped to cgroup"}]
+cme_cwe_relationships: ["CWE-400", "CWE-770", "CWE-772", "CWE-401"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Ubuntu 24.04", "Kubernetes"]

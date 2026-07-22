@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-208: Outbound Network Egress Restriction (SSRF Blast Radius Containment)
+
+# Set to true to skip this control
+cme_208_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_208_custom_remediation: false
+

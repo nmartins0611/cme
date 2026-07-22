@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-1307: Command Injection Prevention (No Shell Invocation)
+
+# Set to true to skip this control
+cme_1307_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_1307_custom_remediation: false
+

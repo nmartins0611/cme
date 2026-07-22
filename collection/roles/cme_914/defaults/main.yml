@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-914: Strict CORS Origin Allowlist Enforcement
+
+# Set to true to skip this control
+cme_914_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_914_custom_remediation: false
+

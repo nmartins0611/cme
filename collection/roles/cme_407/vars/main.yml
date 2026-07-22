@@ -1,0 +1,11 @@
+---
+cme_id: "CME-407"
+cme_control_name: "Data-at-Rest Encryption (LUKS/dm-crypt / BitLocker)"
+cme_tactic: "Harden"
+cme_category: "Cryptographic Controls"
+cme_category_id: "cryptographic-controls"
+cme_control_layer: "Data"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "C", "from": "H", "to": "L", "rationale": "Even if an attacker gains file read access through a path traversal or application vulnerability, the underlying block device encryption prevents reading the actual cleartext data without the encryption key."}]
+cme_cwe_relationships: ["CWE-312", "CWE-311", "CWE-316"]
+cme_platforms: ["RHEL 9", "Ubuntu 24.04", "Fedora 40", "Windows 10", "Windows 11", "Windows Server 2022"]

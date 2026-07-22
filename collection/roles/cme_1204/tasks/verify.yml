@@ -1,0 +1,43 @@
+---
+# CME-1204: Service Watchdog and Automatic Restart (systemd WatchdogSec/Restart)
+# Verification: Check that critical services have restart policies and watchdog timers configured
+
+- name: "CME-1204 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "systemctl show sshd -p Restart -p WatchdogSec -p RestartSec"
+  register: cme_1204_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1204 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1204_verify_0.stdout is search('Restart=on-failure [(]or always[)]; WatchdogSec set to a positive value')"
+    fail_msg: "CME-1204 FAILED — expected 'Restart=on-failure (or always); WatchdogSec set to a positive value'"
+    success_msg: "CME-1204 PASSED — Service Watchdog and Automatic Restart (systemd WatchdogSec/Restart)"
+  ignore_errors: true
+  register: cme_1204_assert_0
+  when: ansible_os_family != 'Windows' and cme_1204_verify_0 is not skipped
+
+- name: "CME-1204 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep -E 'Restart=|WatchdogSec=' /etc/systemd/system/*.service /usr/lib/systemd/system/*.service 2>/dev/null | head -10"
+  register: cme_1204_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1204 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1204_verify_1.stdout is search('Critical services have Restart= and WatchdogSec= directives')"
+    fail_msg: "CME-1204 FAILED — expected 'Critical services have Restart= and WatchdogSec= directives'"
+    success_msg: "CME-1204 PASSED — Service Watchdog and Automatic Restart (systemd WatchdogSec/Restart)"
+  ignore_errors: true
+  register: cme_1204_assert_1
+  when: ansible_os_family != 'Windows' and cme_1204_verify_1 is not skipped
+
+- name: "CME-1204 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1204', 'control_name': 'Service Watchdog and Automatic Restart (systemd WatchdogSec/Restart)', 'tactic': 'Restore', 'category': 'Recovery Controls', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_1204_assert_0 is defined and cme_1204_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1204_assert_0 is defined) | ternary(cme_1204_assert_0.msg | default(''), 'not checked'))}] }}"

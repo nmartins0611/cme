@@ -1,0 +1,41 @@
+---
+# CME-1006: Privilege Change Audit Logging
+# Verification: Inspect application source for audit logging on role/permission change operations; verify log entries are generated on privilege modifications
+
+- name: "CME-1006 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'audit_log\\|AuditLog\\|log.*role.*change\\|log.*permission\\|ActivityLog\\|SecurityEvent' <app_source>/"
+  register: cme_1006_verify_0
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1006 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1006_verify_0.stdout is search('Audit logging calls present in role/permission modification handlers')"
+    fail_msg: "CME-1006 FAILED — expected 'Audit logging calls present in role/permission modification handlers'"
+    success_msg: "CME-1006 PASSED — Privilege Change Audit Logging"
+  ignore_errors: true
+  register: cme_1006_assert_0
+  when: cme_1006_verify_0 is not skipped
+
+- name: "CME-1006 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'before.*after\\|old_role.*new_role\\|previous.*current\\|from_state.*to_state' <app_source>/"
+  register: cme_1006_verify_1
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1006 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1006_verify_1.stdout is search('Before/after state capture in privilege change logging')"
+    fail_msg: "CME-1006 FAILED — expected 'Before/after state capture in privilege change logging'"
+    success_msg: "CME-1006 PASSED — Privilege Change Audit Logging"
+  ignore_errors: true
+  register: cme_1006_assert_1
+  when: cme_1006_verify_1 is not skipped
+
+- name: "CME-1006 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1006', 'control_name': 'Privilege Change Audit Logging', 'tactic': 'Detect', 'category': 'Runtime Detection', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_1006_assert_0 is defined and cme_1006_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1006_assert_0 is defined) | ternary(cme_1006_assert_0.msg | default(''), 'not checked'))}] }}"

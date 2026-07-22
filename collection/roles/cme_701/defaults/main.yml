@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-701: Sandboxing / gVisor Runtime
+
+# Set to true to skip this control
+cme_701_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_701_custom_remediation: false
+

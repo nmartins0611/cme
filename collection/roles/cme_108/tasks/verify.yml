@@ -1,0 +1,25 @@
+---
+# CME-108: kptr_restrict (Kernel Pointer Restriction)
+# Verification: Check kptr_restrict sysctl is 1 or 2
+
+- name: "CME-108 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "cat /proc/sys/kernel/kptr_restrict"
+  register: cme_108_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-108 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_108_verify_0.stdout is search('1')"
+    fail_msg: "CME-108 FAILED — expected '1'"
+    success_msg: "CME-108 PASSED — kptr_restrict (Kernel Pointer Restriction)"
+  ignore_errors: true
+  register: cme_108_assert_0
+  when: ansible_os_family != 'Windows' and cme_108_verify_0 is not skipped
+
+- name: "CME-108 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-108', 'control_name': 'kptr_restrict (Kernel Pointer Restriction)', 'tactic': 'Harden', 'category': 'Kernel Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_108_assert_0 is defined and cme_108_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_108_assert_0 is defined) | ternary(cme_108_assert_0.msg | default(''), 'not checked'))}] }}"

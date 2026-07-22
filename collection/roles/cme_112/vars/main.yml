@@ -1,0 +1,11 @@
+---
+cme_id: "CME-112"
+cme_control_name: "RELRO and PIE (Full)"
+cme_tactic: "Harden"
+cme_category: "Kernel Hardening"
+cme_category_id: "kernel-hardening"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "GOT overwrite attacks blocked; all code addresses randomized"}]
+cme_cwe_relationships: ["CWE-119", "CWE-120", "CWE-787", "CWE-416"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Ubuntu 24.04", "Fedora"]

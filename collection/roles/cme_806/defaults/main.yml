@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-806: Kerberos Authentication (GSSAPI)
+
+# Set to true to skip this control
+cme_806_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_806_custom_remediation: false
+

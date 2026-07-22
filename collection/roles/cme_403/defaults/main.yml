@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-403: TLS 1.3 Enforcement
+
+# Set to true to skip this control
+cme_403_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_403_custom_remediation: false
+

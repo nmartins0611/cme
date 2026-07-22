@@ -1,0 +1,14 @@
+---
+# CME-101: ASLR (Address Space Layout Randomization)
+
+- name: "CME-101 | Set kernel.randomize_va_space"
+  ansible.posix.sysctl:
+    name: kernel.randomize_va_space
+    value: "{{ cme_101_kernel_randomize_va_space | default('2') }}"
+    state: present
+    sysctl_set: true
+    reload: true
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-101 | Verify after remediation"
+  ansible.builtin.include_tasks: verify.yml

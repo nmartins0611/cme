@@ -1,0 +1,11 @@
+---
+cme_id: "CME-915"
+cme_control_name: "Cross-Origin Request Restriction (Reverse Proxy Origin Enforcement)"
+cme_tactic: "Harden"
+cme_category: "Application Controls"
+cme_category_id: "application-controls"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "The attacker must achieve a same-origin position (e.g., XSS on the allowed domain or social engineering to access a same-origin page) to bypass the proxy-level origin restriction. A simple cross-origin request from an attacker-controlled domain is rejected by the proxy before reaching the application, significantly increasing the complexity required for successful exploitation."}]
+cme_cwe_relationships: ["CWE-346", "CWE-352", "CWE-940", "CWE-942"]
+cme_platforms: ["RHEL 8", "RHEL 9", "RHEL 10", "OpenShift 4", "Windows Server 2019", "Windows Server 2022"]

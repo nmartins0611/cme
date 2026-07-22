@@ -1,0 +1,11 @@
+---
+cme_id: "CME-117"
+cme_control_name: "Heap Allocator Hardening (glibc Safe-Linking and Metadata Protection)"
+cme_tactic: "Harden"
+cme_category: "Kernel Hardening"
+cme_category_id: "kernel-hardening"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Safe-linking forces the attacker to defeat pointer encryption (requires both the per-thread random key and the chunk address) before they can redirect allocation to a controlled location via tcache poisoning; tcache key verification detects double-free attempts and aborts the process before the attacker achieves heap corruption \u2014 exploitation requires discovering a bypass for the allocator's integrity checks"}]
+cme_cwe_relationships: ["CWE-416", "CWE-415", "CWE-825", "CWE-122"]
+cme_platforms: ["RHEL 8", "RHEL 9", "RHEL 10", "Fedora", "Ubuntu 24.04"]

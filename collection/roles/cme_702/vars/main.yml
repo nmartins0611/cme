@@ -1,0 +1,11 @@
+---
+cme_id: "CME-702"
+cme_control_name: "Linux Namespaces (User, PID, Network, Mount)"
+cme_tactic: "Isolate"
+cme_category: "Container Isolation"
+cme_category_id: "container-isolation"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "S", "from": "C", "to": "U", "rationale": "Process cannot see or interact with resources outside its namespace"}, {"metric": "PR", "from": "L", "to": "H", "rationale": "UID 0 inside namespace maps to unprivileged user on host (user ns)"}]
+cme_cwe_relationships: ["CWE-269"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Ubuntu 24.04", "Kubernetes"]

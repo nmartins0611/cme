@@ -1,0 +1,11 @@
+---
+cme_id: "CME-405"
+cme_control_name: "DNSSEC Validation"
+cme_tactic: "Harden"
+cme_category: "Cryptographic Controls"
+cme_category_id: "cryptographic-controls"
+cme_control_layer: "Network"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "DNS-based redirect/spoofing attacks require breaking DNSSEC chain of trust"}]
+cme_cwe_relationships: ["CWE-350"]
+cme_platforms: ["RHEL 9", "Ubuntu 24.04"]

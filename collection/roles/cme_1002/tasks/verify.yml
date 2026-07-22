@@ -1,0 +1,43 @@
+---
+# CME-1002: Audit Subsystem (auditd)
+# Verification: Verify auditd is running with rules loaded
+
+- name: "CME-1002 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "auditctl -s | grep enabled"
+  register: cme_1002_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1002 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1002_verify_0.stdout is search('enabled 1')"
+    fail_msg: "CME-1002 FAILED — expected 'enabled 1'"
+    success_msg: "CME-1002 PASSED — Audit Subsystem (auditd)"
+  ignore_errors: true
+  register: cme_1002_assert_0
+  when: ansible_os_family != 'Windows' and cme_1002_verify_0 is not skipped
+
+- name: "CME-1002 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "auditctl -l | wc -l"
+  register: cme_1002_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1002 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1002_verify_1.stdout is search('Non-zero rule count')"
+    fail_msg: "CME-1002 FAILED — expected 'Non-zero rule count'"
+    success_msg: "CME-1002 PASSED — Audit Subsystem (auditd)"
+  ignore_errors: true
+  register: cme_1002_assert_1
+  when: ansible_os_family != 'Windows' and cme_1002_verify_1 is not skipped
+
+- name: "CME-1002 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1002', 'control_name': 'Audit Subsystem (auditd)', 'tactic': 'Detect', 'category': 'Runtime Detection', 'control_layer': 'OS/Kernel', 'confidence': 'Medium', 'status': ((cme_1002_assert_0 is defined and cme_1002_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1002_assert_0 is defined) | ternary(cme_1002_assert_0.msg | default(''), 'not checked'))}] }}"

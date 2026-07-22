@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-405: DNSSEC Validation
+
+# Set to true to skip this control
+cme_405_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_405_custom_remediation: false
+

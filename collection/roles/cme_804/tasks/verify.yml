@@ -1,0 +1,25 @@
+---
+# CME-804: SSH Key-Only Authentication
+# Verification: Check sshd_config for password auth disabled
+
+- name: "CME-804 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "sshd -T | grep passwordauthentication"
+  register: cme_804_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-804 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_804_verify_0.stdout is search('passwordauthentication no')"
+    fail_msg: "CME-804 FAILED — expected 'passwordauthentication no'"
+    success_msg: "CME-804 PASSED — SSH Key-Only Authentication"
+  ignore_errors: true
+  register: cme_804_assert_0
+  when: ansible_os_family != 'Windows' and cme_804_verify_0 is not skipped
+
+- name: "CME-804 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-804', 'control_name': 'SSH Key-Only Authentication', 'tactic': 'Harden', 'category': 'Credential Hardening', 'control_layer': 'Identity', 'confidence': 'High', 'status': ((cme_804_assert_0 is defined and cme_804_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_804_assert_0 is defined) | ternary(cme_804_assert_0.msg | default(''), 'not checked'))}] }}"

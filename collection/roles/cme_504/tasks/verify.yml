@@ -1,0 +1,25 @@
+---
+# CME-504: dm-verity (Verified Boot)
+# Verification: Check dm-verity status on root device
+
+- name: "CME-504 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "veritysetup status root"
+  register: cme_504_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-504 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_504_verify_0.stdout is search('status: verified')"
+    fail_msg: "CME-504 FAILED — expected 'status: verified'"
+    success_msg: "CME-504 PASSED — dm-verity (Verified Boot)"
+  ignore_errors: true
+  register: cme_504_assert_0
+  when: ansible_os_family != 'Windows' and cme_504_verify_0 is not skipped
+
+- name: "CME-504 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-504', 'control_name': 'dm-verity (Verified Boot)', 'tactic': 'Harden', 'category': 'Filesystem Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_504_assert_0 is defined and cme_504_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_504_assert_0 is defined) | ternary(cme_504_assert_0.msg | default(''), 'not checked'))}] }}"

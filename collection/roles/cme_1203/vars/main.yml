@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1203"
+cme_control_name: "Disaster Recovery / Multi-Region Failover"
+cme_tactic: "Restore"
+cme_category: "Recovery Controls"
+cme_category_id: "recovery-controls"
+cme_control_layer: "Application"
+cme_confidence: "Medium"
+cme_cvss_vector_impacts: [{"metric": "A", "from": "H", "to": "L", "rationale": "Service continues from secondary region; availability impact limited to failover time"}]
+cme_cwe_relationships: []
+cme_platforms: ["Any"]

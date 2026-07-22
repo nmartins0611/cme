@@ -1,0 +1,11 @@
+---
+cme_id: "CME-406"
+cme_control_name: "Signed Package Enforcement (GPG)"
+cme_tactic: "Harden"
+cme_category: "Cryptographic Controls"
+cme_category_id: "cryptographic-controls"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "I", "from": "H", "to": "L", "rationale": "Cannot install tampered packages; cryptographic verification enforced"}]
+cme_cwe_relationships: ["CWE-345", "CWE-494", "CWE-347"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Fedora"]

@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-502: noexec on /tmp and /dev/shm
+
+# Set to true to skip this control
+cme_502_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_502_custom_remediation: false
+

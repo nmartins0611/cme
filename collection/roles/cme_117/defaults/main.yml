@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-117: Heap Allocator Hardening (glibc Safe-Linking and Metadata Protection)
+
+# Set to true to skip this control
+cme_117_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_117_custom_remediation: false
+

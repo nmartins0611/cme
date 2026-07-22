@@ -1,0 +1,11 @@
+---
+# CME-1302: Deserialization Allowlist (Safe Loading)
+# This control requires manual/context-specific remediation.
+# Running verification only.
+
+- name: "CME-1302 | Set manual remediation required"
+  ansible.builtin.set_fact:
+    cme_1302_manual_remediation_required: true
+
+- name: "CME-1302 | Run verification"
+  ansible.builtin.include_tasks: verify.yml

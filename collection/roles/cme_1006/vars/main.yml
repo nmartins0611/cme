@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1006"
+cme_control_name: "Privilege Change Audit Logging"
+cme_tactic: "Detect"
+cme_category: "Runtime Detection"
+cme_category_id: "runtime-detection"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Privilege escalation actions are recorded with full actor/target/change context in an application-level audit trail; the attacker must escalate privileges AND act before the logged privilege change triggers alerting or review, significantly narrowing the exploitation window."}]
+cme_cwe_relationships: ["CWE-778", "CWE-223"]
+cme_platforms: ["Any"]

@@ -1,0 +1,14 @@
+---
+# CME-110: KEXEC Restriction
+
+- name: "CME-110 | Set kernel.kexec_load_disabled"
+  ansible.posix.sysctl:
+    name: kernel.kexec_load_disabled
+    value: "{{ cme_110_kernel_kexec_load_disabled | default('1') }}"
+    state: present
+    sysctl_set: true
+    reload: true
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-110 | Verify after remediation"
+  ansible.builtin.include_tasks: verify.yml

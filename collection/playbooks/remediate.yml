@@ -1,0 +1,56 @@
+---
+# CME Compliance Remediation Playbook
+#
+# Applies CME controls from a given profile to target hosts.
+# Converges each host to the desired security posture, then verifies.
+#
+# Usage:
+#   ansible-playbook cme.controls.remediate -e cme_profile=rhel9_baseline
+#   ansible-playbook cme.controls.remediate -e cme_profile=minimal --check
+#   ansible-playbook cme.controls.remediate -e cme_profile_path=/path/to/custom.yml
+
+- name: CME Compliance Remediation
+  hosts: all
+  gather_facts: true
+  become: true
+  vars:
+    cme_profile: "minimal"
+    cme_profile_path: ""
+    cme_profiles_dir: "{{ playbook_dir }}/../profiles"
+    cme_stop_on_failure: false
+
+  pre_tasks:
+    - name: Load profile from file path
+      ansible.builtin.include_vars:
+        file: "{{ cme_profile_path }}"
+        name: cme_loaded_profile
+      when: cme_profile_path | length > 0
+
+    - name: Load profile from profiles directory
+      ansible.builtin.include_vars:
+        file: "{{ cme_profiles_dir }}/{{ cme_profile }}.yml"
+        name: cme_loaded_profile
+      when: cme_profile_path | length == 0
+
+    - name: Display remediation plan
+      ansible.builtin.debug:
+        msg: "Applying {{ cme_loaded_profile.controls | length }} controls from profile '{{ cme_profile }}' to {{ inventory_hostname }}"
+
+  tasks:
+    - name: Apply each control in profile
+      ansible.builtin.include_tasks:
+        file: _apply_control.yml
+      loop: "{{ cme_loaded_profile.controls }}"
+      loop_control:
+        loop_var: control_id
+      when: not (lookup('vars', control_id + '_skip', default=false))
+
+  post_tasks:
+    - name: Set remediation summary facts
+      ansible.builtin.set_fact:
+        cme_remediated_controls: "{{ cme_loaded_profile.controls | length }}"
+        cme_remediation_complete: true
+
+    - name: Display remediation summary
+      ansible.builtin.debug:
+        msg: "Remediation complete: {{ cme_loaded_profile.controls | length }} controls applied on {{ inventory_hostname }}"

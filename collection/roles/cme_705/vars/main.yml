@@ -1,0 +1,11 @@
+---
+cme_id: "CME-705"
+cme_control_name: "Dropped Linux Capabilities"
+cme_tactic: "Isolate"
+cme_category: "Container Isolation"
+cme_category_id: "container-isolation"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "PR", "from": "L", "to": "H", "rationale": "Even privileged operations require specific capabilities that have been dropped"}, {"metric": "S", "from": "C", "to": "U", "rationale": "Cannot mount filesystems, trace processes, or perform other scope-changing operations"}]
+cme_cwe_relationships: ["CWE-250", "CWE-269"]
+cme_platforms: ["RHEL 9", "Kubernetes", "OpenShift"]

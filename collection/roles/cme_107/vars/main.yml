@@ -1,0 +1,11 @@
+---
+cme_id: "CME-107"
+cme_control_name: "Kernel Module Loading Restriction"
+cme_tactic: "Harden"
+cme_category: "Kernel Hardening"
+cme_category_id: "kernel-hardening"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Cannot load malicious kernel modules even with root access"}, {"metric": "I", "from": "H", "to": "L", "rationale": "Prevents kernel-level persistence via modules"}]
+cme_cwe_relationships: ["CWE-94", "CWE-829"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Ubuntu 24.04"]

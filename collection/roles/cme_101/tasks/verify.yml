@@ -1,0 +1,79 @@
+---
+# CME-101: ASLR (Address Space Layout Randomization)
+# Verification: Check kernel randomize_va_space sysctl is set to 2 (full randomization)
+
+- name: "CME-101 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "cat /proc/sys/kernel/randomize_va_space"
+  register: cme_101_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-101 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_101_verify_0.stdout is search('2')"
+    fail_msg: "CME-101 FAILED — expected '2'"
+    success_msg: "CME-101 PASSED — ASLR (Address Space Layout Randomization)"
+  ignore_errors: true
+  register: cme_101_assert_0
+  when: ansible_os_family != 'Windows' and cme_101_verify_0 is not skipped
+
+- name: "CME-101 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "sysctl kernel.randomize_va_space"
+  register: cme_101_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-101 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_101_verify_1.stdout is search('kernel.randomize_va_space = 2')"
+    fail_msg: "CME-101 FAILED — expected 'kernel.randomize_va_space = 2'"
+    success_msg: "CME-101 PASSED — ASLR (Address Space Layout Randomization)"
+  ignore_errors: true
+  register: cme_101_assert_1
+  when: ansible_os_family != 'Windows' and cme_101_verify_1 is not skipped
+
+- name: "CME-101 | Run verification command (windows)"
+  ansible.builtin.shell:
+    cmd: "(Get-ProcessMitigation -System).ASLR.ForceRelocateImages"
+  register: cme_101_verify_2
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'Windows'
+
+- name: "CME-101 | Assert control is active (windows)"
+  ansible.builtin.assert:
+    that:
+      - "cme_101_verify_2.stdout is search('ON')"
+    fail_msg: "CME-101 FAILED — expected 'ON'"
+    success_msg: "CME-101 PASSED — ASLR (Address Space Layout Randomization)"
+  ignore_errors: true
+  register: cme_101_assert_2
+  when: ansible_os_family == 'Windows' and cme_101_verify_2 is not skipped
+
+- name: "CME-101 | Run verification command (windows)"
+  ansible.builtin.shell:
+    cmd: "(Get-ProcessMitigation -System).ASLR.BottomUp"
+  register: cme_101_verify_3
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'Windows'
+
+- name: "CME-101 | Assert control is active (windows)"
+  ansible.builtin.assert:
+    that:
+      - "cme_101_verify_3.stdout is search('ON')"
+    fail_msg: "CME-101 FAILED — expected 'ON'"
+    success_msg: "CME-101 PASSED — ASLR (Address Space Layout Randomization)"
+  ignore_errors: true
+  register: cme_101_assert_3
+  when: ansible_os_family == 'Windows' and cme_101_verify_3 is not skipped
+
+- name: "CME-101 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-101', 'control_name': 'ASLR (Address Space Layout Randomization)', 'tactic': 'Harden', 'category': 'Kernel Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_101_assert_0 is defined and cme_101_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_101_assert_0 is defined) | ternary(cme_101_assert_0.msg | default(''), 'not checked'))}] }}"

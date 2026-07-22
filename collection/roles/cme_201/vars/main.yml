@@ -1,0 +1,11 @@
+---
+cme_id: "CME-201"
+cme_control_name: "Zero Trust Gateway / Identity-Aware Proxy"
+cme_tactic: "Isolate"
+cme_category: "Network Isolation"
+cme_category_id: "network-isolation"
+cme_control_layer: "Network"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AV", "from": "N", "to": "L", "rationale": "Network-accessible services are shielded behind identity verification; attacker cannot exploit remotely without valid credentials"}]
+cme_cwe_relationships: ["CWE-284", "CWE-306", "CWE-287"]
+cme_platforms: ["Any"]

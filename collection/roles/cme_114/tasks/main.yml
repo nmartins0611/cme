@@ -1,0 +1,15 @@
+---
+# CME-114: Process Resource Limits (ulimit/prlimit)
+# Remediation strategy: generic (review and customize for your environment)
+# Verification method: Check that CPU time limits are set for processes
+
+- name: "CME-114 | Remediation requires environment-specific configuration"
+  ansible.builtin.debug:
+    msg: >-
+      CME-114 (Process Resource Limits (ulimit/prlimit)) remediation depends on your
+      environment configuration. Override this role's tasks/main.yml
+      with site-specific remediation steps.
+  when: not (cme_114_custom_remediation | default(false))
+
+- name: "CME-114 | Verify current state"
+  ansible.builtin.include_tasks: verify.yml

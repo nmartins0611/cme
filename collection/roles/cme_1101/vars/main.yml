@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1101"
+cme_control_name: "Automated Patch Management (dnf-automatic)"
+cme_tactic: "Evict"
+cme_category: "Patch Management"
+cme_category_id: "patch-management"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Temporal: vulnerability window shortened; exploits against patched code fail"}]
+cme_cwe_relationships: []
+cme_platforms: ["RHEL 9", "RHEL 8", "Fedora"]

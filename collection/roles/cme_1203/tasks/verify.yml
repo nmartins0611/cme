@@ -1,0 +1,13 @@
+---
+# CME-1203: Disaster Recovery / Multi-Region Failover
+# Verification method: Verify failover configuration and last failover test
+# No machine-executable verification commands defined.
+
+- name: "CME-1203 | No automated verification available"
+  ansible.builtin.debug:
+    msg: "Manual verification required: Verify failover configuration and last failover test"
+  changed_when: false
+
+- name: "CME-1203 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1203', 'control_name': 'Disaster Recovery / Multi-Region Failover', 'tactic': 'Restore', 'category': 'Recovery Controls', 'control_layer': 'Application', 'confidence': 'Medium', 'status': skipped, 'detail': No automated verification}] }}"

@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-109: Kernel Lockdown Mode
+
+# Set to true to skip this control
+cme_109_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_109_custom_remediation: false
+

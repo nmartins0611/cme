@@ -1,0 +1,11 @@
+---
+cme_id: "CME-114"
+cme_control_name: "Process Resource Limits (ulimit/prlimit)"
+cme_tactic: "Harden"
+cme_category: "Kernel Hardening"
+cme_category_id: "kernel-hardening"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "A", "from": "H", "to": "L", "rationale": "Resource limits contain the blast radius of denial-of-service conditions to the targeted process rather than the system; an infinite loop consumes its CPU quota then receives SIGKILL, preventing system-wide resource exhaustion."}]
+cme_cwe_relationships: ["CWE-835", "CWE-400", "CWE-770", "CWE-834", "CWE-772", "CWE-401"]
+cme_platforms: ["RHEL 9", "Ubuntu 24.04", "Fedora 40"]

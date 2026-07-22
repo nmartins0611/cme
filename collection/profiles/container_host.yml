@@ -1,0 +1,19 @@
+---
+# Container host profile — container and syscall controls
+controls:
+  - cme_1003
+  - cme_1010
+  - cme_1103
+  - cme_206
+  - cme_501
+  - cme_601
+  - cme_602
+  - cme_603
+  - cme_604
+  - cme_701
+  - cme_702
+  - cme_703
+  - cme_704
+  - cme_705
+  - cme_706
+  - cme_707

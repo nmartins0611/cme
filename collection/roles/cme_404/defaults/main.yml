@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-404: Certificate Pinning
+
+# Set to true to skip this control
+cme_404_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_404_custom_remediation: false
+

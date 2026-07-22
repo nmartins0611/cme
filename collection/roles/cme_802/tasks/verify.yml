@@ -1,0 +1,43 @@
+---
+# CME-802: Password Quality Enforcement (pwquality)
+# Verification: Check pwquality configuration
+
+- name: "CME-802 | Run verification command (rhel)"
+  ansible.builtin.shell:
+    cmd: "grep -E 'minlen|minclass|dcredit' /etc/security/pwquality.conf"
+  register: cme_802_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-802 | Assert control is active (rhel)"
+  ansible.builtin.assert:
+    that:
+      - "cme_802_verify_0.stdout is search('minlen = 14')"
+    fail_msg: "CME-802 FAILED — expected 'minlen = 14'"
+    success_msg: "CME-802 PASSED — Password Quality Enforcement (pwquality)"
+  ignore_errors: true
+  register: cme_802_assert_0
+  when: ansible_os_family == 'RedHat' and cme_802_verify_0 is not skipped
+
+- name: "CME-802 | Run verification command (windows)"
+  ansible.builtin.shell:
+    cmd: "net accounts | Select-String 'Minimum password length'"
+  register: cme_802_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'Windows'
+
+- name: "CME-802 | Assert control is active (windows)"
+  ansible.builtin.assert:
+    that:
+      - "cme_802_verify_1.stdout is search('Minimum password length                  14')"
+    fail_msg: "CME-802 FAILED — expected 'Minimum password length                  14'"
+    success_msg: "CME-802 PASSED — Password Quality Enforcement (pwquality)"
+  ignore_errors: true
+  register: cme_802_assert_1
+  when: ansible_os_family == 'Windows' and cme_802_verify_1 is not skipped
+
+- name: "CME-802 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-802', 'control_name': 'Password Quality Enforcement (pwquality)', 'tactic': 'Harden', 'category': 'Credential Hardening', 'control_layer': 'Identity', 'confidence': 'Medium', 'status': ((cme_802_assert_0 is defined and cme_802_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_802_assert_0 is defined) | ternary(cme_802_assert_0.msg | default(''), 'not checked'))}] }}"

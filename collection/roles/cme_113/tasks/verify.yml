@@ -1,0 +1,61 @@
+---
+# CME-113: Control Flow Integrity (CFI / Shadow Call Stack)
+# Verification: Check kernel config for CFI or Shadow Call Stack
+
+- name: "CME-113 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep CONFIG_CFI_CLANG /boot/config-$(uname -r)"
+  register: cme_113_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-113 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_113_verify_0.stdout is search('CONFIG_CFI_CLANG=y')"
+    fail_msg: "CME-113 FAILED — expected 'CONFIG_CFI_CLANG=y'"
+    success_msg: "CME-113 PASSED — Control Flow Integrity (CFI / Shadow Call Stack)"
+  ignore_errors: true
+  register: cme_113_assert_0
+  when: ansible_os_family != 'Windows' and cme_113_verify_0 is not skipped
+
+- name: "CME-113 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep CONFIG_SHADOW_CALL_STACK /boot/config-$(uname -r)"
+  register: cme_113_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-113 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_113_verify_1.stdout is search('CONFIG_SHADOW_CALL_STACK=y')"
+    fail_msg: "CME-113 FAILED — expected 'CONFIG_SHADOW_CALL_STACK=y'"
+    success_msg: "CME-113 PASSED — Control Flow Integrity (CFI / Shadow Call Stack)"
+  ignore_errors: true
+  register: cme_113_assert_1
+  when: ansible_os_family != 'Windows' and cme_113_verify_1 is not skipped
+
+- name: "CME-113 | Run verification command (windows)"
+  ansible.builtin.shell:
+    cmd: "(Get-ProcessMitigation -System).CFG.Enable"
+  register: cme_113_verify_2
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'Windows'
+
+- name: "CME-113 | Assert control is active (windows)"
+  ansible.builtin.assert:
+    that:
+      - "cme_113_verify_2.stdout is search('ON')"
+    fail_msg: "CME-113 FAILED — expected 'ON'"
+    success_msg: "CME-113 PASSED — Control Flow Integrity (CFI / Shadow Call Stack)"
+  ignore_errors: true
+  register: cme_113_assert_2
+  when: ansible_os_family == 'Windows' and cme_113_verify_2 is not skipped
+
+- name: "CME-113 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-113', 'control_name': 'Control Flow Integrity (CFI / Shadow Call Stack)', 'tactic': 'Harden', 'category': 'Kernel Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'Medium', 'status': ((cme_113_assert_0 is defined and cme_113_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_113_assert_0 is defined) | ternary(cme_113_assert_0.msg | default(''), 'not checked'))}] }}"

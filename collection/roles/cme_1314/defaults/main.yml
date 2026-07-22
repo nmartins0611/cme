@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-1314: Input Canonicalization Before Security Decision
+
+# Set to true to skip this control
+cme_1314_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_1314_custom_remediation: false
+

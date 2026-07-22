@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-805: Credential Rotation Policy
+
+# Set to true to skip this control
+cme_805_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_805_custom_remediation: false
+

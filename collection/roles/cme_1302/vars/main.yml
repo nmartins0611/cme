@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1302"
+cme_control_name: "Deserialization Allowlist (Safe Loading)"
+cme_tactic: "Harden"
+cme_category: "Application Input Validation"
+cme_category_id: "application-input-validation"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Only allowlisted types can be deserialized; arbitrary class instantiation blocked"}, {"metric": "I", "from": "H", "to": "L", "rationale": "Cannot invoke arbitrary functions or modify state via deserialized objects"}]
+cme_cwe_relationships: ["CWE-502", "CWE-915", "CWE-1321", "CWE-1188"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

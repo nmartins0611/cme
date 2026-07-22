@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1001"
+cme_control_name: "EDR Agent (Endpoint Detection & Response)"
+cme_tactic: "Detect"
+cme_category: "Runtime Detection"
+cme_category_id: "runtime-detection"
+cme_control_layer: "Application"
+cme_confidence: "Medium"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Compensating control: exploit behavior patterns are detected and may be blocked in real-time"}]
+cme_cwe_relationships: []
+cme_platforms: ["Any"]

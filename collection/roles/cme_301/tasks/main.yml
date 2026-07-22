@@ -1,0 +1,20 @@
+---
+# CME-301: SELinux (Enforcing Mode)
+
+- name: "CME-301 | Ensure SELinux packages are installed"
+  ansible.builtin.package:
+    name:
+      - libselinux
+      - policycoreutils
+      - selinux-policy-targeted
+    state: present
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-301 | Set SELinux to enforcing"
+  ansible.posix.selinux:
+    policy: targeted
+    state: enforcing
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-301 | Verify after remediation"
+  ansible.builtin.include_tasks: verify.yml

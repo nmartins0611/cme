@@ -1,0 +1,14 @@
+---
+# CME-108: kptr_restrict (Kernel Pointer Restriction)
+
+- name: "CME-108 | Set kernel.kptr_restrict"
+  ansible.posix.sysctl:
+    name: kernel.kptr_restrict
+    value: "{{ cme_108_kernel_kptr_restrict | default('1') }}"
+    state: present
+    sysctl_set: true
+    reload: true
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-108 | Verify after remediation"
+  ansible.builtin.include_tasks: verify.yml

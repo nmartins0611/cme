@@ -1,0 +1,11 @@
+---
+cme_id: "CME-710"
+cme_control_name: "DynamicUser (systemd)"
+cme_tactic: "Isolate"
+cme_category: "Privilege Isolation"
+cme_category_id: "privilege-isolation"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "S", "from": "C", "to": "U", "rationale": "Service runs with ephemeral identity that owns no persistent files"}]
+cme_cwe_relationships: ["CWE-269"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Ubuntu 24.04"]

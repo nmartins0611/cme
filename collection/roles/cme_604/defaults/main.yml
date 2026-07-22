@@ -1,0 +1,15 @@
+---
+# Tunable defaults for CME-604: Unprivileged User Namespaces Disabled
+
+# Set to true to skip this control
+cme_604_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_604_custom_remediation: false
+
+# Desired value for user.max_user_namespaces
+cme_604_user_max_user_namespaces: "0"
+
+# Desired value for kernel.unprivileged_userns_clone
+cme_604_kernel_unprivileged_userns_clone: "0"
+

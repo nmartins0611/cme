@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-913: CSRF Protection (Anti-CSRF Token & SameSite Cookie Enforcement)
+
+# Set to true to skip this control
+cme_913_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_913_custom_remediation: false
+

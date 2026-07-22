@@ -1,0 +1,24 @@
+---
+# CME-1305: SQL Injection Prevention (Parameterized Queries)
+# Verification: Verify all database queries use parameterized statements; no string formatting for SQL
+
+- name: "CME-1305 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'execute.*%s\\|execute.*format\\|execute.*f\"' <app_source>/ | grep -v 'execute.*,.*params'"
+  register: cme_1305_verify_0
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1305 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_1305_verify_0.stdout is search('No string-formatted SQL queries')"
+    fail_msg: "CME-1305 FAILED — expected 'No string-formatted SQL queries'"
+    success_msg: "CME-1305 PASSED — SQL Injection Prevention (Parameterized Queries)"
+  ignore_errors: true
+  register: cme_1305_assert_0
+  when: cme_1305_verify_0 is not skipped
+
+- name: "CME-1305 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1305', 'control_name': 'SQL Injection Prevention (Parameterized Queries)', 'tactic': 'Harden', 'category': 'Application Input Validation', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_1305_assert_0 is defined and cme_1305_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1305_assert_0 is defined) | ternary(cme_1305_assert_0.msg | default(''), 'not checked'))}] }}"

@@ -1,0 +1,15 @@
+---
+# CME-1001: EDR Agent (Endpoint Detection & Response)
+# Remediation strategy: generic (review and customize for your environment)
+# Verification method: Verify EDR agent is running and connected to management console
+
+- name: "CME-1001 | Remediation requires environment-specific configuration"
+  ansible.builtin.debug:
+    msg: >-
+      CME-1001 (EDR Agent (Endpoint Detection & Response)) remediation depends on your
+      environment configuration. Override this role's tasks/main.yml
+      with site-specific remediation steps.
+  when: not (cme_1001_custom_remediation | default(false))
+
+- name: "CME-1001 | Verify current state"
+  ansible.builtin.include_tasks: verify.yml

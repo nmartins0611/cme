@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-908: Object-Level Authorization Checks (IDOR Prevention)
+
+# Set to true to skip this control
+cme_908_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_908_custom_remediation: false
+

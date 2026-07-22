@@ -1,0 +1,75 @@
+---
+# CME-1317: XML External Entity Prevention (Secure XML Parser Configuration)
+# Verification: Verify that XML parsers are configured to disable external entities and DTD processing across all application languages in use
+
+- name: "CME-1317 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'FEATURE_SECURE_PROCESSING\\|disallow-doctype-decl\\|XMLConstants\\|setFeature.*external' <app_source>/"
+  register: cme_1317_verify_0
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1317 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1317_verify_0.stdout is search('Secure XML parsing features enabled in Java XML parser configuration')"
+    fail_msg: "CME-1317 FAILED — expected 'Secure XML parsing features enabled in Java XML parser configuration'"
+    success_msg: "CME-1317 PASSED — XML External Entity Prevention (Secure XML Parser Configuration)"
+  ignore_errors: true
+  register: cme_1317_assert_0
+  when: cme_1317_verify_0 is not skipped
+
+- name: "CME-1317 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'defusedxml\\|resolve_entities.*False\\|no_network.*True\\|etree.XMLParser.*resolve_entities' <app_source>/"
+  register: cme_1317_verify_1
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1317 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1317_verify_1.stdout is search('Python XML parsing uses defusedxml or explicitly disables entity resolution')"
+    fail_msg: "CME-1317 FAILED — expected 'Python XML parsing uses defusedxml or explicitly disables entity resolution'"
+    success_msg: "CME-1317 PASSED — XML External Entity Prevention (Secure XML Parser Configuration)"
+  ignore_errors: true
+  register: cme_1317_assert_1
+  when: cme_1317_verify_1 is not skipped
+
+- name: "CME-1317 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'DtdProcessing.Prohibit\\|ProhibitDtd.*true\\|XmlReaderSettings' <app_source>/"
+  register: cme_1317_verify_2
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1317 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1317_verify_2.stdout is search('.NET XML parsing prohibits DTD processing')"
+    fail_msg: "CME-1317 FAILED — expected '.NET XML parsing prohibits DTD processing'"
+    success_msg: "CME-1317 PASSED — XML External Entity Prevention (Secure XML Parser Configuration)"
+  ignore_errors: true
+  register: cme_1317_assert_2
+  when: cme_1317_verify_2 is not skipped
+
+- name: "CME-1317 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'libxml_disable_entity_loader\\|LIBXML_NOENT\\|XML_PARSE_NOENT' <app_source>/"
+  register: cme_1317_verify_3
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1317 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1317_verify_3.stdout is search('PHP/C XML parsing has external entity loading disabled')"
+    fail_msg: "CME-1317 FAILED — expected 'PHP/C XML parsing has external entity loading disabled'"
+    success_msg: "CME-1317 PASSED — XML External Entity Prevention (Secure XML Parser Configuration)"
+  ignore_errors: true
+  register: cme_1317_assert_3
+  when: cme_1317_verify_3 is not skipped
+
+- name: "CME-1317 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1317', 'control_name': 'XML External Entity Prevention (Secure XML Parser Configuration)', 'tactic': 'Harden', 'category': 'Application Input Validation', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_1317_assert_0 is defined and cme_1317_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1317_assert_0 is defined) | ternary(cme_1317_assert_0.msg | default(''), 'not checked'))}] }}"

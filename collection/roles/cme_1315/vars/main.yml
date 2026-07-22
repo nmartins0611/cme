@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1315"
+cme_control_name: "Allowlist-Preferred Input Validation (Deny-by-Default Filtering)"
+cme_tactic: "Harden"
+cme_category: "Application Input Validation"
+cme_category_id: "application-input-validation"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "The attacker must find an input that satisfies the explicit allowlist criteria while still achieving the malicious objective \u2014 this is fundamentally harder than finding an input that evades a denylist, because novel or unexpected input formats are rejected by default rather than implicitly permitted"}, {"metric": "I", "from": "H", "to": "L", "rationale": "Unauthorized operations (SSRF to internal hosts, deserialization of gadget types, sandbox escape via unblocked APIs, policy-bypassed file access) are prevented because only explicitly permitted targets, types, capabilities, or destinations are accepted"}]
+cme_cwe_relationships: ["CWE-184", "CWE-183", "CWE-693", "CWE-20", "CWE-1286", "CWE-601"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

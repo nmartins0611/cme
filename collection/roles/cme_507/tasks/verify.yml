@@ -1,0 +1,79 @@
+---
+# CME-507: Secure Dynamic Linker Configuration (LD_PRELOAD/PATH Hardening)
+# Verification: Verify that the dynamic linker search path only references trusted directories, LD_PRELOAD/LD_LIBRARY_PATH are cleared for services, and no world-writable directories appear in library search paths.
+
+- name: "CME-507 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep -rn \".\" /etc/ld.so.conf.d/"
+  register: cme_507_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-507 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_507_verify_0.stdout is search('Only trusted, non-writable library directories listed')"
+    fail_msg: "CME-507 FAILED — expected 'Only trusted, non-writable library directories listed'"
+    success_msg: "CME-507 PASSED — Secure Dynamic Linker Configuration (LD_PRELOAD/PATH Hardening)"
+  ignore_errors: true
+  register: cme_507_assert_0
+  when: ansible_os_family != 'Windows' and cme_507_verify_0 is not skipped
+
+- name: "CME-507 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "find $(cat /etc/ld.so.conf.d/*.conf 2>/dev/null) -maxdepth 0 -writable 2>/dev/null"
+  register: cme_507_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-507 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_507_verify_1.stdout is search('No output [(]no writable directories in library path[)]')"
+    fail_msg: "CME-507 FAILED — expected 'No output (no writable directories in library path)'"
+    success_msg: "CME-507 PASSED — Secure Dynamic Linker Configuration (LD_PRELOAD/PATH Hardening)"
+  ignore_errors: true
+  register: cme_507_assert_1
+  when: ansible_os_family != 'Windows' and cme_507_verify_1 is not skipped
+
+- name: "CME-507 | Run verification command (rhel)"
+  ansible.builtin.shell:
+    cmd: "systemctl show <service> -p Environment | grep -i ld_preload"
+  register: cme_507_verify_2
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-507 | Assert control is active (rhel)"
+  ansible.builtin.assert:
+    that:
+      - "cme_507_verify_2.stdout is search('LD_PRELOAD is empty or absent')"
+    fail_msg: "CME-507 FAILED — expected 'LD_PRELOAD is empty or absent'"
+    success_msg: "CME-507 PASSED — Secure Dynamic Linker Configuration (LD_PRELOAD/PATH Hardening)"
+  ignore_errors: true
+  register: cme_507_assert_2
+  when: ansible_os_family == 'RedHat' and cme_507_verify_2 is not skipped
+
+- name: "CME-507 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "ldconfig -p | wc -l"
+  register: cme_507_verify_3
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-507 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_507_verify_3.stdout is search('Library cache populated from trusted paths only')"
+    fail_msg: "CME-507 FAILED — expected 'Library cache populated from trusted paths only'"
+    success_msg: "CME-507 PASSED — Secure Dynamic Linker Configuration (LD_PRELOAD/PATH Hardening)"
+  ignore_errors: true
+  register: cme_507_assert_3
+  when: ansible_os_family != 'Windows' and cme_507_verify_3 is not skipped
+
+- name: "CME-507 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-507', 'control_name': 'Secure Dynamic Linker Configuration (LD_PRELOAD/PATH Hardening)', 'tactic': 'Harden', 'category': 'Filesystem Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'Medium', 'status': ((cme_507_assert_0 is defined and cme_507_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_507_assert_0 is defined) | ternary(cme_507_assert_0.msg | default(''), 'not checked'))}] }}"

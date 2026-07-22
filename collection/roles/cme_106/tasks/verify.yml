@@ -1,0 +1,25 @@
+---
+# CME-106: SMAP (Supervisor Mode Access Prevention)
+# Verification: Check CPU flags for smap support
+
+- name: "CME-106 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "grep -o smap /proc/cpuinfo | head -1"
+  register: cme_106_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-106 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_106_verify_0.stdout is search('smap')"
+    fail_msg: "CME-106 FAILED — expected 'smap'"
+    success_msg: "CME-106 PASSED — SMAP (Supervisor Mode Access Prevention)"
+  ignore_errors: true
+  register: cme_106_assert_0
+  when: ansible_os_family != 'Windows' and cme_106_verify_0 is not skipped
+
+- name: "CME-106 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-106', 'control_name': 'SMAP (Supervisor Mode Access Prevention)', 'tactic': 'Harden', 'category': 'Kernel Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_106_assert_0 is defined and cme_106_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_106_assert_0 is defined) | ternary(cme_106_assert_0.msg | default(''), 'not checked'))}] }}"

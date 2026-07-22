@@ -1,0 +1,18 @@
+---
+# CME-1101: Automated Patch Management (dnf-automatic)
+
+- name: "CME-1101 | Ensure security updates are applied (RedHat)"
+  ansible.builtin.dnf:
+    name: "*"
+    security: true
+    state: latest
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-1101 | Ensure security updates are applied (Debian)"
+  ansible.builtin.apt:
+    upgrade: safe
+    update_cache: true
+  when: ansible_os_family == 'Debian'
+
+- name: "CME-1101 | Verify after remediation"
+  ansible.builtin.include_tasks: verify.yml

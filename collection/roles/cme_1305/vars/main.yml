@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1305"
+cme_control_name: "SQL Injection Prevention (Parameterized Queries)"
+cme_tactic: "Harden"
+cme_category: "Application Input Validation"
+cme_category_id: "application-input-validation"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "SQL injection payloads treated as data, not code; parameterization enforced"}, {"metric": "C", "from": "H", "to": "L", "rationale": "Cannot extract data via UNION/blind SQL injection"}, {"metric": "I", "from": "H", "to": "L", "rationale": "Cannot modify or delete database records via injection"}]
+cme_cwe_relationships: ["CWE-89"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

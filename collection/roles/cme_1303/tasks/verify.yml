@@ -1,0 +1,24 @@
+---
+# CME-1303: Application-Level Filesystem Access Confinement
+# Verification: Verify application restricts filesystem operations to designated directories
+
+- name: "CME-1303 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'chroot\\|basedir\\|allowed_paths\\|MEDIA_ROOT\\|UPLOAD_DIR' <app_source>/"
+  register: cme_1303_verify_0
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1303 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_1303_verify_0.stdout is search('Application-level directory confinement configured')"
+    fail_msg: "CME-1303 FAILED — expected 'Application-level directory confinement configured'"
+    success_msg: "CME-1303 PASSED — Application-Level Filesystem Access Confinement"
+  ignore_errors: true
+  register: cme_1303_assert_0
+  when: cme_1303_verify_0 is not skipped
+
+- name: "CME-1303 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1303', 'control_name': 'Application-Level Filesystem Access Confinement', 'tactic': 'Isolate', 'category': 'Application Input Validation', 'control_layer': 'Application', 'confidence': 'Medium', 'status': ((cme_1303_assert_0 is defined and cme_1303_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1303_assert_0 is defined) | ternary(cme_1303_assert_0.msg | default(''), 'not checked'))}] }}"

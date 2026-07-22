@@ -1,0 +1,58 @@
+---
+# CME Compliance Verification Playbook
+#
+# Verifies which CME controls from a given profile are active on target hosts.
+# Does NOT make any changes — read-only audit mode.
+#
+# Usage:
+#   ansible-playbook cme.controls.verify -e cme_profile=rhel9_baseline
+#   ansible-playbook cme.controls.verify -e cme_profile=minimal
+#   ansible-playbook cme.controls.verify -e cme_profile_path=/path/to/custom.yml
+
+- name: CME Compliance Verification
+  hosts: all
+  gather_facts: true
+  vars:
+    cme_profile: "minimal"
+    cme_profile_path: ""
+    cme_profiles_dir: "{{ playbook_dir }}/../profiles"
+
+  pre_tasks:
+    - name: Load profile from file path
+      ansible.builtin.include_vars:
+        file: "{{ cme_profile_path }}"
+        name: cme_loaded_profile
+      when: cme_profile_path | length > 0
+
+    - name: Load profile from profiles directory
+      ansible.builtin.include_vars:
+        file: "{{ cme_profiles_dir }}/{{ cme_profile }}.yml"
+        name: cme_loaded_profile
+      when: cme_profile_path | length == 0
+
+    - name: Display profile being verified
+      ansible.builtin.debug:
+        msg: "Verifying {{ cme_loaded_profile.controls | length }} controls from profile '{{ cme_profile }}'"
+
+  tasks:
+    - name: Run verification for each control in profile
+      ansible.builtin.include_role:
+        name: "{{ control_id }}"
+        tasks_from: verify.yml
+      loop: "{{ cme_loaded_profile.controls }}"
+      loop_control:
+        loop_var: control_id
+      when: not (lookup('vars', control_id + '_skip', default=false))
+      ignore_errors: true
+      register: cme_verification_results
+
+  post_tasks:
+    - name: Set verification summary facts
+      ansible.builtin.set_fact:
+        cme_verified_controls: "{{ cme_loaded_profile.controls | length }}"
+        cme_verification_complete: true
+      changed_when: false
+
+    - name: Display verification summary
+      ansible.builtin.debug:
+        msg: "Verification complete: {{ cme_loaded_profile.controls | length }} controls checked on {{ inventory_hostname }}"

@@ -1,0 +1,11 @@
+---
+# CME-701: Sandboxing / gVisor Runtime
+# This control requires manual/context-specific remediation.
+# Running verification only.
+
+- name: "CME-701 | Set manual remediation required"
+  ansible.builtin.set_fact:
+    cme_701_manual_remediation_required: true
+
+- name: "CME-701 | Run verification"
+  ansible.builtin.include_tasks: verify.yml

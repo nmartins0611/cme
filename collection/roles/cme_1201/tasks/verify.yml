@@ -1,0 +1,13 @@
+---
+# CME-1201: Immutable Infrastructure
+# Verification method: Verify deployment pipeline builds from golden images
+# No machine-executable verification commands defined.
+
+- name: "CME-1201 | No automated verification available"
+  ansible.builtin.debug:
+    msg: "Manual verification required: Verify deployment pipeline builds from golden images"
+  changed_when: false
+
+- name: "CME-1201 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1201', 'control_name': 'Immutable Infrastructure', 'tactic': 'Restore', 'category': 'Recovery Controls', 'control_layer': 'Application', 'confidence': 'Medium', 'status': skipped, 'detail': No automated verification}] }}"

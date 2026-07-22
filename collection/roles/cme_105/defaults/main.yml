@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-105: SMEP (Supervisor Mode Execution Prevention)
+
+# Set to true to skip this control
+cme_105_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_105_custom_remediation: false
+

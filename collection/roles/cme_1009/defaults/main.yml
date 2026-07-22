@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-1009: Privilege Assignment Monitoring (Role Grant Alerting)
+
+# Set to true to skip this control
+cme_1009_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_1009_custom_remediation: false
+

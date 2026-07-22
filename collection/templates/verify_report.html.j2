@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CME Compliance Report — {{ inventory_hostname }}</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --border: #2a2d37;
+    --text: #e1e4eb;
+    --muted: #8b8fa3;
+    --pass: #34d399;
+    --pass-bg: rgba(52, 211, 153, 0.08);
+    --fail: #f87171;
+    --fail-bg: rgba(248, 113, 113, 0.08);
+    --skip: #fbbf24;
+    --skip-bg: rgba(251, 191, 36, 0.08);
+    --accent: #818cf8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  .container { max-width: 1200px; margin: 0 auto; }
+  header { margin-bottom: 2rem; }
+  h1 { font-size: 1.75rem; font-weight: 600; margin-bottom: 0.25rem; }
+  .subtitle { color: var(--muted); font-size: 0.95rem; }
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+  }
+  .stat .value { font-size: 2rem; font-weight: 700; }
+  .stat .label { color: var(--muted); font-size: 0.85rem; margin-top: 0.25rem; }
+  .stat.pass .value { color: var(--pass); }
+  .stat.fail .value { color: var(--fail); }
+  .stat.skip .value { color: var(--skip); }
+  .stat.total .value { color: var(--accent); }
+  .progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 1rem 0 2rem;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--pass), var(--accent));
+    border-radius: 4px;
+    transition: width 0.5s;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    background: var(--bg);
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr.passed { background: var(--pass-bg); }
+  tr.failed { background: var(--fail-bg); }
+  tr.skipped { background: var(--skip-bg); }
+  .badge {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .badge.passed { background: rgba(52, 211, 153, 0.15); color: var(--pass); }
+  .badge.failed { background: rgba(248, 113, 113, 0.15); color: var(--fail); }
+  .badge.skipped { background: rgba(251, 191, 36, 0.15); color: var(--skip); }
+  .tactic-tag {
+    display: inline-block;
+    padding: 0.1rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    background: rgba(129, 140, 248, 0.12);
+    color: var(--accent);
+  }
+  .section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 2rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  footer {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>CME Compliance Report</h1>
+    <div class="subtitle">
+      Host: <strong>{{ inventory_hostname }}</strong>
+      &nbsp;|&nbsp; Profile: <strong>{{ cme_profile }}</strong>
+      &nbsp;|&nbsp; Generated: <strong>{{ ansible_date_time.iso8601 }}</strong>
+    </div>
+  </header>
+
+  {% set passed = cme_results | selectattr('status', 'equalto', 'passed') | list %}
+  {% set failed = cme_results | selectattr('status', 'equalto', 'failed') | list %}
+  {% set skipped = cme_results | selectattr('status', 'equalto', 'skipped') | list %}
+  {% set total = cme_results | length %}
+  {% set pass_pct = ((passed | length / total) * 100) | round(0) | int if total > 0 else 0 %}
+
+  <div class="summary">
+    <div class="stat total">
+      <div class="value">{{ total }}</div>
+      <div class="label">Controls Checked</div>
+    </div>
+    <div class="stat pass">
+      <div class="value">{{ passed | length }}</div>
+      <div class="label">Passed</div>
+    </div>
+    <div class="stat fail">
+      <div class="value">{{ failed | length }}</div>
+      <div class="label">Failed</div>
+    </div>
+    <div class="stat skip">
+      <div class="value">{{ skipped | length }}</div>
+      <div class="label">Skipped</div>
+    </div>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-fill" style="width: {{ pass_pct }}%"></div>
+  </div>
+
+  {% if failed | length > 0 %}
+  <div class="section-title">Failed Controls — Remediation Required</div>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Control</th>
+        <th>Tactic</th>
+        <th>Layer</th>
+        <th>Confidence</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for r in failed %}
+      <tr class="failed">
+        <td><strong>{{ r.cme_id }}</strong></td>
+        <td>{{ r.control_name }}</td>
+        <td><span class="tactic-tag">{{ r.tactic }}</span></td>
+        <td>{{ r.control_layer }}</td>
+        <td>{{ r.confidence }}</td>
+        <td><span class="badge failed">Failed</span></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <div class="section-title">All Controls</div>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Control</th>
+        <th>Category</th>
+        <th>Tactic</th>
+        <th>Layer</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for r in cme_results | sort(attribute='cme_id') %}
+      <tr class="{{ r.status }}">
+        <td><strong>{{ r.cme_id }}</strong></td>
+        <td>{{ r.control_name }}</td>
+        <td>{{ r.category }}</td>
+        <td><span class="tactic-tag">{{ r.tactic }}</span></td>
+        <td>{{ r.control_layer }}</td>
+        <td><span class="badge {{ r.status }}">{{ r.status | capitalize }}</span></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+  <footer>
+    CME Compliance-as-Code Collection &mdash; cme.controls v1.0.0
+    &nbsp;|&nbsp; {{ ansible_distribution }} {{ ansible_distribution_version }}
+    &nbsp;|&nbsp; {{ ansible_architecture }}
+  </footer>
+</div>
+</body>
+</html>

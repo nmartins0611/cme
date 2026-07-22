@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-703: Rootless Containers
+
+# Set to true to skip this control
+cme_703_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_703_custom_remediation: false
+

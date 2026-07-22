@@ -1,0 +1,9 @@
+---
+galaxy_info:
+  role_name: cme_1201
+  author: CME Project
+  description: "CME-1201: Immutable Infrastructure"
+  license: Apache-2.0
+  min_ansible_version: "2.15"
+
+dependencies: []

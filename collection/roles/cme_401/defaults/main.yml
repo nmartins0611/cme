@@ -1,0 +1,12 @@
+---
+# Tunable defaults for CME-401: System-wide Crypto Policy (FUTURE)
+
+# Set to true to skip this control
+cme_401_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_401_custom_remediation: false
+
+# Crypto policy level
+cme_401_crypto_policy: "FUTURE"
+

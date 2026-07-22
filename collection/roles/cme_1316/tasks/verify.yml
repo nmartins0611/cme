@@ -1,0 +1,93 @@
+---
+# CME-1316: Algorithmic Complexity Safeguards (Pattern/Regex Execution Limits)
+# Verification: Verify that the application uses linear-time regex engines or enforces execution budgets on pattern operations. Check for RE2 bindings, regex timeout configuration, recursion depth limits, and that user-controlled input is never compiled directly into regex patterns without escaping.
+
+- name: "CME-1316 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "node -e \"try { require('re2'); console.log('RE2 available') } catch(e) { console.log('RE2 NOT installed — using backtracking engine') }\""
+  register: cme_1316_verify_0
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1316 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1316_verify_0.stdout is search('RE2 available')"
+    fail_msg: "CME-1316 FAILED — expected 'RE2 available'"
+    success_msg: "CME-1316 PASSED — Algorithmic Complexity Safeguards (Pattern/Regex Execution Limits)"
+  ignore_errors: true
+  register: cme_1316_assert_0
+  when: cme_1316_verify_0 is not skipped
+
+- name: "CME-1316 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "python3 -c \"import google.re2; print('google-re2 available')\" 2>/dev/null || python3 -c \"import re; print('WARNING: using backtracking re module — consider google-re2 or regex with timeout')\""
+  register: cme_1316_verify_1
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1316 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1316_verify_1.stdout is search('google-re2 available')"
+    fail_msg: "CME-1316 FAILED — expected 'google-re2 available'"
+    success_msg: "CME-1316 PASSED — Algorithmic Complexity Safeguards (Pattern/Regex Execution Limits)"
+  ignore_errors: true
+  register: cme_1316_assert_1
+  when: cme_1316_verify_1 is not skipped
+
+- name: "CME-1316 | Run verification command (windows)"
+  ansible.builtin.shell:
+    cmd: "powershell -Command \"try { [System.Text.RegularExpressions.RegexOptions]::NonBacktracking; Write-Host 'NonBacktracking mode available (.NET 7+)' } catch { Write-Host 'WARNING: NonBacktracking not available — requires .NET 7+' }\""
+  register: cme_1316_verify_2
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'Windows'
+
+- name: "CME-1316 | Assert control is active (windows)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1316_verify_2.stdout is search('NonBacktracking mode available [(].NET 7+[)]')"
+    fail_msg: "CME-1316 FAILED — expected 'NonBacktracking mode available (.NET 7+)'"
+    success_msg: "CME-1316 PASSED — Algorithmic Complexity Safeguards (Pattern/Regex Execution Limits)"
+  ignore_errors: true
+  register: cme_1316_assert_2
+  when: ansible_os_family == 'Windows' and cme_1316_verify_2 is not skipped
+
+- name: "CME-1316 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'RegexOptions\\.NonBacktracking\\|RegexOptions\\.MatchTimeout\\|Regex\\.IsMatch.*TimeSpan' <app_source>/ | head -10"
+  register: cme_1316_verify_3
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1316 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1316_verify_3.stdout is search('Regex operations use NonBacktracking mode [(].NET 7+[)] or explicit MatchTimeout')"
+    fail_msg: "CME-1316 FAILED — expected 'Regex operations use NonBacktracking mode (.NET 7+) or explicit MatchTimeout'"
+    success_msg: "CME-1316 PASSED — Algorithmic Complexity Safeguards (Pattern/Regex Execution Limits)"
+  ignore_errors: true
+  register: cme_1316_assert_3
+  when: cme_1316_verify_3 is not skipped
+
+- name: "CME-1316 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'new RegExp(\\|RegExp(.*\\buser\\|RegExp(.*\\breq\\.' <app_source>/ | head -10"
+  register: cme_1316_verify_4
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1316 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1316_verify_4.stdout is search('No instances of user-controlled input compiled into RegExp without escaping')"
+    fail_msg: "CME-1316 FAILED — expected 'No instances of user-controlled input compiled into RegExp without escaping'"
+    success_msg: "CME-1316 PASSED — Algorithmic Complexity Safeguards (Pattern/Regex Execution Limits)"
+  ignore_errors: true
+  register: cme_1316_assert_4
+  when: cme_1316_verify_4 is not skipped
+
+- name: "CME-1316 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1316', 'control_name': 'Algorithmic Complexity Safeguards (Pattern/Regex Execution Limits)', 'tactic': 'Harden', 'category': 'Application Input Validation', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_1316_assert_0 is defined and cme_1316_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1316_assert_0 is defined) | ternary(cme_1316_assert_0.msg | default(''), 'not checked'))}] }}"

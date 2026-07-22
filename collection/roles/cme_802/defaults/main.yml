@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-802: Password Quality Enforcement (pwquality)
+
+# Set to true to skip this control
+cme_802_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_802_custom_remediation: false
+

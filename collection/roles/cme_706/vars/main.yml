@@ -1,0 +1,11 @@
+---
+cme_id: "CME-706"
+cme_control_name: "Pod Security Standards (Restricted)"
+cme_tactic: "Isolate"
+cme_category: "Container Isolation"
+cme_category_id: "container-isolation"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "S", "from": "C", "to": "U", "rationale": "Pod cannot access host resources or escalate to host context"}, {"metric": "PR", "from": "L", "to": "H", "rationale": "Non-root, no privilege escalation, minimal capabilities"}]
+cme_cwe_relationships: ["CWE-269", "CWE-284"]
+cme_platforms: ["Kubernetes 1.25+", "OpenShift 4.12+"]

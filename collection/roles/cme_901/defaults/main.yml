@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-901: SSH Hardening (Comprehensive)
+
+# Set to true to skip this control
+cme_901_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_901_custom_remediation: false
+

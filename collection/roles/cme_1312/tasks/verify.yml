@@ -1,0 +1,41 @@
+---
+# CME-1312: Argument Injection Prevention (Downstream Input Delimiter Sanitization)
+# Verification: Verify that subprocess invocations use -- end-of-options before variable arguments and validate input for delimiter characters
+
+- name: "CME-1312 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn '\"--\"' <app_source>/"
+  register: cme_1312_verify_0
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1312 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1312_verify_0.stdout is search('End-of-options separator present before variable positional arguments in subprocess calls')"
+    fail_msg: "CME-1312 FAILED — expected 'End-of-options separator present before variable positional arguments in subprocess calls'"
+    success_msg: "CME-1312 PASSED — Argument Injection Prevention (Downstream Input Delimiter Sanitization)"
+  ignore_errors: true
+  register: cme_1312_assert_0
+  when: cme_1312_verify_0 is not skipped
+
+- name: "CME-1312 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'subprocess\\|exec\\|spawn' <app_source>/ | grep -v 'shell=True'"
+  register: cme_1312_verify_1
+  changed_when: false
+  failed_when: false
+
+- name: "CME-1312 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1312_verify_1.stdout is search('Subprocess invocations use array-based arguments with input validation for delimiter characters')"
+    fail_msg: "CME-1312 FAILED — expected 'Subprocess invocations use array-based arguments with input validation for delimiter characters'"
+    success_msg: "CME-1312 PASSED — Argument Injection Prevention (Downstream Input Delimiter Sanitization)"
+  ignore_errors: true
+  register: cme_1312_assert_1
+  when: cme_1312_verify_1 is not skipped
+
+- name: "CME-1312 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1312', 'control_name': 'Argument Injection Prevention (Downstream Input Delimiter Sanitization)', 'tactic': 'Harden', 'category': 'Application Input Validation', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_1312_assert_0 is defined and cme_1312_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1312_assert_0 is defined) | ternary(cme_1312_assert_0.msg | default(''), 'not checked'))}] }}"

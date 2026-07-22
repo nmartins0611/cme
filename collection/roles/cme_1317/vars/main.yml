@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1317"
+cme_control_name: "XML External Entity Prevention (Secure XML Parser Configuration)"
+cme_tactic: "Harden"
+cme_category: "Application Input Validation"
+cme_category_id: "application-input-validation"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "C", "from": "H", "to": "N", "rationale": "External entity resolution is disabled at the parser level; the attacker cannot use file:// or http:// entity references to read local files or probe internal services because the parser rejects all external entity declarations before resolution occurs"}, {"metric": "A", "from": "H", "to": "N", "rationale": "DTD processing is disabled, preventing entity expansion bombs (billion laughs) that cause exponential memory consumption; the parser rejects DOCTYPE declarations before recursive entity expansion begins"}]
+cme_cwe_relationships: ["CWE-611", "CWE-776", "CWE-827"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

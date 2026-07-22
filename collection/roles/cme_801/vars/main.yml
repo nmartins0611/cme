@@ -1,0 +1,11 @@
+---
+cme_id: "CME-801"
+cme_control_name: "Multi-Factor Authentication (MFA)"
+cme_tactic: "Harden"
+cme_category: "Credential Hardening"
+cme_category_id: "credential-hardening"
+cme_control_layer: "Identity"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Stolen credential alone is insufficient; second factor required"}, {"metric": "PR", "from": "N", "to": "H", "rationale": "Unauthenticated access impossible; multi-factor barrier"}]
+cme_cwe_relationships: ["CWE-287", "CWE-306", "CWE-521", "CWE-303", "CWE-305"]
+cme_platforms: ["Any"]

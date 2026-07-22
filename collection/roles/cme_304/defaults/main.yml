@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-304: AppArmor (Enforcing Profile)
+
+# Set to true to skip this control
+cme_304_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_304_custom_remediation: false
+

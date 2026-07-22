@@ -1,0 +1,11 @@
+---
+cme_id: "CME-403"
+cme_control_name: "TLS 1.3 Enforcement"
+cme_tactic: "Harden"
+cme_category: "Cryptographic Controls"
+cme_category_id: "cryptographic-controls"
+cme_control_layer: "Network"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "TLS downgrade attacks impossible; forward secrecy mandatory"}]
+cme_cwe_relationships: ["CWE-757", "CWE-327"]
+cme_platforms: ["Any"]

@@ -1,0 +1,11 @@
+---
+# CME-1308: Origin and CORS Validation Enforcement
+# This control requires manual/context-specific remediation.
+# Running verification only.
+
+- name: "CME-1308 | Set manual remediation required"
+  ansible.builtin.set_fact:
+    cme_1308_manual_remediation_required: true
+
+- name: "CME-1308 | Run verification"
+  ansible.builtin.include_tasks: verify.yml

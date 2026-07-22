@@ -1,0 +1,11 @@
+---
+cme_id: "CME-602"
+cme_control_name: "seccomp-bpf Profile (Container Default)"
+cme_tactic: "Harden"
+cme_category: "Syscall & BPF Controls"
+cme_category_id: "syscall-bpf-controls"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "S", "from": "C", "to": "U", "rationale": "Blocked syscalls prevent container escape via kernel"}, {"metric": "AC", "from": "L", "to": "H", "rationale": "Many kernel exploit primitives require blocked syscalls"}]
+cme_cwe_relationships: ["CWE-78", "CWE-119", "CWE-269"]
+cme_platforms: ["RHEL 9", "Kubernetes", "OpenShift"]

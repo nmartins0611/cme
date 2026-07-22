@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-1313: CRLF / Line Injection Prevention (Newline Sanitization for Structured Formats)
+
+# Set to true to skip this control
+cme_1313_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_1313_custom_remediation: false
+

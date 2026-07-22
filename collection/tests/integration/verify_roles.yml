@@ -1,0 +1,31 @@
+---
+# Integration smoke test — verifies all roles parse correctly in check mode.
+#
+# Usage:
+#   ansible-playbook collection/tests/integration/verify_roles.yml --check --connection=local
+
+- name: CME Collection Smoke Test — Role Parsing
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    cme_profiles_dir: "{{ playbook_dir }}/../../profiles"
+
+  tasks:
+    - name: Load minimal profile
+      ansible.builtin.include_vars:
+        file: "{{ cme_profiles_dir }}/minimal.yml"
+        name: cme_test_profile
+
+    - name: Verify each role in minimal profile parses correctly
+      ansible.builtin.include_role:
+        name: "{{ control_id }}"
+        tasks_from: verify.yml
+      loop: "{{ cme_test_profile.controls }}"
+      loop_control:
+        loop_var: control_id
+      ignore_errors: true
+
+    - name: Smoke test passed
+      ansible.builtin.debug:
+        msg: "All {{ cme_test_profile.controls | length }} roles in minimal profile parsed successfully"

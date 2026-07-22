@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-902: Disable Unused Network Services
+
+# Set to true to skip this control
+cme_902_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_902_custom_remediation: false
+

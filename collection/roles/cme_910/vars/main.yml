@@ -1,0 +1,11 @@
+---
+cme_id: "CME-910"
+cme_control_name: "Role Separation / Duty Segregation"
+cme_tactic: "Isolate"
+cme_category: "Application Controls"
+cme_category_id: "application-controls"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "S", "from": "C", "to": "U", "rationale": "Compromise of one admin capability is confined to that capability's privilege domain; the attacker cannot leverage it to affect resources in unrelated domains (e.g., compromising container management cannot yield host filesystem access, compromising profile editing cannot yield role assignment). Each role's blast radius is bounded by its single-responsibility scope."}]
+cme_cwe_relationships: ["CWE-268", "CWE-266", "CWE-269"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

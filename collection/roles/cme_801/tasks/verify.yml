@@ -1,0 +1,43 @@
+---
+# CME-801: Multi-Factor Authentication (MFA)
+# Verification: Verify MFA enforcement in PAM or IdP
+
+- name: "CME-801 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep pam_google_authenticator /etc/pam.d/sshd"
+  register: cme_801_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-801 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_801_verify_0.stdout is search('auth required pam_google_authenticator.so')"
+    fail_msg: "CME-801 FAILED — expected 'auth required pam_google_authenticator.so'"
+    success_msg: "CME-801 PASSED — Multi-Factor Authentication (MFA)"
+  ignore_errors: true
+  register: cme_801_assert_0
+  when: ansible_os_family != 'Windows' and cme_801_verify_0 is not skipped
+
+- name: "CME-801 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep -r 'auth.*required.*pam_u2f' /etc/pam.d/"
+  register: cme_801_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-801 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_801_verify_1.stdout is search('pam_u2f.so')"
+    fail_msg: "CME-801 FAILED — expected 'pam_u2f.so'"
+    success_msg: "CME-801 PASSED — Multi-Factor Authentication (MFA)"
+  ignore_errors: true
+  register: cme_801_assert_1
+  when: ansible_os_family != 'Windows' and cme_801_verify_1 is not skipped
+
+- name: "CME-801 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-801', 'control_name': 'Multi-Factor Authentication (MFA)', 'tactic': 'Harden', 'category': 'Credential Hardening', 'control_layer': 'Identity', 'confidence': 'High', 'status': ((cme_801_assert_0 is defined and cme_801_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_801_assert_0 is defined) | ternary(cme_801_assert_0.msg | default(''), 'not checked'))}] }}"

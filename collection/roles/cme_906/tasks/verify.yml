@@ -1,0 +1,24 @@
+---
+# CME-906: Rate Limiting / Connection Throttling
+# Verification: Verify rate limiting is configured
+
+- name: "CME-906 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "grep -r 'limit_req_zone\\|rate-limit' /etc/nginx/ 2>/dev/null"
+  register: cme_906_verify_0
+  changed_when: false
+  failed_when: false
+
+- name: "CME-906 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_906_verify_0.stdout is search('limit_req_zone')"
+    fail_msg: "CME-906 FAILED — expected 'limit_req_zone'"
+    success_msg: "CME-906 PASSED — Rate Limiting / Connection Throttling"
+  ignore_errors: true
+  register: cme_906_assert_0
+  when: cme_906_verify_0 is not skipped
+
+- name: "CME-906 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-906', 'control_name': 'Rate Limiting / Connection Throttling', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Network', 'confidence': 'Medium', 'status': ((cme_906_assert_0 is defined and cme_906_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_906_assert_0 is defined) | ternary(cme_906_assert_0.msg | default(''), 'not checked'))}] }}"

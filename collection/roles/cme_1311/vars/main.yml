@@ -1,0 +1,11 @@
+---
+cme_id: "CME-1311"
+cme_control_name: "Input Size and Quantity Bounds Enforcement"
+cme_tactic: "Harden"
+cme_category: "Application Input Validation"
+cme_category_id: "application-input-validation"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "Malicious size or count values are rejected before reaching allocation or copy operations; the attacker must find a quantity field that bypasses validation or an alternative code path that does not enforce bounds"}]
+cme_cwe_relationships: ["CWE-1284", "CWE-20", "CWE-1285", "CWE-190", "CWE-131", "CWE-130"]
+cme_platforms: ["RHEL 9", "RHEL 10", "Ubuntu 24.04", "Fedora", "Windows Server 2019", "Windows Server 2022"]

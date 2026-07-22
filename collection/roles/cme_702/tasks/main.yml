@@ -1,0 +1,11 @@
+---
+# CME-702: Linux Namespaces (User, PID, Network, Mount)
+# This control requires manual/context-specific remediation.
+# Running verification only.
+
+- name: "CME-702 | Set manual remediation required"
+  ansible.builtin.set_fact:
+    cme_702_manual_remediation_required: true
+
+- name: "CME-702 | Run verification"
+  ansible.builtin.include_tasks: verify.yml

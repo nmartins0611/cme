@@ -1,0 +1,41 @@
+---
+# CME-914: Strict CORS Origin Allowlist Enforcement
+# Verification: Test that the server rejects unapproved origins and does not reflect arbitrary Origin headers in CORS response headers
+
+- name: "CME-914 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "curl -sI -H 'Origin: https://evil.example.com' http://localhost:8080/api/v1/user | grep -i 'access-control-allow'"
+  register: cme_914_verify_0
+  changed_when: false
+  failed_when: false
+
+- name: "CME-914 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_914_verify_0.stdout is search('No Access-Control-Allow-Origin header, or not reflecting evil.example.com')"
+    fail_msg: "CME-914 FAILED — expected 'No Access-Control-Allow-Origin header, or not reflecting evil.example.com'"
+    success_msg: "CME-914 PASSED — Strict CORS Origin Allowlist Enforcement"
+  ignore_errors: true
+  register: cme_914_assert_0
+  when: cme_914_verify_0 is not skipped
+
+- name: "CME-914 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "curl -sI -H 'Origin: https://trusted.example.com' http://localhost:8080/api/v1/user | grep -i 'access-control-allow'"
+  register: cme_914_verify_1
+  changed_when: false
+  failed_when: false
+
+- name: "CME-914 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_914_verify_1.stdout is search('Access-Control-Allow-Origin: https://trusted.example.com')"
+    fail_msg: "CME-914 FAILED — expected 'Access-Control-Allow-Origin: https://trusted.example.com'"
+    success_msg: "CME-914 PASSED — Strict CORS Origin Allowlist Enforcement"
+  ignore_errors: true
+  register: cme_914_assert_1
+  when: cme_914_verify_1 is not skipped
+
+- name: "CME-914 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-914', 'control_name': 'Strict CORS Origin Allowlist Enforcement', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_914_assert_0 is defined and cme_914_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_914_assert_0 is defined) | ternary(cme_914_assert_0.msg | default(''), 'not checked'))}] }}"

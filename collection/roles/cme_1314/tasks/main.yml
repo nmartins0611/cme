@@ -1,0 +1,11 @@
+---
+# CME-1314: Input Canonicalization Before Security Decision
+# This control requires manual/context-specific remediation.
+# Running verification only.
+
+- name: "CME-1314 | Set manual remediation required"
+  ansible.builtin.set_fact:
+    cme_1314_manual_remediation_required: true
+
+- name: "CME-1314 | Run verification"
+  ansible.builtin.include_tasks: verify.yml

@@ -1,0 +1,79 @@
+---
+# CME-803: Account Lockout Policy (pam_faillock)
+# Verification: Check pam_faillock configuration
+
+- name: "CME-803 | Run verification command (rhel)"
+  ansible.builtin.shell:
+    cmd: "grep faillock /etc/pam.d/system-auth"
+  register: cme_803_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-803 | Assert control is active (rhel)"
+  ansible.builtin.assert:
+    that:
+      - "cme_803_verify_0.stdout is search('pam_faillock.so')"
+    fail_msg: "CME-803 FAILED — expected 'pam_faillock.so'"
+    success_msg: "CME-803 PASSED — Account Lockout Policy (pam_faillock)"
+  ignore_errors: true
+  register: cme_803_assert_0
+  when: ansible_os_family == 'RedHat' and cme_803_verify_0 is not skipped
+
+- name: "CME-803 | Run verification command (rhel)"
+  ansible.builtin.shell:
+    cmd: "grep deny /etc/security/faillock.conf"
+  register: cme_803_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-803 | Assert control is active (rhel)"
+  ansible.builtin.assert:
+    that:
+      - "cme_803_verify_1.stdout is search('deny = 5')"
+    fail_msg: "CME-803 FAILED — expected 'deny = 5'"
+    success_msg: "CME-803 PASSED — Account Lockout Policy (pam_faillock)"
+  ignore_errors: true
+  register: cme_803_assert_1
+  when: ansible_os_family == 'RedHat' and cme_803_verify_1 is not skipped
+
+- name: "CME-803 | Run verification command (windows)"
+  ansible.builtin.shell:
+    cmd: "net accounts | Select-String 'Lockout threshold'"
+  register: cme_803_verify_2
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'Windows'
+
+- name: "CME-803 | Assert control is active (windows)"
+  ansible.builtin.assert:
+    that:
+      - "cme_803_verify_2.stdout is search('Lockout threshold                        5')"
+    fail_msg: "CME-803 FAILED — expected 'Lockout threshold                        5'"
+    success_msg: "CME-803 PASSED — Account Lockout Policy (pam_faillock)"
+  ignore_errors: true
+  register: cme_803_assert_2
+  when: ansible_os_family == 'Windows' and cme_803_verify_2 is not skipped
+
+- name: "CME-803 | Run verification command (windows)"
+  ansible.builtin.shell:
+    cmd: "net accounts | Select-String 'Lockout duration'"
+  register: cme_803_verify_3
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'Windows'
+
+- name: "CME-803 | Assert control is active (windows)"
+  ansible.builtin.assert:
+    that:
+      - "cme_803_verify_3.stdout is search('Lockout duration [(]minutes[)]               30')"
+    fail_msg: "CME-803 FAILED — expected 'Lockout duration (minutes)               30'"
+    success_msg: "CME-803 PASSED — Account Lockout Policy (pam_faillock)"
+  ignore_errors: true
+  register: cme_803_assert_3
+  when: ansible_os_family == 'Windows' and cme_803_verify_3 is not skipped
+
+- name: "CME-803 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-803', 'control_name': 'Account Lockout Policy (pam_faillock)', 'tactic': 'Harden', 'category': 'Credential Hardening', 'control_layer': 'Identity', 'confidence': 'High', 'status': ((cme_803_assert_0 is defined and cme_803_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_803_assert_0 is defined) | ternary(cme_803_assert_0.msg | default(''), 'not checked'))}] }}"

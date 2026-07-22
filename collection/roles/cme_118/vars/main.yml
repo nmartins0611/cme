@@ -1,0 +1,11 @@
+---
+cme_id: "CME-118"
+cme_control_name: "Protected File Links (Kernel Symlink/Hardlink Protection)"
+cme_tactic: "Harden"
+cme_category: "Kernel Hardening"
+cme_category_id: "kernel-hardening"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "The most common filesystem TOCTOU and symlink following pattern \u2014 symlink or hardlink swap in a sticky world-writable directory like /tmp between a privileged process check and use \u2014 is blocked at the kernel level. The attacker must find a TOCTOU target outside of protected directories, exploit a race that does not involve filesystem links, or resort to more complex techniques such as procfs-based redirects. This significantly increases the complexity required for successful exploitation."}]
+cme_cwe_relationships: ["CWE-59", "CWE-61", "CWE-367", "CWE-362"]
+cme_platforms: ["RHEL 7", "RHEL 8", "RHEL 9", "RHEL 10"]

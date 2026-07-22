@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-1003: Falco / eBPF Runtime Security
+
+# Set to true to skip this control
+cme_1003_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_1003_custom_remediation: false
+

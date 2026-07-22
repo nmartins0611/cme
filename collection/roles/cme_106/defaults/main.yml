@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-106: SMAP (Supervisor Mode Access Prevention)
+
+# Set to true to skip this control
+cme_106_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_106_custom_remediation: false
+

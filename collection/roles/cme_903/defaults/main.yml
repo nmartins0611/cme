@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-903: Kernel Network Hardening (sysctl)
+
+# Set to true to skip this control
+cme_903_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_903_custom_remediation: false
+

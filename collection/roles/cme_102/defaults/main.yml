@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-102: NX/XD Bit (Non-Executable Memory)
+
+# Set to true to skip this control
+cme_102_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_102_custom_remediation: false
+

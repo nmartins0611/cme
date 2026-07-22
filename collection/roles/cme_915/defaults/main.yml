@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-915: Cross-Origin Request Restriction (Reverse Proxy Origin Enforcement)
+
+# Set to true to skip this control
+cme_915_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_915_custom_remediation: false
+

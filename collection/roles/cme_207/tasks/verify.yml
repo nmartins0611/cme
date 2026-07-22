@@ -1,0 +1,60 @@
+---
+# CME-207: DNS Rebinding Protection
+# Verification: Verify that DNS resolvers are configured to block private IP resolution from public domains, and that firewall rules inspect DNS responses for private address answers.
+
+- name: "CME-207 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep -E \"stop-dns-rebind|rebind-localhost-ok\" /etc/dnsmasq.conf"
+  register: cme_207_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-207 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_207_verify_0.stdout is search('stop-dns-rebind present')"
+    fail_msg: "CME-207 FAILED — expected 'stop-dns-rebind present'"
+    success_msg: "CME-207 PASSED — DNS Rebinding Protection"
+  ignore_errors: true
+  register: cme_207_assert_0
+  when: ansible_os_family != 'Windows' and cme_207_verify_0 is not skipped
+
+- name: "CME-207 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "grep \"private-address\" /etc/unbound/unbound.conf"
+  register: cme_207_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-207 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_207_verify_1.stdout is search('private-address directives for RFC 1918 ranges')"
+    fail_msg: "CME-207 FAILED — expected 'private-address directives for RFC 1918 ranges'"
+    success_msg: "CME-207 PASSED — DNS Rebinding Protection"
+  ignore_errors: true
+  register: cme_207_assert_1
+  when: ansible_os_family != 'Windows' and cme_207_verify_1 is not skipped
+
+- name: "CME-207 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "dig @localhost rebind-test.example.com A +short"
+  register: cme_207_verify_2
+  changed_when: false
+  failed_when: false
+
+- name: "CME-207 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_207_verify_2.stdout is search('No private IP addresses in response [(]empty output or NXDOMAIN[)]')"
+    fail_msg: "CME-207 FAILED — expected 'No private IP addresses in response (empty output or NXDOMAIN)'"
+    success_msg: "CME-207 PASSED — DNS Rebinding Protection"
+  ignore_errors: true
+  register: cme_207_assert_2
+  when: cme_207_verify_2 is not skipped
+
+- name: "CME-207 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-207', 'control_name': 'DNS Rebinding Protection', 'tactic': 'Harden', 'category': 'Network Isolation', 'control_layer': 'Network', 'confidence': 'High', 'status': ((cme_207_assert_0 is defined and cme_207_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_207_assert_0 is defined) | ternary(cme_207_assert_0.msg | default(''), 'not checked'))}] }}"

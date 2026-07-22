@@ -1,0 +1,9 @@
+---
+# Tunable defaults for CME-116: FORTIFY_SOURCE (Buffer Overflow Detection)
+
+# Set to true to skip this control
+cme_116_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_116_custom_remediation: false
+

@@ -1,0 +1,25 @@
+---
+# CME-1103: Automated Container Image Rebuilds
+# Verification: Verify image age and rebuild pipeline
+
+- name: "CME-1103 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "podman image inspect <image> | grep Created"
+  register: cme_1103_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1103 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_1103_verify_0.stdout is search('Recent date')"
+    fail_msg: "CME-1103 FAILED — expected 'Recent date'"
+    success_msg: "CME-1103 PASSED — Automated Container Image Rebuilds"
+  ignore_errors: true
+  register: cme_1103_assert_0
+  when: ansible_os_family != 'Windows' and cme_1103_verify_0 is not skipped
+
+- name: "CME-1103 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1103', 'control_name': 'Automated Container Image Rebuilds', 'tactic': 'Evict', 'category': 'Patch Management', 'control_layer': 'Application', 'confidence': 'Medium', 'status': ((cme_1103_assert_0 is defined and cme_1103_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1103_assert_0 is defined) | ternary(cme_1103_assert_0.msg | default(''), 'not checked'))}] }}"

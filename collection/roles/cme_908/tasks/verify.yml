@@ -1,0 +1,41 @@
+---
+# CME-908: Object-Level Authorization Checks (IDOR Prevention)
+# Verification: Inspect application source for object-level ownership checks; test that authenticated users cannot access resources belonging to other users by manipulating object identifiers
+
+- name: "CME-908 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "grep -rn 'owner_id.*==.*current_user\\|belongs_to.*user\\|authorize_resource\\|object_permission\\|get_object_or_403\\|filter.*user=' <app_source>/"
+  register: cme_908_verify_0
+  changed_when: false
+  failed_when: false
+
+- name: "CME-908 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_908_verify_0.stdout is search('Per-object ownership or permission checks present in data access handlers')"
+    fail_msg: "CME-908 FAILED — expected 'Per-object ownership or permission checks present in data access handlers'"
+    success_msg: "CME-908 PASSED — Object-Level Authorization Checks (IDOR Prevention)"
+  ignore_errors: true
+  register: cme_908_assert_0
+  when: cme_908_verify_0 is not skipped
+
+- name: "CME-908 | Run verification command (any)"
+  ansible.builtin.shell:
+    cmd: "curl -s -o /dev/null -w '%{http_code}' -H 'Authorization: Bearer <user_a_token>' http://localhost:8080/api/v1/documents/<user_b_doc_id>"
+  register: cme_908_verify_1
+  changed_when: false
+  failed_when: false
+
+- name: "CME-908 | Assert control is active (any)"
+  ansible.builtin.assert:
+    that:
+      - "cme_908_verify_1.stdout is search('403 or 404')"
+    fail_msg: "CME-908 FAILED — expected '403 or 404'"
+    success_msg: "CME-908 PASSED — Object-Level Authorization Checks (IDOR Prevention)"
+  ignore_errors: true
+  register: cme_908_assert_1
+  when: cme_908_verify_1 is not skipped
+
+- name: "CME-908 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-908', 'control_name': 'Object-Level Authorization Checks (IDOR Prevention)', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_908_assert_0 is defined and cme_908_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_908_assert_0 is defined) | ternary(cme_908_assert_0.msg | default(''), 'not checked'))}] }}"

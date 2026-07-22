@@ -1,0 +1,43 @@
+---
+# CME-1003: Falco / eBPF Runtime Security
+# Verification: Verify Falco is running with rules loaded
+
+- name: "CME-1003 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "systemctl is-active falco"
+  register: cme_1003_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1003 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1003_verify_0.stdout is search('active')"
+    fail_msg: "CME-1003 FAILED — expected 'active'"
+    success_msg: "CME-1003 PASSED — Falco / eBPF Runtime Security"
+  ignore_errors: true
+  register: cme_1003_assert_0
+  when: ansible_os_family != 'Windows' and cme_1003_verify_0 is not skipped
+
+- name: "CME-1003 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "falco --list 2>/dev/null | head -5"
+  register: cme_1003_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1003 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_1003_verify_1.stdout is search('rule names')"
+    fail_msg: "CME-1003 FAILED — expected 'rule names'"
+    success_msg: "CME-1003 PASSED — Falco / eBPF Runtime Security"
+  ignore_errors: true
+  register: cme_1003_assert_1
+  when: ansible_os_family != 'Windows' and cme_1003_verify_1 is not skipped
+
+- name: "CME-1003 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1003', 'control_name': 'Falco / eBPF Runtime Security', 'tactic': 'Detect', 'category': 'Runtime Detection', 'control_layer': 'OS/Kernel', 'confidence': 'Medium', 'status': ((cme_1003_assert_0 is defined and cme_1003_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1003_assert_0 is defined) | ternary(cme_1003_assert_0.msg | default(''), 'not checked'))}] }}"

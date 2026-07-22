@@ -1,0 +1,15 @@
+---
+# CME-109: Kernel Lockdown Mode
+# Remediation strategy: generic (review and customize for your environment)
+# Verification method: Check lockdown LSM state
+
+- name: "CME-109 | Remediation requires environment-specific configuration"
+  ansible.builtin.debug:
+    msg: >-
+      CME-109 (Kernel Lockdown Mode) remediation depends on your
+      environment configuration. Override this role's tasks/main.yml
+      with site-specific remediation steps.
+  when: not (cme_109_custom_remediation | default(false))
+
+- name: "CME-109 | Verify current state"
+  ansible.builtin.include_tasks: verify.yml

@@ -1,0 +1,25 @@
+---
+# CME-205: Service Binding to Localhost
+# Verification: Check service listen address is localhost only
+
+- name: "CME-205 | Run verification command"
+  ansible.builtin.shell:
+    cmd: "ss -tlnp | grep ':8080'"
+  register: cme_205_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-205 | Assert control is active"
+  ansible.builtin.assert:
+    that:
+      - "cme_205_verify_0.stdout is search('127.0.0.1:8080')"
+    fail_msg: "CME-205 FAILED — expected '127.0.0.1:8080'"
+    success_msg: "CME-205 PASSED — Service Binding to Localhost"
+  ignore_errors: true
+  register: cme_205_assert_0
+  when: ansible_os_family != 'Windows' and cme_205_verify_0 is not skipped
+
+- name: "CME-205 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-205', 'control_name': 'Service Binding to Localhost', 'tactic': 'Isolate', 'category': 'Network Isolation', 'control_layer': 'Network', 'confidence': 'High', 'status': ((cme_205_assert_0 is defined and cme_205_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_205_assert_0 is defined) | ternary(cme_205_assert_0.msg | default(''), 'not checked'))}] }}"

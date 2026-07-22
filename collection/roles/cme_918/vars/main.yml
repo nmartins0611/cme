@@ -1,0 +1,11 @@
+---
+cme_id: "CME-918"
+cme_control_name: "URL Path Authorization Enforcement (Forced Browsing Prevention)"
+cme_tactic: "Harden"
+cme_category: "Application Controls"
+cme_category_id: "application-controls"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "PR", "from": "N", "to": "L", "rationale": "Forced browsing to administrative or internal endpoints fails because the web server rejects unauthenticated requests to restricted URL patterns before the application processes them; the attacker must first obtain valid credentials to reach any protected path"}, {"metric": "AC", "from": "L", "to": "H", "rationale": "Discovering and accessing a restricted endpoint requires bypassing both the web server URL authorization rules and the application-layer authorization checks; simply guessing or enumerating URLs is insufficient because the infrastructure layer denies access to any path not explicitly permitted for the caller's role"}]
+cme_cwe_relationships: ["CWE-425", "CWE-862", "CWE-306", "CWE-284"]
+cme_platforms: ["Any", "Windows Server 2019", "Windows Server 2022"]

@@ -1,0 +1,11 @@
+---
+cme_id: "CME-601"
+cme_control_name: "Kernel-Level Syscall Filtering (seccomp)"
+cme_tactic: "Harden"
+cme_category: "Syscall & BPF Controls"
+cme_category_id: "syscall-bpf-controls"
+cme_control_layer: "OS/Kernel"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "S", "from": "C", "to": "U", "rationale": "Process cannot invoke blocked syscalls to escape to host kernel"}, {"metric": "I", "from": "H", "to": "L", "rationale": "Blocked syscalls like execve/ptrace prevent shell breakout"}]
+cme_cwe_relationships: ["CWE-119", "CWE-78", "CWE-653"]
+cme_platforms: ["RHEL 9", "RHEL 8", "Ubuntu 24.04", "Kubernetes"]

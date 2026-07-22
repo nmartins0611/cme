@@ -1,0 +1,11 @@
+---
+# CME-914: Strict CORS Origin Allowlist Enforcement
+# This control requires manual/context-specific remediation.
+# Running verification only.
+
+- name: "CME-914 | Set manual remediation required"
+  ansible.builtin.set_fact:
+    cme_914_manual_remediation_required: true
+
+- name: "CME-914 | Run verification"
+  ansible.builtin.include_tasks: verify.yml

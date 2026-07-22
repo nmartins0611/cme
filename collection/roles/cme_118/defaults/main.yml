@@ -1,0 +1,21 @@
+---
+# Tunable defaults for CME-118: Protected File Links (Kernel Symlink/Hardlink Protection)
+
+# Set to true to skip this control
+cme_118_skip: false
+
+# Set to true if you have custom remediation tasks
+cme_118_custom_remediation: false
+
+# Desired value for fs.protected_symlinks
+cme_118_fs_protected_symlinks: "1"
+
+# Desired value for fs.protected_hardlinks
+cme_118_fs_protected_hardlinks: "1"
+
+# Desired value for fs.protected_regular
+cme_118_fs_protected_regular: "2"
+
+# Desired value for fs.protected_fifos
+cme_118_fs_protected_fifos: "2"
+

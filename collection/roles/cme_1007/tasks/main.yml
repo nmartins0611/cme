@@ -1,0 +1,15 @@
+---
+# CME-1007: Application Configuration Drift Detection (IaC Enforcement)
+# Remediation strategy: generic (review and customize for your environment)
+# Verification method: Verify that application configuration is managed via IaC and that drift detection runs on a schedule. Introduce a test configuration change via the application admin API and confirm it is detected or reverted within the expected interval.
+
+- name: "CME-1007 | Remediation requires environment-specific configuration"
+  ansible.builtin.debug:
+    msg: >-
+      CME-1007 (Application Configuration Drift Detection (IaC Enforcement)) remediation depends on your
+      environment configuration. Override this role's tasks/main.yml
+      with site-specific remediation steps.
+  when: not (cme_1007_custom_remediation | default(false))
+
+- name: "CME-1007 | Verify current state"
+  ansible.builtin.include_tasks: verify.yml

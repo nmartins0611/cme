@@ -1,0 +1,43 @@
+---
+# CME-104: KASLR (Kernel Address Space Layout Randomization)
+# Verification: Verify KASLR is not disabled in boot parameters
+
+- name: "CME-104 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "cat /proc/cmdline | grep -v nokaslr && echo 'KASLR active'"
+  register: cme_104_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-104 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_104_verify_0.stdout is search('KASLR active')"
+    fail_msg: "CME-104 FAILED — expected 'KASLR active'"
+    success_msg: "CME-104 PASSED — KASLR (Kernel Address Space Layout Randomization)"
+  ignore_errors: true
+  register: cme_104_assert_0
+  when: ansible_os_family != 'Windows' and cme_104_verify_0 is not skipped
+
+- name: "CME-104 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "dmesg | grep 'KASLR'"
+  register: cme_104_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-104 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_104_verify_1.stdout is search('KASLR enabled')"
+    fail_msg: "CME-104 FAILED — expected 'KASLR enabled'"
+    success_msg: "CME-104 PASSED — KASLR (Kernel Address Space Layout Randomization)"
+  ignore_errors: true
+  register: cme_104_assert_1
+  when: ansible_os_family != 'Windows' and cme_104_verify_1 is not skipped
+
+- name: "CME-104 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-104', 'control_name': 'KASLR (Kernel Address Space Layout Randomization)', 'tactic': 'Harden', 'category': 'Kernel Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_104_assert_0 is defined and cme_104_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_104_assert_0 is defined) | ternary(cme_104_assert_0.msg | default(''), 'not checked'))}] }}"

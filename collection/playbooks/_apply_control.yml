@@ -1,0 +1,10 @@
+---
+- name: "Apply control {{ control_id }}"
+  block:
+    - name: "Include role {{ control_id }}"
+      ansible.builtin.include_role:
+        name: "{{ control_id }}"
+  rescue:
+    - name: "Log failure for {{ control_id }}"
+      ansible.builtin.debug:
+        msg: "Control {{ control_id }} remediation failed — continuing with next control"

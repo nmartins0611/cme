@@ -1,0 +1,43 @@
+---
+# CME-112: RELRO and PIE (Full)
+# Verification: Check binary for Full RELRO and PIE
+
+- name: "CME-112 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "readelf -l /usr/bin/ls | grep GNU_RELRO"
+  register: cme_112_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-112 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_112_verify_0.stdout is search('GNU_RELRO')"
+    fail_msg: "CME-112 FAILED — expected 'GNU_RELRO'"
+    success_msg: "CME-112 PASSED — RELRO and PIE (Full)"
+  ignore_errors: true
+  register: cme_112_assert_0
+  when: ansible_os_family != 'Windows' and cme_112_verify_0 is not skipped
+
+- name: "CME-112 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "file /usr/bin/ls | grep 'shared object'"
+  register: cme_112_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-112 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_112_verify_1.stdout is search('shared object')"
+    fail_msg: "CME-112 FAILED — expected 'shared object'"
+    success_msg: "CME-112 PASSED — RELRO and PIE (Full)"
+  ignore_errors: true
+  register: cme_112_assert_1
+  when: ansible_os_family != 'Windows' and cme_112_verify_1 is not skipped
+
+- name: "CME-112 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-112', 'control_name': 'RELRO and PIE (Full)', 'tactic': 'Harden', 'category': 'Kernel Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_112_assert_0 is defined and cme_112_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_112_assert_0 is defined) | ternary(cme_112_assert_0.msg | default(''), 'not checked'))}] }}"

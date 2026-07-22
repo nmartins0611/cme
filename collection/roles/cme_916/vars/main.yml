@@ -1,0 +1,11 @@
+---
+cme_id: "CME-916"
+cme_control_name: "SameSite Cookie Attribute Enforcement"
+cme_tactic: "Harden"
+cme_category: "Application Controls"
+cme_category_id: "application-controls"
+cme_control_layer: "Application"
+cme_confidence: "High"
+cme_cvss_vector_impacts: [{"metric": "AC", "from": "L", "to": "H", "rationale": "The attacker must find a way to bypass the SameSite restriction (e.g., exploit a subdomain XSS vulnerability to achieve same-site context, or target a browser that does not enforce SameSite) to include the victim session cookie in a cross-site request. Without this bypass, cross-site state-changing requests arrive unauthenticated and are rejected by the application."}]
+cme_cwe_relationships: ["CWE-346", "CWE-352", "CWE-1275"]
+cme_platforms: ["RHEL 8", "RHEL 9", "RHEL 10", "OpenShift 4", "Windows Server 2019", "Windows Server 2022"]

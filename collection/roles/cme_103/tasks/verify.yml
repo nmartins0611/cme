@@ -1,0 +1,43 @@
+---
+# CME-103: Stack Canaries (Stack Protector)
+# Verification: Verify binaries compiled with -fstack-protector-strong
+
+- name: "CME-103 | Run verification command (linux)"
+  ansible.builtin.shell:
+    cmd: "readelf -s /usr/bin/ls | grep __stack_chk_fail"
+  register: cme_103_verify_0
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-103 | Assert control is active (linux)"
+  ansible.builtin.assert:
+    that:
+      - "cme_103_verify_0.stdout is search('__stack_chk_fail')"
+    fail_msg: "CME-103 FAILED — expected '__stack_chk_fail'"
+    success_msg: "CME-103 PASSED — Stack Canaries (Stack Protector)"
+  ignore_errors: true
+  register: cme_103_assert_0
+  when: ansible_os_family != 'Windows' and cme_103_verify_0 is not skipped
+
+- name: "CME-103 | Run verification command (rhel)"
+  ansible.builtin.shell:
+    cmd: "rpm -q --queryformat '%{FLAGS}' coreutils | grep stack-protector"
+  register: cme_103_verify_1
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-103 | Assert control is active (rhel)"
+  ansible.builtin.assert:
+    that:
+      - "cme_103_verify_1.stdout is search('stack-protector')"
+    fail_msg: "CME-103 FAILED — expected 'stack-protector'"
+    success_msg: "CME-103 PASSED — Stack Canaries (Stack Protector)"
+  ignore_errors: true
+  register: cme_103_assert_1
+  when: ansible_os_family == 'RedHat' and cme_103_verify_1 is not skipped
+
+- name: "CME-103 | Record result"
+  ansible.builtin.set_fact:
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-103', 'control_name': 'Stack Canaries (Stack Protector)', 'tactic': 'Harden', 'category': 'Kernel Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_103_assert_0 is defined and cme_103_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_103_assert_0 is defined) | ternary(cme_103_assert_0.msg | default(''), 'not checked'))}] }}"
