@@ -10,3 +10,4 @@ dist/
 inventory.yml
 inventory/
 reports/
+collections/

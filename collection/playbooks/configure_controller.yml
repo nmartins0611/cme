@@ -1,0 +1,333 @@
+---
+# CME Controller Configuration-as-Code Playbook
+#
+# Configures Ansible Automation Controller with all resources needed
+# to run the CME compliance and CVE response workflows:
+#
+#   Organization → Credential → EE → Project → Inventory →
+#   Job Templates → Workflow Template → Notification
+#
+# Requirements:
+#   - ansible.controller collection (certified, ships with AAP)
+#   - A controller OAuth token with admin/org-admin privileges
+#
+# Usage:
+#   ansible-playbook cme.controls.configure_controller \
+#     -e controller_host=https://controller.example.com \
+#     -e controller_oauthtoken=<token> \
+#     -e cme_scm_url=https://github.com/nmartins0611/cme.git \
+#     -e cme_target_host=192.168.1.201
+#
+#   Or with a vault-encrypted vars file:
+#   ansible-playbook cme.controls.configure_controller \
+#     -e @controller_credentials.yml --ask-vault-pass
+
+- name: Configure Automation Controller for CME
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    controller_host: ""
+    controller_oauthtoken: ""
+    controller_validate_certs: false
+
+    cme_org_name: "CME Security"
+    cme_project_name: "CME Compliance Collection"
+    cme_scm_url: "https://github.com/nmartins0611/cme.git"
+    cme_scm_branch: "main"
+    cme_inventory_name: "CME Target Hosts"
+    cme_ee_name: "CME Execution Environment"
+    cme_ee_image: "quay.io/cme/cme-ee:latest"
+    cme_credential_name: "CME Machine Credential"
+    cme_mcp_endpoint: "http://cme-mcp:8000"
+    cme_target_host: ""
+
+  pre_tasks:
+    - name: Validate required parameters
+      ansible.builtin.assert:
+        that:
+          - controller_host | length > 0
+          - controller_oauthtoken | length > 0
+        fail_msg: "controller_host and controller_oauthtoken are required"
+
+  tasks:
+    # ── Organisation ────────────────────────────────────────────────
+    - name: Create CME organisation
+      ansible.controller.organization:
+        name: "{{ cme_org_name }}"
+        description: "Common Mitigation Enumeration — compliance-as-code security controls"
+        state: present
+
+    # ── Credential Types ────────────────────────────────────────────
+    - name: Create CME MCP credential type
+      ansible.controller.credential_type:
+        name: "CME MCP Endpoint"
+        kind: cloud
+        inputs:
+          fields:
+            - id: cme_mcp_endpoint
+              type: string
+              label: "CME MCP Server URL"
+          required:
+            - cme_mcp_endpoint
+        injectors:
+          extra_vars:
+            cme_mcp_endpoint: "{%raw%}{{ cme_mcp_endpoint }}{%endraw%}"
+        state: present
+
+    # ── Credentials ─────────────────────────────────────────────────
+    - name: Create machine credential
+      ansible.controller.credential:
+        name: "{{ cme_credential_name }}"
+        organization: "{{ cme_org_name }}"
+        credential_type: "Machine"
+        inputs:
+          username: root
+          ssh_key_data: "{{ cme_ssh_key | default(omit) }}"
+          password: "{{ cme_ssh_password | default(omit) }}"
+        state: present
+      no_log: true
+
+    - name: Create MCP endpoint credential
+      ansible.controller.credential:
+        name: "CME MCP Server"
+        organization: "{{ cme_org_name }}"
+        credential_type: "CME MCP Endpoint"
+        inputs:
+          cme_mcp_endpoint: "{{ cme_mcp_endpoint }}"
+        state: present
+
+    # ── Execution Environment ───────────────────────────────────────
+    - name: Create CME execution environment
+      ansible.controller.execution_environment:
+        name: "{{ cme_ee_name }}"
+        image: "{{ cme_ee_image }}"
+        pull: missing
+        description: "EE with cme.controls collection, ansible.posix, community.general"
+        state: present
+
+    # ── Project ─────────────────────────────────────────────────────
+    - name: Create CME project
+      ansible.controller.project:
+        name: "{{ cme_project_name }}"
+        organization: "{{ cme_org_name }}"
+        scm_type: git
+        scm_url: "{{ cme_scm_url }}"
+        scm_branch: "{{ cme_scm_branch }}"
+        scm_update_on_launch: true
+        description: "CME compliance-as-code collection — 118 security controls"
+        state: present
+
+    # ── Inventory ───────────────────────────────────────────────────
+    - name: Create CME inventory
+      ansible.controller.inventory:
+        name: "{{ cme_inventory_name }}"
+        organization: "{{ cme_org_name }}"
+        description: "Hosts targeted for CME compliance verification and remediation"
+        state: present
+
+    - name: Add target host to inventory
+      ansible.controller.host:
+        name: "{{ cme_target_host }}"
+        inventory: "{{ cme_inventory_name }}"
+        enabled: true
+        state: present
+      when: cme_target_host | length > 0
+
+    # ── Job Templates ───────────────────────────────────────────────
+    - name: Create Verify job template
+      ansible.controller.job_template:
+        name: "CME — Verify Posture"
+        organization: "{{ cme_org_name }}"
+        project: "{{ cme_project_name }}"
+        playbook: "collection/playbooks/verify.yml"
+        inventory: "{{ cme_inventory_name }}"
+        credential: "{{ cme_credential_name }}"
+        execution_environment: "{{ cme_ee_name }}"
+        ask_variables_on_launch: true
+        extra_vars:
+          cme_profile: "rhel9_baseline"
+        description: "Read-only verification of CME controls against a profile"
+        state: present
+
+    - name: Create Remediate job template
+      ansible.controller.job_template:
+        name: "CME — Remediate"
+        organization: "{{ cme_org_name }}"
+        project: "{{ cme_project_name }}"
+        playbook: "collection/playbooks/remediate.yml"
+        inventory: "{{ cme_inventory_name }}"
+        credential: "{{ cme_credential_name }}"
+        execution_environment: "{{ cme_ee_name }}"
+        become_enabled: true
+        ask_variables_on_launch: true
+        extra_vars:
+          cme_profile: "rhel9_baseline"
+        description: "Apply remediation for CME controls from a profile"
+        state: present
+
+    - name: Create Report job template
+      ansible.controller.job_template:
+        name: "CME — Posture Report"
+        organization: "{{ cme_org_name }}"
+        project: "{{ cme_project_name }}"
+        playbook: "collection/playbooks/report.yml"
+        inventory: "{{ cme_inventory_name }}"
+        credential: "{{ cme_credential_name }}"
+        execution_environment: "{{ cme_ee_name }}"
+        ask_variables_on_launch: true
+        extra_vars:
+          cme_profile: "rhel9_baseline"
+          cme_mcp_endpoint: "{{ cme_mcp_endpoint }}"
+        description: "Verify + CVSS attenuation scoring + Markdown/JSON reports"
+        state: present
+
+    - name: Create CVE Response job template
+      ansible.controller.job_template:
+        name: "CME — CVE Response"
+        organization: "{{ cme_org_name }}"
+        project: "{{ cme_project_name }}"
+        playbook: "collection/playbooks/cve_response.yml"
+        inventory: "{{ cme_inventory_name }}"
+        credential: "{{ cme_credential_name }}"
+        execution_environment: "{{ cme_ee_name }}"
+        become_enabled: true
+        ask_variables_on_launch: true
+        extra_vars:
+          cme_mcp_endpoint: "{{ cme_mcp_endpoint }}"
+          cvss_vector: ""
+          cwe_ids: []
+          cve_id: "CVE-UNKNOWN"
+        survey_enabled: true
+        survey_spec:
+          name: "CVE Details"
+          description: "Provide CVE information for targeted response"
+          spec:
+            - question_name: "CVE ID"
+              question_description: "The CVE identifier (e.g. CVE-2024-38476)"
+              variable: cve_id
+              type: text
+              required: true
+              default: ""
+            - question_name: "CVSS Vector"
+              question_description: "Full CVSS 3.1 vector string"
+              variable: cvss_vector
+              type: text
+              required: true
+              default: ""
+            - question_name: "CWE IDs"
+              question_description: "Comma-separated CWE IDs (e.g. CWE-829,CWE-918)"
+              variable: cwe_ids_csv
+              type: text
+              required: false
+              default: ""
+        description: "Full CVE response: query CME → verify → remediate → re-verify → CVSS score"
+        state: present
+
+    # ── Workflow Template ───────────────────────────────────────────
+    - name: Create full-cycle workflow template
+      ansible.controller.workflow_job_template:
+        name: "CME — Full Compliance Cycle"
+        organization: "{{ cme_org_name }}"
+        inventory: "{{ cme_inventory_name }}"
+        ask_variables_on_launch: true
+        extra_vars:
+          cme_profile: "rhel9_baseline"
+        description: "Verify → Remediate → Re-verify → Report (with approval gate)"
+        state: present
+
+    - name: Add PRE-verify node
+      ansible.controller.workflow_job_template_node:
+        workflow_job_template: "CME — Full Compliance Cycle"
+        identifier: pre_verify
+        unified_job_template: "CME — Verify Posture"
+        organization: "{{ cme_org_name }}"
+        state: present
+
+    - name: Add approval gate after verify
+      ansible.controller.workflow_job_template_node:
+        workflow_job_template: "CME — Full Compliance Cycle"
+        identifier: approval_gate
+        approval_node:
+          name: "Approve Remediation"
+          description: "Review verification results before applying changes"
+          timeout: 3600
+        organization: "{{ cme_org_name }}"
+        state: present
+
+    - name: Link verify → approval
+      ansible.controller.workflow_job_template_node:
+        workflow_job_template: "CME — Full Compliance Cycle"
+        identifier: pre_verify
+        success_nodes:
+          - approval_gate
+        organization: "{{ cme_org_name }}"
+        state: present
+
+    - name: Add remediate node
+      ansible.controller.workflow_job_template_node:
+        workflow_job_template: "CME — Full Compliance Cycle"
+        identifier: remediate
+        unified_job_template: "CME — Remediate"
+        organization: "{{ cme_org_name }}"
+        state: present
+
+    - name: Link approval → remediate
+      ansible.controller.workflow_job_template_node:
+        workflow_job_template: "CME — Full Compliance Cycle"
+        identifier: approval_gate
+        success_nodes:
+          - remediate
+        organization: "{{ cme_org_name }}"
+        state: present
+
+    - name: Add POST-verify + report node
+      ansible.controller.workflow_job_template_node:
+        workflow_job_template: "CME — Full Compliance Cycle"
+        identifier: post_report
+        unified_job_template: "CME — Posture Report"
+        organization: "{{ cme_org_name }}"
+        state: present
+
+    - name: Link remediate → post-report
+      ansible.controller.workflow_job_template_node:
+        workflow_job_template: "CME — Full Compliance Cycle"
+        identifier: remediate
+        success_nodes:
+          - post_report
+        organization: "{{ cme_org_name }}"
+        state: present
+
+    # ── Notification Template ───────────────────────────────────────
+    - name: Create webhook notification for completed runs
+      ansible.controller.notification_template:
+        name: "CME Compliance Webhook"
+        organization: "{{ cme_org_name }}"
+        notification_type: webhook
+        notification_configuration:
+          url: "{{ cme_webhook_url | default('https://hooks.example.com/cme') }}"
+          http_method: POST
+          headers:
+            Content-Type: "application/json"
+        description: "Posts completion events to SIEM/SOAR/ticketing system"
+        state: present
+      when: cme_webhook_url is defined
+
+  post_tasks:
+    - name: Display configuration summary
+      ansible.builtin.debug:
+        msg:
+          - "Controller:  {{ controller_host }}"
+          - "Org:         {{ cme_org_name }}"
+          - "Project:     {{ cme_project_name }} ({{ cme_scm_url }})"
+          - "Inventory:   {{ cme_inventory_name }}"
+          - "EE:          {{ cme_ee_name }} ({{ cme_ee_image }})"
+          - "──────────────────────────────────────────────"
+          - "Job Templates:"
+          - "  • CME — Verify Posture"
+          - "  • CME — Remediate"
+          - "  • CME — Posture Report"
+          - "  • CME — CVE Response (with survey)"
+          - "Workflow:"
+          - "  • CME — Full Compliance Cycle"
+          - "    Verify → [Approve] → Remediate → Report"

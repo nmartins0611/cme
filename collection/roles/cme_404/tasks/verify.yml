@@ -10,4 +10,4 @@
 
 - name: "CME-404 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-404', 'control_name': 'Certificate Pinning', 'tactic': 'Harden', 'category': 'Cryptographic Controls', 'control_layer': 'Application', 'confidence': 'Medium', 'status': skipped, 'detail': No automated verification}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-404', 'control_name': 'Certificate Pinning', 'tactic': 'Harden', 'category': 'Cryptographic Controls', 'control_layer': 'Application', 'confidence': 'Medium', 'status': 'skipped', 'detail': 'No automated verification'}] }}"

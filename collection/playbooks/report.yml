@@ -2,11 +2,13 @@
 # CME Posture Report Playbook
 #
 # Runs verification across all hosts, then calculates CVSS attenuation
-# scores using the CME scoring module. Produces a per-host posture report.
+# scores using the CME MCP server. Produces both a machine-readable JSON
+# and a human-readable Markdown report with full MCP feedback.
 #
 # Usage:
-#   ansible-playbook cme.controls.report -e cme_profile=rhel9_baseline -e cme_mcp_endpoint=http://cme:8000
+#   ansible-playbook cme.controls.report -e cme_profile=rhel9_baseline -e cme_mcp_endpoint=https://cmetaxonomy.org
 #   ansible-playbook cme.controls.report -e cme_profile=full -e cme_database_path=/opt/cme/cme.db
+#   ansible-playbook cme.controls.report -e cme_profile=minimal -e cme_mcp_endpoint=https://cmetaxonomy.org -e cme_report_dir=./reports
 
 - name: CME Posture Verification
   hosts: all
@@ -23,6 +25,10 @@
         name: cme_loaded_profile
 
   tasks:
+    - name: Initialize results list
+      ansible.builtin.set_fact:
+        cme_results: []
+
     - name: Run verification for each control
       ansible.builtin.include_role:
         name: "{{ control_id }}"
@@ -33,50 +39,176 @@
       when: not (lookup('vars', control_id + '_skip', default=false))
       ignore_errors: true
 
-    - name: Collect active controls
+    - name: Determine passed controls
       ansible.builtin.set_fact:
-        cme_host_active_controls: "{{ cme_loaded_profile.controls | select('match', '.*') | list }}"
+        cme_host_active_controls: "{{ cme_results | selectattr('status', 'equalto', 'passed') | map(attribute='cme_id') | list }}"
+        cme_host_failed_controls: "{{ cme_results | selectattr('status', 'equalto', 'failed') | map(attribute='cme_id') | list }}"
+        cme_host_results: "{{ cme_results }}"
 
 - name: CME Scoring and Report
   hosts: localhost
-  gather_facts: false
+  connection: local
+  become: false
+  gather_facts: true
   vars:
+    cme_profile: "minimal"
     cme_mcp_endpoint: ""
     cme_database_path: ""
-    cme_report_output: "./cme_posture_report.json"
+    cme_report_dir: "."
 
   tasks:
-    - name: Collect active controls from all hosts
+    - name: Collect per-host results
       ansible.builtin.set_fact:
-        cme_fleet_controls: >-
-          {{ groups['all'] | map('extract', hostvars, 'cme_host_active_controls')
+        cme_all_host_results: >-
+          {{ groups['all'] | map('extract', hostvars, 'cme_host_results')
              | select('defined') | list }}
+        cme_all_active: >-
+          {{ groups['all'] | map('extract', hostvars, 'cme_host_active_controls')
+             | select('defined') | flatten | unique | list }}
+        cme_all_failed: >-
+          {{ groups['all'] | map('extract', hostvars, 'cme_host_failed_controls')
+             | select('defined') | flatten | unique | list }}
 
-    - name: Calculate fleet attenuation score
+    - name: Calculate fleet attenuation score via MCP
       cme.controls.cme_score:
-        active_controls: "{{ cme_fleet_controls | flatten | unique | map('upper') | map('replace', 'CME_', 'CME-') | list }}"
+        active_controls: "{{ cme_all_active | map('upper') | map('replace', 'CME_', 'CME-') | list }}"
         mcp_endpoint: "{{ cme_mcp_endpoint if cme_mcp_endpoint | length > 0 else omit }}"
         database_path: "{{ cme_database_path if cme_database_path | length > 0 else omit }}"
       register: cme_fleet_score
-      when: cme_mcp_endpoint | length > 0 or cme_database_path | length > 0
+      when: (cme_mcp_endpoint | length > 0 or cme_database_path | length > 0) and (cme_all_active | length > 0)
 
-    - name: Generate posture report
+    - name: Ensure report directory exists
+      ansible.builtin.file:
+        path: "{{ cme_report_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Generate JSON report
       ansible.builtin.copy:
-        content: "{{ cme_report | to_nice_json }}"
-        dest: "{{ cme_report_output }}"
+        content: "{{ cme_json_report | to_nice_json }}"
+        dest: "{{ cme_report_dir }}/cme_posture_report.json"
         mode: "0644"
       vars:
-        cme_report:
-          generated_at: "{{ ansible_date_time.iso8601 | default(now()) }}"
-          hosts_scanned: "{{ groups['all'] | length }}"
-          fleet_score: "{{ cme_fleet_score | default({}) }}"
-          per_host_summary: "{{ groups['all'] | map('extract', hostvars, ['cme_host_active_controls']) | list }}"
+        cme_json_report:
+          report_metadata:
+            generated_at: "{{ ansible_date_time.iso8601 }}"
+            profile: "{{ cme_profile }}"
+            mcp_endpoint: "{{ cme_mcp_endpoint | default('local database') }}"
+            hosts_scanned: "{{ groups['all'] | length }}"
+          summary:
+            total_controls: "{{ (cme_all_active | length) + (cme_all_failed | length) }}"
+            passed: "{{ cme_all_active | length }}"
+            failed: "{{ cme_all_failed | length }}"
+            pass_rate: "{{ '%0.1f' | format((cme_all_active | length) / (((cme_all_active | length) + (cme_all_failed | length)) | float) * 100) }}%"
+          mcp_attenuation: "{{ cme_fleet_score | default({}) }}"
+          per_host: "{{ cme_all_host_results }}"
 
-    - name: Display report location
+    - name: Generate Markdown report
+      ansible.builtin.copy:
+        content: |
+          # CME Security Posture Report
+
+          **Generated:** {{ ansible_date_time.iso8601 }}
+          **Profile:** {{ cme_profile }}
+          **MCP Endpoint:** {{ cme_mcp_endpoint | default('local database') }}
+          **Hosts Scanned:** {{ groups['all'] | length }}
+
+          ---
+
+          ## Summary
+
+          | Metric | Value |
+          |--------|-------|
+          | Controls Evaluated | {{ (cme_all_active | length) + (cme_all_failed | length) }} |
+          | Passed | {{ cme_all_active | length }} |
+          | Failed | {{ cme_all_failed | length }} |
+          | Pass Rate | {{ '%0.1f' | format((cme_all_active | length) / (((cme_all_active | length) + (cme_all_failed | length)) | float) * 100) }}% |
+
+          ---
+
+          ## CVSS Attenuation (from CME MCP Server)
+
+          The following CVSS base metrics are **attenuated** by the active controls on this fleet:
+
+          | CVSS Metric | Attenuated To | Contributing Controls |
+          |-------------|---------------|-----------------------|
+          {% for item in (cme_fleet_score.attenuation | default([])) %}
+          | {{ item.metric }} | **{{ item.modified_to }}** | {{ item.contributing_controls | join(', ') }} |
+          {% endfor %}
+
+          {% if cme_fleet_score.detail is defined %}
+          ---
+
+          ## Detailed MCP Feedback (Per-Control Impact)
+
+          | CME ID | Control Name | Metric | From → To | Rationale |
+          |--------|--------------|--------|-----------|-----------|
+          {% for d in cme_fleet_score.detail %}
+          | {{ d.cme_id }} | {{ d.control_name }} | {{ d.metric }} | {{ d.from_value }} → {{ d.to_value }} | {{ d.rationale }} |
+          {% endfor %}
+          {% endif %}
+
+          ---
+
+          ## Controls Status
+
+          ### Passed ({{ cme_all_active | length }})
+
+          {% for cid in cme_all_active | sort %}
+          - [x] {{ cid }}
+          {% endfor %}
+
+          {% if cme_all_failed | length > 0 %}
+          ### Failed ({{ cme_all_failed | length }})
+
+          {% for cid in cme_all_failed | sort %}
+          - [ ] {{ cid }}
+          {% endfor %}
+          {% endif %}
+
+          ---
+
+          ## Per-Host Detail
+
+          {% for host in groups['all'] %}
+          ### {{ host }}
+
+          {% set host_results = hostvars[host]['cme_host_results'] | default([]) %}
+          {% set host_passed = host_results | selectattr('status', 'equalto', 'passed') | list %}
+          {% set host_failed = host_results | selectattr('status', 'equalto', 'failed') | list %}
+          - **Passed:** {{ host_passed | length }}
+          - **Failed:** {{ host_failed | length }}
+
+          {% if host_failed | length > 0 %}
+          | CME ID | Control | Category | Detail |
+          |--------|---------|----------|--------|
+          {% for r in host_failed %}
+          | {{ r.cme_id }} | {{ r.control_name }} | {{ r.category }} | {{ r.detail | default('—') }} |
+          {% endfor %}
+          {% endif %}
+
+          {% endfor %}
+
+          ---
+
+          *Report generated by CME Ansible Collection (cme.controls) using MCP server data from {{ cme_mcp_endpoint | default('local') }}*
+        dest: "{{ cme_report_dir }}/cme_posture_report.md"
+        mode: "0644"
+
+    - name: Display report locations
       ansible.builtin.debug:
-        msg: "Posture report written to {{ cme_report_output }}"
+        msg:
+          - "JSON report: {{ cme_report_dir }}/cme_posture_report.json"
+          - "Markdown report: {{ cme_report_dir }}/cme_posture_report.md"
 
     - name: Display attenuation summary
       ansible.builtin.debug:
-        var: cme_fleet_score.attenuation
+        msg: |
+          ═══════════════════════════════════════════════════════════
+           CME POSTURE SCORE — {{ cme_all_active | length }}/{{ (cme_all_active | length) + (cme_all_failed | length) }} controls active
+          ═══════════════════════════════════════════════════════════
+          {% for item in (cme_fleet_score.attenuation | default([])) %}
+           {{ "%-4s" | format(item.metric) }} → {{ item.modified_to }}  ({{ item.contributing_controls | length }} controls)
+          {% endfor %}
+          ═══════════════════════════════════════════════════════════
       when: cme_fleet_score is defined and cme_fleet_score.attenuation is defined

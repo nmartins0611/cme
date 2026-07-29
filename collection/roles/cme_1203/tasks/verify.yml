@@ -10,4 +10,4 @@
 
 - name: "CME-1203 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1203', 'control_name': 'Disaster Recovery / Multi-Region Failover', 'tactic': 'Restore', 'category': 'Recovery Controls', 'control_layer': 'Application', 'confidence': 'Medium', 'status': skipped, 'detail': No automated verification}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1203', 'control_name': 'Disaster Recovery / Multi-Region Failover', 'tactic': 'Restore', 'category': 'Recovery Controls', 'control_layer': 'Application', 'confidence': 'Medium', 'status': 'skipped', 'detail': 'No automated verification'}] }}"

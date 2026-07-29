@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CME Posture Report — {{ report_phase }}</title>
+<style>
+  :root {
+    --rh-red: #ee0000;
+    --rh-red-dark: #a30000;
+    --rh-red-light: #ff442b;
+    --bg: #151515;
+    --surface: #1f1f1f;
+    --surface-raised: #292929;
+    --border: #3c3f42;
+    --text: #e0e0e0;
+    --text-secondary: #a3a3a3;
+    --pass: #3e8635;
+    --pass-light: #5ba352;
+    --pass-bg: rgba(62, 134, 53, 0.12);
+    --fail: #c9190b;
+    --fail-light: #f56e6e;
+    --fail-bg: rgba(201, 25, 11, 0.10);
+    --warn: #f0ab00;
+    --warn-bg: rgba(240, 171, 0, 0.10);
+    --info: #06c;
+    --info-bg: rgba(0, 102, 204, 0.10);
+    --accent: #73bcf7;
+    --font: 'Red Hat Display', 'Red Hat Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  .container { max-width: 1280px; margin: 0 auto; }
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 3px solid var(--rh-red);
+  }
+  .logo {
+    width: 40px;
+    height: 40px;
+    background: var(--rh-red);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: white;
+    flex-shrink: 0;
+  }
+  .header-text h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .header-meta {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-top: 0.2rem;
+  }
+  .header-meta strong { color: var(--text); }
+  .phase-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-left: auto;
+  }
+  .phase-badge.pre { background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn); }
+  .phase-badge.post { background: var(--pass-bg); color: var(--pass-light); border: 1px solid var(--pass); }
+
+  .score-hero {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+  .score-ring {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    flex-shrink: 0;
+  }
+  .score-ring svg {
+    width: 140px;
+    height: 140px;
+    transform: rotate(-90deg);
+  }
+  .score-ring .ring-bg {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 10;
+  }
+  .score-ring .ring-fill {
+    fill: none;
+    stroke-width: 10;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.6s ease;
+  }
+  .score-ring .score-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .score-ring .score-number {
+    font-size: 2.5rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .score-ring .score-unit {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .score-details {
+    flex: 1;
+  }
+  .score-details h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.75rem;
+  }
+  .score-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.5rem;
+  }
+  .score-metric {
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.6rem 0.75rem;
+    text-align: center;
+  }
+  .score-metric .sm-value {
+    font-size: 1.1rem;
+    font-weight: 800;
+  }
+  .score-metric .sm-label {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: 0.15rem;
+  }
+  .score-metric.sm-pass .sm-value { color: var(--pass-light); }
+  .score-metric.sm-fail .sm-value { color: var(--fail-light); }
+  .score-metric.sm-cvss .sm-value { color: var(--rh-red-light); }
+  .score-metric.sm-total .sm-value { color: var(--accent); }
+
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    text-align: center;
+  }
+  .stat .value { font-size: 2.25rem; font-weight: 800; }
+  .stat .label { color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.25rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  .stat.pass .value { color: var(--pass-light); }
+  .stat.fail .value { color: var(--fail-light); }
+  .stat.total .value { color: var(--accent); }
+  .stat.rate .value { color: #fff; }
+
+  .progress-bar {
+    width: 100%;
+    height: 10px;
+    background: var(--surface-raised);
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border);
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--rh-red), var(--pass-light));
+    border-radius: 5px;
+    transition: width 0.5s;
+  }
+
+  .section-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 2.5rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border);
+    color: #fff;
+  }
+  .section-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    margin-bottom: 1rem;
+  }
+  th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    background: var(--surface-raised);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.875rem;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr.passed { background: var(--pass-bg); }
+  tr.failed { background: var(--fail-bg); }
+
+  .badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .badge.passed { background: rgba(62, 134, 53, 0.2); color: var(--pass-light); }
+  .badge.failed { background: rgba(201, 25, 11, 0.2); color: var(--fail-light); }
+
+  .tactic-tag {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: rgba(115, 188, 247, 0.1);
+    color: var(--accent);
+  }
+
+  .metric-tag {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: rgba(238, 0, 0, 0.12);
+    color: var(--rh-red-light);
+  }
+
+  .attenuation-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .attenuation-card .metric-name {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--rh-red-light);
+    min-width: 2.5rem;
+  }
+  .attenuation-card .arrow {
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+  }
+  .attenuation-card .value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--pass-light);
+  }
+  .attenuation-card .controls {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin-left: auto;
+  }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 2px solid var(--rh-red);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  footer .powered {
+    color: var(--rh-red-light);
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="logo">CME</div>
+    <div class="header-text">
+      <h1>Security Posture Report</h1>
+      <div class="header-meta">
+        Profile: <strong>{{ report_profile }}</strong>
+        &nbsp;|&nbsp; Hosts: <strong>{{ report_hosts | join(', ') }}</strong>
+        &nbsp;|&nbsp; {{ report_timestamp }}
+      </div>
+    </div>
+    <span class="phase-badge {{ 'pre' if 'PRE' in report_phase else 'post' }}">{{ report_phase }}</span>
+  </header>
+
+{% set total = (report_active | length) + (report_failed | length) %}
+{% set pass_rate = (report_active | length) / (total | float) * 100 if total > 0 else 0 %}
+{% set cvss_attenuated = report_attenuation | length %}
+{% set score_color = '--pass-light' if pass_rate >= 70 else ('--warn' if pass_rate >= 40 else '--fail-light') %}
+
+  <div class="score-hero">
+    <div class="score-ring">
+      <svg viewBox="0 0 140 140">
+        <circle class="ring-bg" cx="70" cy="70" r="58"></circle>
+        <circle class="ring-fill" cx="70" cy="70" r="58"
+          stroke="var({{ score_color }})"
+          stroke-dasharray="{{ 364.4 }}"
+          stroke-dashoffset="{{ 364.4 - (364.4 * pass_rate / 100) }}">
+        </circle>
+      </svg>
+      <div class="score-label">
+        <div class="score-number" style="color: var({{ score_color }})">{{ '%0.0f' | format(pass_rate) }}</div>
+        <div class="score-unit">Score</div>
+      </div>
+    </div>
+    <div class="score-details">
+      <h2>CME Posture Score</h2>
+      <div class="score-metrics">
+        <div class="score-metric sm-pass">
+          <div class="sm-value">{{ report_active | length }}</div>
+          <div class="sm-label">Controls Active</div>
+        </div>
+        <div class="score-metric sm-fail">
+          <div class="sm-value">{{ report_failed | length }}</div>
+          <div class="sm-label">Controls Failed</div>
+        </div>
+        <div class="score-metric sm-total">
+          <div class="sm-value">{{ total }}</div>
+          <div class="sm-label">Total Evaluated</div>
+        </div>
+        <div class="score-metric sm-cvss">
+          <div class="sm-value">{{ cvss_attenuated }}/8</div>
+          <div class="sm-label">CVSS Metrics Attenuated</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-fill" style="width: {{ '%0.0f' | format(pass_rate) }}%"></div>
+  </div>
+
+{% if report_attenuation | length > 0 %}
+  <div class="section-title">CVSS Attenuation (MCP Server)</div>
+  <div class="section-subtitle">Active controls shift these CVSS base metrics, reducing exploitability and impact.</div>
+
+{% for item in report_attenuation %}
+  <div class="attenuation-card">
+    <span class="metric-name">{{ item.metric }}</span>
+    <span class="arrow">→</span>
+    <span class="value">{{ item.modified_to }}</span>
+    <span class="controls">{{ item.contributing_controls | length }} control{{ 's' if item.contributing_controls | length > 1 else '' }}: {{ item.contributing_controls | join(', ') }}</span>
+  </div>
+{% endfor %}
+{% endif %}
+
+{% if report_detail | length > 0 %}
+  <div class="section-title">MCP Detailed Feedback</div>
+  <table>
+    <thead>
+      <tr>
+        <th>CME ID</th>
+        <th>Control</th>
+        <th>Metric</th>
+        <th>Shift</th>
+        <th>Rationale</th>
+      </tr>
+    </thead>
+    <tbody>
+{% for d in report_detail %}
+      <tr>
+        <td><strong>{{ d.cme_id }}</strong></td>
+        <td>{{ d.control_name }}</td>
+        <td><span class="metric-tag">{{ d.metric }}</span></td>
+        <td>{{ d.from_value }} → <strong>{{ d.to_value }}</strong></td>
+        <td>{{ d.rationale }}</td>
+      </tr>
+{% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+
+{% if report_failed | length > 0 %}
+  <div class="section-title">Failed Controls — Remediation Required</div>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Control</th>
+        <th>Category</th>
+        <th>Tactic</th>
+        <th>Layer</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+{% for r in report_results | selectattr('status', 'equalto', 'failed') %}
+      <tr class="failed">
+        <td><strong>{{ r.cme_id }}</strong></td>
+        <td>{{ r.control_name }}</td>
+        <td>{{ r.category }}</td>
+        <td><span class="tactic-tag">{{ r.tactic }}</span></td>
+        <td>{{ r.control_layer }}</td>
+        <td><span class="badge failed">Failed</span></td>
+      </tr>
+{% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+
+  <div class="section-title">All Controls</div>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Control</th>
+        <th>Category</th>
+        <th>Tactic</th>
+        <th>Layer</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+{% for r in report_results | sort(attribute='cme_id') %}
+      <tr class="{{ r.status }}">
+        <td><strong>{{ r.cme_id }}</strong></td>
+        <td>{{ r.control_name }}</td>
+        <td>{{ r.category }}</td>
+        <td><span class="tactic-tag">{{ r.tactic }}</span></td>
+        <td>{{ r.control_layer }}</td>
+        <td><span class="badge {{ r.status }}">{{ r.status | capitalize }}</span></td>
+      </tr>
+{% endfor %}
+    </tbody>
+  </table>
+
+  <footer>
+    <span>CME Ansible Collection (cme.controls) v1.0.0 &nbsp;|&nbsp; MCP: {{ report_mcp_endpoint }}</span>
+    <span class="powered">Powered by Common Mitigation Enumeration</span>
+  </footer>
+</div>
+</body>
+</html>

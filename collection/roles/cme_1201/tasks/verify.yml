@@ -10,4 +10,4 @@
 
 - name: "CME-1201 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1201', 'control_name': 'Immutable Infrastructure', 'tactic': 'Restore', 'category': 'Recovery Controls', 'control_layer': 'Application', 'confidence': 'Medium', 'status': skipped, 'detail': No automated verification}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1201', 'control_name': 'Immutable Infrastructure', 'tactic': 'Restore', 'category': 'Recovery Controls', 'control_layer': 'Application', 'confidence': 'Medium', 'status': 'skipped', 'detail': 'No automated verification'}] }}"

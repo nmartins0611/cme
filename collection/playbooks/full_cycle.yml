@@ -1,0 +1,394 @@
+---
+# CME Full Cycle Playbook — PRE report, Remediate, POST report
+#
+# Generates a before/after comparison showing how remediation improves
+# the security posture, with CVSS attenuation scored by the CME MCP server.
+#
+# Usage:
+#   ansible-playbook collection/playbooks/full_cycle.yml \
+#     -e cme_profile=minimal \
+#     -e cme_mcp_endpoint=https://cmetaxonomy.org \
+#     -e cme_report_dir=./reports \
+#     -i inventory.yml
+
+###############################################################################
+# PHASE 1: PRE-REMEDIATION VERIFICATION
+###############################################################################
+- name: "PHASE 1 — PRE-Remediation Verification"
+  hosts: all
+  gather_facts: true
+  vars:
+    cme_profile: "minimal"
+    cme_profile_path: ""
+    cme_profiles_dir: "{{ playbook_dir }}/../profiles"
+
+  pre_tasks:
+    - name: Load profile
+      ansible.builtin.include_vars:
+        file: "{{ cme_profile_path if (cme_profile_path | length > 0) else cme_profiles_dir + '/' + cme_profile + '.yml' }}"
+        name: cme_loaded_profile
+
+  tasks:
+    - name: Initialize PRE results
+      ansible.builtin.set_fact:
+        cme_results: []
+
+    - name: Run verification for each control
+      ansible.builtin.include_role:
+        name: "{{ control_id }}"
+        tasks_from: verify.yml
+      loop: "{{ cme_loaded_profile.controls }}"
+      loop_control:
+        loop_var: control_id
+      when: not (lookup('vars', control_id + '_skip', default=false))
+      ignore_errors: true
+
+    - name: Collect PRE results
+      ansible.builtin.set_fact:
+        cme_pre_active: "{{ cme_results | selectattr('status', 'equalto', 'passed') | map(attribute='cme_id') | list }}"
+        cme_pre_failed: "{{ cme_results | selectattr('status', 'equalto', 'failed') | map(attribute='cme_id') | list }}"
+        cme_pre_results: "{{ cme_results }}"
+
+###############################################################################
+# PHASE 2: PRE-REMEDIATION SCORING (MCP)
+###############################################################################
+- name: "PHASE 2 — PRE Score via MCP"
+  hosts: localhost
+  connection: local
+  become: false
+  gather_facts: true
+  vars:
+    cme_profile: "minimal"
+    cme_mcp_endpoint: ""
+    cme_database_path: ""
+    cme_report_dir: "./reports"
+
+  tasks:
+    - name: Collect PRE active controls
+      ansible.builtin.set_fact:
+        cme_pre_all_active: >-
+          {{ groups['all'] | map('extract', hostvars, 'cme_pre_active')
+             | select('defined') | flatten | unique | list }}
+        cme_pre_all_failed: >-
+          {{ groups['all'] | map('extract', hostvars, 'cme_pre_failed')
+             | select('defined') | flatten | unique | list }}
+        cme_pre_all_results: >-
+          {{ groups['all'] | map('extract', hostvars, 'cme_pre_results')
+             | select('defined') | list }}
+
+    - name: Calculate PRE attenuation via MCP
+      cme.controls.cme_score:
+        active_controls: "{{ cme_pre_all_active | map('upper') | map('replace', 'CME_', 'CME-') | list }}"
+        mcp_endpoint: "{{ cme_mcp_endpoint if cme_mcp_endpoint | length > 0 else omit }}"
+        database_path: "{{ cme_database_path if cme_database_path | length > 0 else omit }}"
+      register: cme_pre_score
+      when: (cme_mcp_endpoint | length > 0 or cme_database_path | length > 0) and (cme_pre_all_active | length > 0)
+
+    - name: Save PRE score for comparison
+      ansible.builtin.set_fact:
+        cme_saved_pre_score: "{{ cme_pre_score }}"
+        cme_saved_pre_active: "{{ cme_pre_all_active }}"
+        cme_saved_pre_failed: "{{ cme_pre_all_failed }}"
+        cme_saved_pre_results: "{{ cme_pre_all_results }}"
+
+    - name: Display PRE posture
+      ansible.builtin.debug:
+        msg: |
+          ═══════════════════════════════════════════════════════════
+           PRE-REMEDIATION — {{ cme_pre_all_active | length }}/{{ (cme_pre_all_active | length) + (cme_pre_all_failed | length) }} controls active
+          ═══════════════════════════════════════════════════════════
+          {% for item in (cme_pre_score.attenuation | default([])) %}
+           {{ "%-4s" | format(item.metric) }} → {{ item.modified_to }}  ({{ item.contributing_controls | length }} controls)
+          {% endfor %}
+          ═══════════════════════════════════════════════════════════
+      when: cme_pre_score is defined and cme_pre_score.attenuation is defined
+
+###############################################################################
+# PHASE 3: REMEDIATION
+###############################################################################
+- name: "PHASE 3 — Remediation"
+  hosts: all
+  gather_facts: true
+  become: true
+  vars:
+    cme_profile: "minimal"
+    cme_profile_path: ""
+    cme_profiles_dir: "{{ playbook_dir }}/../profiles"
+
+  pre_tasks:
+    - name: Load profile
+      ansible.builtin.include_vars:
+        file: "{{ cme_profile_path if (cme_profile_path | length > 0) else cme_profiles_dir + '/' + cme_profile + '.yml' }}"
+        name: cme_loaded_profile
+
+    - name: Display remediation plan
+      ansible.builtin.debug:
+        msg: "Applying {{ cme_loaded_profile.controls | length }} controls from profile '{{ cme_profile }}' to {{ inventory_hostname }}"
+
+  tasks:
+    - name: Apply each control
+      ansible.builtin.include_role:
+        name: "{{ control_id }}"
+        tasks_from: main.yml
+      loop: "{{ cme_loaded_profile.controls }}"
+      loop_control:
+        loop_var: control_id
+      when: not (lookup('vars', control_id + '_skip', default=false))
+      ignore_errors: true
+
+###############################################################################
+# PHASE 4: POST-REMEDIATION VERIFICATION
+###############################################################################
+- name: "PHASE 4 — POST-Remediation Verification"
+  hosts: all
+  gather_facts: true
+  vars:
+    cme_profile: "minimal"
+    cme_profile_path: ""
+    cme_profiles_dir: "{{ playbook_dir }}/../profiles"
+
+  pre_tasks:
+    - name: Load profile
+      ansible.builtin.include_vars:
+        file: "{{ cme_profile_path if (cme_profile_path | length > 0) else cme_profiles_dir + '/' + cme_profile + '.yml' }}"
+        name: cme_loaded_profile
+
+  tasks:
+    - name: Initialize POST results
+      ansible.builtin.set_fact:
+        cme_results: []
+
+    - name: Run verification for each control
+      ansible.builtin.include_role:
+        name: "{{ control_id }}"
+        tasks_from: verify.yml
+      loop: "{{ cme_loaded_profile.controls }}"
+      loop_control:
+        loop_var: control_id
+      when: not (lookup('vars', control_id + '_skip', default=false))
+      ignore_errors: true
+
+    - name: Collect POST results
+      ansible.builtin.set_fact:
+        cme_post_active: "{{ cme_results | selectattr('status', 'equalto', 'passed') | map(attribute='cme_id') | list }}"
+        cme_post_failed: "{{ cme_results | selectattr('status', 'equalto', 'failed') | map(attribute='cme_id') | list }}"
+        cme_post_results: "{{ cme_results }}"
+
+###############################################################################
+# PHASE 5: POST-REMEDIATION SCORING + FINAL REPORTS
+###############################################################################
+- name: "PHASE 5 — POST Score and Report Generation"
+  hosts: localhost
+  connection: local
+  become: false
+  gather_facts: true
+  vars:
+    cme_profile: "minimal"
+    cme_mcp_endpoint: ""
+    cme_database_path: ""
+    cme_report_dir: "./reports"
+
+  tasks:
+    - name: Collect POST active controls
+      ansible.builtin.set_fact:
+        cme_post_all_active: >-
+          {{ groups['all'] | map('extract', hostvars, 'cme_post_active')
+             | select('defined') | flatten | unique | list }}
+        cme_post_all_failed: >-
+          {{ groups['all'] | map('extract', hostvars, 'cme_post_failed')
+             | select('defined') | flatten | unique | list }}
+        cme_post_all_results: >-
+          {{ groups['all'] | map('extract', hostvars, 'cme_post_results')
+             | select('defined') | list }}
+
+    - name: Calculate POST attenuation via MCP
+      cme.controls.cme_score:
+        active_controls: "{{ cme_post_all_active | map('upper') | map('replace', 'CME_', 'CME-') | list }}"
+        mcp_endpoint: "{{ cme_mcp_endpoint if cme_mcp_endpoint | length > 0 else omit }}"
+        database_path: "{{ cme_database_path if cme_database_path | length > 0 else omit }}"
+      register: cme_post_score
+      when: (cme_mcp_endpoint | length > 0 or cme_database_path | length > 0) and (cme_post_all_active | length > 0)
+
+    - name: Ensure report directory exists
+      ansible.builtin.file:
+        path: "{{ cme_report_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Set template path
+      ansible.builtin.set_fact:
+        cme_template_path: "{{ playbook_dir }}/../templates/posture_report.html.j2"
+
+    - name: Generate PRE HTML report
+      ansible.builtin.template:
+        src: "{{ cme_template_path }}"
+        dest: "{{ cme_report_dir }}/cme_report_PRE.html"
+        mode: "0644"
+      vars:
+        report_phase: "PRE-REMEDIATION"
+        report_profile: "{{ cme_profile }}"
+        report_timestamp: "{{ ansible_date_time.iso8601 }}"
+        report_mcp_endpoint: "{{ cme_mcp_endpoint | default('local database') }}"
+        report_hosts: "{{ groups['all'] }}"
+        report_active: "{{ cme_saved_pre_active }}"
+        report_failed: "{{ cme_saved_pre_failed }}"
+        report_results: "{{ cme_saved_pre_results | flatten }}"
+        report_attenuation: "{{ cme_saved_pre_score.attenuation | default([]) }}"
+        report_detail: "{{ cme_saved_pre_score.detail | default([]) }}"
+
+    - name: Generate POST HTML report
+      ansible.builtin.template:
+        src: "{{ cme_template_path }}"
+        dest: "{{ cme_report_dir }}/cme_report_POST.html"
+        mode: "0644"
+      vars:
+        report_phase: "POST-REMEDIATION"
+        report_profile: "{{ cme_profile }}"
+        report_timestamp: "{{ ansible_date_time.iso8601 }}"
+        report_mcp_endpoint: "{{ cme_mcp_endpoint | default('local database') }}"
+        report_hosts: "{{ groups['all'] }}"
+        report_active: "{{ cme_post_all_active }}"
+        report_failed: "{{ cme_post_all_failed }}"
+        report_results: "{{ cme_post_all_results | flatten }}"
+        report_attenuation: "{{ cme_post_score.attenuation | default([]) }}"
+        report_detail: "{{ cme_post_score.detail | default([]) }}"
+
+    - name: Generate combined Markdown report
+      ansible.builtin.copy:
+        content: |
+          # CME Security Posture Report — PRE vs POST Remediation
+
+          **Generated:** {{ ansible_date_time.iso8601 }}
+          **Profile:** {{ cme_profile }}
+          **MCP Endpoint:** {{ cme_mcp_endpoint | default('local database') }}
+          **Hosts Scanned:** {{ groups['all'] | length }}
+
+          ---
+
+          ## Executive Summary
+
+          | Metric | PRE | POST | Change |
+          |--------|-----|------|--------|
+          | Controls Passed | {{ cme_saved_pre_active | length }} | {{ cme_post_all_active | length }} | +{{ (cme_post_all_active | length) - (cme_saved_pre_active | length) }} |
+          | Controls Failed | {{ cme_saved_pre_failed | length }} | {{ cme_post_all_failed | length }} | {{ (cme_post_all_failed | length) - (cme_saved_pre_failed | length) }} |
+          | Pass Rate | {{ '%0.1f' | format((cme_saved_pre_active | length) / (((cme_saved_pre_active | length) + (cme_saved_pre_failed | length)) | float) * 100) }}% | {{ '%0.1f' | format((cme_post_all_active | length) / (((cme_post_all_active | length) + (cme_post_all_failed | length)) | float) * 100) }}% | |
+          | CVSS Metrics Attenuated | {{ (cme_saved_pre_score.attenuation | default([])) | length }} | {{ (cme_post_score.attenuation | default([])) | length }} | +{{ ((cme_post_score.attenuation | default([])) | length) - ((cme_saved_pre_score.attenuation | default([])) | length) }} |
+
+          ---
+
+          ## PRE-Remediation Posture
+
+          ### CVSS Attenuation ({{ cme_saved_pre_active | length }} controls active)
+
+          | CVSS Metric | Attenuated To | Contributing Controls |
+          |-------------|---------------|-----------------------|
+          {% for item in (cme_saved_pre_score.attenuation | default([])) %}
+          | {{ item.metric }} | **{{ item.modified_to }}** | {{ item.contributing_controls | join(', ') }} |
+          {% endfor %}
+
+          ### Controls Status (PRE)
+
+          {% for cid in cme_saved_pre_active | sort %}
+          - [x] {{ cid }}
+          {% endfor %}
+          {% for cid in cme_saved_pre_failed | sort %}
+          - [ ] {{ cid }}
+          {% endfor %}
+
+          ---
+
+          ## POST-Remediation Posture
+
+          ### CVSS Attenuation ({{ cme_post_all_active | length }} controls active)
+
+          | CVSS Metric | Attenuated To | Contributing Controls |
+          |-------------|---------------|-----------------------|
+          {% for item in (cme_post_score.attenuation | default([])) %}
+          | {{ item.metric }} | **{{ item.modified_to }}** | {{ item.contributing_controls | join(', ') }} |
+          {% endfor %}
+
+          ### Controls Status (POST)
+
+          {% for cid in cme_post_all_active | sort %}
+          - [x] {{ cid }}
+          {% endfor %}
+          {% for cid in cme_post_all_failed | sort %}
+          - [ ] {{ cid }}
+          {% endfor %}
+
+          {% if cme_post_score.detail is defined %}
+          ---
+
+          ## Detailed MCP Feedback (POST — Per-Control Impact)
+
+          | CME ID | Control Name | Metric | From → To | Rationale |
+          |--------|--------------|--------|-----------|-----------|
+          {% for d in cme_post_score.detail %}
+          | {{ d.cme_id }} | {{ d.control_name }} | {{ d.metric }} | {{ d.from_value }} → {{ d.to_value }} | {{ d.rationale }} |
+          {% endfor %}
+          {% endif %}
+
+          ---
+
+          ## Remediation Gains
+
+          Controls that moved from FAILED to PASSED after remediation:
+
+          {% set newly_passed = cme_post_all_active | difference(cme_saved_pre_active) | sort %}
+          {% if newly_passed | length > 0 %}
+          | CME ID | Status |
+          |--------|--------|
+          {% for cid in newly_passed %}
+          | {{ cid }} | FAILED → **PASSED** |
+          {% endfor %}
+          {% else %}
+          No new controls were activated by remediation. The remaining failures may require manual intervention or are not applicable to this platform.
+          {% endif %}
+
+          {% set still_failed = cme_post_all_failed | sort %}
+          {% if still_failed | length > 0 %}
+
+          ### Still Failing (requires manual attention)
+
+          {% for host in groups['all'] %}
+          {% set host_post = hostvars[host]['cme_post_results'] | default([]) %}
+          {% set host_failed = host_post | selectattr('status', 'equalto', 'failed') | list %}
+          {% if host_failed | length > 0 %}
+          **{{ host }}:**
+
+          | CME ID | Control | Category | Detail |
+          |--------|---------|----------|--------|
+          {% for r in host_failed %}
+          | {{ r.cme_id }} | {{ r.control_name }} | {{ r.category }} | {{ r.detail | default('—') }} |
+          {% endfor %}
+          {% endif %}
+          {% endfor %}
+          {% endif %}
+
+          ---
+
+          *Report generated by CME Ansible Collection (cme.controls) using MCP server data from {{ cme_mcp_endpoint | default('local') }}*
+        dest: "{{ cme_report_dir }}/cme_posture_report.md"
+        mode: "0644"
+
+    - name: Display report locations
+      ansible.builtin.debug:
+        msg:
+          - "PRE report:  {{ cme_report_dir }}/cme_posture_PRE.json"
+          - "POST report: {{ cme_report_dir }}/cme_posture_POST.json"
+          - "Combined:    {{ cme_report_dir }}/cme_posture_report.md"
+
+    - name: Display comparison
+      ansible.builtin.debug:
+        msg: |
+          ═══════════════════════════════════════════════════════════
+                         CME POSTURE COMPARISON
+          ═══════════════════════════════════════════════════════════
+           PRE:  {{ cme_saved_pre_active | length }}/{{ (cme_saved_pre_active | length) + (cme_saved_pre_failed | length) }} controls ({{ '%0.0f' | format((cme_saved_pre_active | length) / (((cme_saved_pre_active | length) + (cme_saved_pre_failed | length)) | float) * 100) }}%)
+           POST: {{ cme_post_all_active | length }}/{{ (cme_post_all_active | length) + (cme_post_all_failed | length) }} controls ({{ '%0.0f' | format((cme_post_all_active | length) / (((cme_post_all_active | length) + (cme_post_all_failed | length)) | float) * 100) }}%)
+           GAIN: +{{ (cme_post_all_active | length) - (cme_saved_pre_active | length) }} controls remediated
+          ───────────────────────────────────────────────────────────
+           CVSS Metrics Attenuated:
+             PRE:  {{ (cme_saved_pre_score.attenuation | default([])) | length }} metrics
+             POST: {{ (cme_post_score.attenuation | default([])) | length }} metrics
+          ═══════════════════════════════════════════════════════════

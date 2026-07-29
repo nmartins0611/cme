@@ -79,7 +79,7 @@ def generate_verify_tasks(entry: dict) -> str:
             f"  changed_when: false",
             f"",
         ]
-        no_cmd_lines.append(_record_result_task(entry, "skipped", "No automated verification"))
+        no_cmd_lines.append(_record_result_task(entry, "'skipped'", "'No automated verification'"))
         return "\n".join(no_cmd_lines)
 
     lines = [f"---\n# {entry['cme_id']}: {entry['control_name']}"]
@@ -134,7 +134,7 @@ def _escape_regex(s: str) -> str:
 
 
 def _escape_yaml(s: str) -> str:
-    return s.replace('"', '\\"')
+    return s.replace("\\", "\\\\").replace('"', '\\"')
 
 
 def _record_result_task(entry: dict, status_expr: str, detail_expr: str) -> str:

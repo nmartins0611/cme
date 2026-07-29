@@ -132,9 +132,78 @@ except ImportError:
     HAS_SQLITE = False
 
 
+def _mcp_post(url: str, payload: dict, session_id: str = "") -> tuple:
+    """Send a JSON-RPC request to an MCP Streamable HTTP endpoint.
+
+    Returns (parsed_result_dict, session_id_from_response).
+    Handles both SSE (text/event-stream) and plain JSON responses.
+    """
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json, text/event-stream",
+    }
+    if session_id:
+        headers["Mcp-Session-Id"] = session_id
+
+    data = json.dumps(payload).encode("utf-8")
+    req = Request(url, data=data, headers=headers)
+    response = urlopen(req, timeout=30)
+
+    resp_session_id = response.headers.get("Mcp-Session-Id", session_id)
+    raw = response.read().decode("utf-8")
+    content_type = response.headers.get("Content-Type", "")
+
+    if "text/event-stream" in content_type:
+        result = _parse_sse(raw)
+    else:
+        result = json.loads(raw)
+
+    if "error" in result:
+        raise Exception(f"MCP error: {result['error']}")
+
+    return result, resp_session_id
+
+
+def _parse_sse(raw: str) -> dict:
+    """Parse Server-Sent Events response and extract JSON-RPC data."""
+    for line in raw.splitlines():
+        if line.startswith("data: "):
+            return json.loads(line[6:])
+    raise Exception(f"No data line found in SSE response: {raw[:200]}")
+
+
+def _mcp_init_session(url: str) -> str:
+    """Initialize an MCP session and return the session ID."""
+    payload = {
+        "jsonrpc": "2.0",
+        "id": 0,
+        "method": "initialize",
+        "params": {
+            "protocolVersion": "2025-03-26",
+            "capabilities": {},
+            "clientInfo": {"name": "cme-ansible-module", "version": "1.0.0"},
+        },
+    }
+    _, session_id = _mcp_post(url, payload)
+    return session_id
+
+
+def _extract_tool_result(result: dict) -> dict:
+    """Extract the parsed JSON from an MCP tools/call response."""
+    content = result.get("result", {}).get("content", [])
+    if content and content[0].get("type") == "text":
+        return json.loads(content[0]["text"])
+    return result.get("result", {})
+
+
 def query_http_attenuation(endpoint: str, active_ids: list) -> dict:
-    url = endpoint.rstrip("/") + "/mcp"
-    payload = json.dumps({
+    url = endpoint.rstrip("/")
+    if not url.endswith("/mcp"):
+        url += "/mcp"
+
+    session_id = _mcp_init_session(url)
+
+    payload = {
         "jsonrpc": "2.0",
         "id": 1,
         "method": "tools/call",
@@ -142,24 +211,19 @@ def query_http_attenuation(endpoint: str, active_ids: list) -> dict:
             "name": "calculate_attenuation",
             "arguments": {"active_cme_ids": active_ids},
         },
-    }).encode("utf-8")
-
-    req = Request(url, data=payload, headers={"Content-Type": "application/json"})
-    response = urlopen(req, timeout=30)
-    result = json.loads(response.read().decode("utf-8"))
-
-    if "error" in result:
-        raise Exception(f"MCP error: {result['error']}")
-
-    content = result.get("result", {}).get("content", [])
-    if content and content[0].get("type") == "text":
-        return json.loads(content[0]["text"])
-    return result.get("result", {})
+    }
+    result, _ = _mcp_post(url, payload, session_id)
+    return _extract_tool_result(result)
 
 
 def query_http_simulation(endpoint: str, active_ids: list, base_score: float, base_vector: str) -> dict:
-    url = endpoint.rstrip("/") + "/mcp"
-    payload = json.dumps({
+    url = endpoint.rstrip("/")
+    if not url.endswith("/mcp"):
+        url += "/mcp"
+
+    session_id = _mcp_init_session(url)
+
+    payload = {
         "jsonrpc": "2.0",
         "id": 2,
         "method": "tools/call",
@@ -171,19 +235,9 @@ def query_http_simulation(endpoint: str, active_ids: list, base_score: float, ba
                 "active_cme_ids": active_ids,
             },
         },
-    }).encode("utf-8")
-
-    req = Request(url, data=payload, headers={"Content-Type": "application/json"})
-    response = urlopen(req, timeout=30)
-    result = json.loads(response.read().decode("utf-8"))
-
-    if "error" in result:
-        raise Exception(f"MCP error: {result['error']}")
-
-    content = result.get("result", {}).get("content", [])
-    if content and content[0].get("type") == "text":
-        return json.loads(content[0]["text"])
-    return result.get("result", {})
+    }
+    result, _ = _mcp_post(url, payload, session_id)
+    return _extract_tool_result(result)
 
 
 def query_sqlite_attenuation(db_path: str, active_ids: list) -> dict:

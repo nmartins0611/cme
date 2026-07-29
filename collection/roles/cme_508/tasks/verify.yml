@@ -50,7 +50,7 @@
   ansible.builtin.assert:
     that:
       - "cme_508_verify_2.stdout is search('No write permissions for BUILTIN\\Users on path prefix directories')"
-    fail_msg: "CME-508 FAILED — expected 'No write permissions for BUILTIN\Users on path prefix directories'"
+    fail_msg: "CME-508 FAILED — expected 'No write permissions for BUILTIN\\Users on path prefix directories'"
     success_msg: "CME-508 PASSED — Quoted Service Path Enforcement (Windows)"
   ignore_errors: true
   register: cme_508_assert_2

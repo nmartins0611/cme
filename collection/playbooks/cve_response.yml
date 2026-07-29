@@ -1,0 +1,324 @@
+---
+# CME CVE Response Playbook
+#
+# The full workflow: CVE comes in → query CME for relevant controls →
+# verify current posture → remediate → verify again → report.
+#
+# This is the playbook EDA would trigger when a scanner finds a CVE.
+#
+# Usage:
+#   ansible-playbook cme.controls.cve_response \
+#     -e cme_mcp_endpoint=http://cme-server:8000 \
+#     -e cvss_vector="CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H" \
+#     -e '{"cwe_ids": ["CWE-119", "CWE-787"]}' \
+#     -e cme_report_dir=./reports \
+#     -i inventory.yml
+#
+# With EDA, the extra-vars come from the event payload (scanner webhook).
+
+###############################################################################
+# PHASE 1: QUERY CME MCP — Which controls mitigate this CVE?
+###############################################################################
+- name: "PHASE 1 — Query CME for relevant controls"
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    cme_mcp_endpoint: ""
+    cvss_vector: ""
+    cwe_ids: []
+    cve_id: "CVE-UNKNOWN"
+    cme_report_dir: "{{ playbook_dir }}/../../reports"
+
+  tasks:
+    - name: Validate MCP endpoint is provided
+      ansible.builtin.assert:
+        that:
+          - cme_mcp_endpoint | length > 0
+        fail_msg: "cme_mcp_endpoint is required — set it to the CME MCP server URL"
+
+    - name: Validate at least one query parameter
+      ansible.builtin.assert:
+        that:
+          - cvss_vector | length > 0 or cwe_ids | length > 0
+        fail_msg: "Provide cvss_vector, cwe_ids, or both"
+
+    - name: Query CME MCP for mitigating controls
+      cme_query:
+        cvss_vector: "{{ cvss_vector }}"
+        cwe_ids: "{{ cwe_ids }}"
+        mcp_endpoint: "{{ cme_mcp_endpoint }}"
+      register: cme_query_result
+
+    - name: Display query results
+      ansible.builtin.debug:
+        msg: >-
+          CME found {{ cme_query_result.cme_ids | length }} controls for {{ cve_id }}
+          ({{ cme_query_result.query_summary.matched_by_vector }} by CVSS vector,
+          {{ cme_query_result.query_summary.matched_by_cwe }} by CWE).
+          Controls: {{ cme_query_result.cme_ids | join(', ') }}
+
+    - name: Fail if no controls found
+      ansible.builtin.assert:
+        that:
+          - cme_query_result.cme_ids | length > 0
+        fail_msg: "CME found no controls for this CVE. Manual triage required."
+
+    - name: Build dynamic profile
+      ansible.builtin.set_fact:
+        cme_dynamic_profile:
+          controls: "{{ cme_query_result.cme_ids | map('lower') | map('replace', '-', '_') | list }}"
+        cme_dynamic_controls_detail: "{{ cme_query_result.controls }}"
+        cme_dynamic_cme_ids: "{{ cme_query_result.cme_ids }}"
+
+    - name: Write dynamic profile to disk
+      ansible.builtin.copy:
+        content: |
+          ---
+          # Dynamic profile generated for {{ cve_id }}
+          # CVSS: {{ cvss_vector | default('N/A') }}
+          # CWE: {{ cwe_ids | join(', ') | default('N/A') }}
+          # Generated: {{ ansible_date_time.iso8601 }}
+          controls:
+          {% for cid in cme_dynamic_profile.controls %}
+            - {{ cid }}
+          {% endfor %}
+        dest: "{{ cme_report_dir }}/cve_profile_{{ cve_id | replace('-', '_') }}.yml"
+        mode: "0644"
+      delegate_to: localhost
+
+    - name: Display dynamic profile
+      ansible.builtin.debug:
+        msg: "Dynamic profile: {{ cme_dynamic_profile.controls | join(', ') }}"
+
+###############################################################################
+# PHASE 2: PRE-REMEDIATION VERIFY
+###############################################################################
+- name: "PHASE 2 — PRE-Remediation Verification"
+  hosts: all
+  gather_facts: true
+  vars:
+    cme_results: []
+
+  tasks:
+    - name: Load dynamic profile from Phase 1
+      ansible.builtin.set_fact:
+        cme_target_controls: "{{ hostvars['localhost']['cme_dynamic_profile']['controls'] }}"
+
+    - name: Verify each control
+      ansible.builtin.include_role:
+        name: "{{ control_id }}"
+        tasks_from: verify.yml
+      loop: "{{ cme_target_controls }}"
+      loop_control:
+        loop_var: control_id
+      ignore_errors: true
+
+    - name: Save PRE results
+      ansible.builtin.set_fact:
+        cme_pre_results: "{{ cme_results }}"
+        cme_pre_passed: "{{ cme_results | selectattr('status', 'equalto', 'passed') | list }}"
+        cme_pre_failed: "{{ cme_results | selectattr('status', 'equalto', 'failed') | list }}"
+
+    - name: Display PRE posture
+      ansible.builtin.debug:
+        msg: >-
+          PRE — {{ inventory_hostname }}:
+          {{ cme_pre_passed | length }} passed,
+          {{ cme_pre_failed | length }} failed
+          out of {{ cme_results | length }} controls
+
+###############################################################################
+# PHASE 3: REMEDIATE
+###############################################################################
+- name: "PHASE 3 — Remediation"
+  hosts: all
+  gather_facts: true
+
+  tasks:
+    - name: Load dynamic profile
+      ansible.builtin.set_fact:
+        cme_target_controls: "{{ hostvars['localhost']['cme_dynamic_profile']['controls'] }}"
+
+    - name: Apply each control
+      ansible.builtin.include_tasks:
+        file: _apply_control.yml
+      loop: "{{ cme_target_controls }}"
+      loop_control:
+        loop_var: control_id
+
+###############################################################################
+# PHASE 4: POST-REMEDIATION VERIFY + REPORT
+###############################################################################
+- name: "PHASE 4 — POST-Remediation Verification and Report"
+  hosts: all
+  gather_facts: true
+  vars:
+    cme_results: []
+    cme_report_dir: "{{ playbook_dir }}/../../reports"
+    cve_id: "CVE-UNKNOWN"
+    cvss_vector: ""
+    cwe_ids: []
+
+  tasks:
+    - name: Load dynamic profile
+      ansible.builtin.set_fact:
+        cme_target_controls: "{{ hostvars['localhost']['cme_dynamic_profile']['controls'] }}"
+
+    - name: Verify each control
+      ansible.builtin.include_role:
+        name: "{{ control_id }}"
+        tasks_from: verify.yml
+      loop: "{{ cme_target_controls }}"
+      loop_control:
+        loop_var: control_id
+      ignore_errors: true
+
+    - name: Save POST results
+      ansible.builtin.set_fact:
+        cme_post_results: "{{ cme_results }}"
+        cme_post_passed: "{{ cme_results | selectattr('status', 'equalto', 'passed') | list }}"
+        cme_post_failed: "{{ cme_results | selectattr('status', 'equalto', 'failed') | list }}"
+
+    - name: Calculate remediation gains
+      ansible.builtin.set_fact:
+        cme_newly_passed: >-
+          {{ (cme_post_passed | map(attribute='cme_id') | list)
+             | difference(cme_pre_passed | map(attribute='cme_id') | list) }}
+        cme_still_failed: "{{ cme_post_failed | map(attribute='cme_id') | list }}"
+
+    - name: Ensure report directory exists
+      ansible.builtin.file:
+        path: "{{ cme_report_dir }}"
+        state: directory
+        mode: "0755"
+      delegate_to: localhost
+      become: false
+      run_once: true
+
+    - name: Generate PRE report
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/../templates/verify_report.html.j2"
+        dest: "{{ cme_report_dir }}/cve_{{ cve_id }}_{{ inventory_hostname }}_PRE.html"
+        mode: "0644"
+      vars:
+        cme_results: "{{ cme_pre_results }}"
+        cme_profile: "{{ cve_id }}"
+      delegate_to: localhost
+      become: false
+
+    - name: Generate POST report
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/../templates/verify_report.html.j2"
+        dest: "{{ cme_report_dir }}/cve_{{ cve_id }}_{{ inventory_hostname }}_POST.html"
+        mode: "0644"
+      vars:
+        cme_results: "{{ cme_post_results }}"
+        cme_profile: "{{ cve_id }}"
+      delegate_to: localhost
+      become: false
+
+    - name: Display phase 4 summary
+      ansible.builtin.debug:
+        msg: >-
+          {{ inventory_hostname }}: PRE {{ cme_pre_passed | length }}/{{ cme_pre_results | length }},
+          POST {{ cme_post_passed | length }}/{{ cme_post_results | length }},
+          +{{ cme_newly_passed | length }} remediated
+
+###############################################################################
+# PHASE 5: CVSS SCORE ATTENUATION
+###############################################################################
+- name: "PHASE 5 — CVSS Score Attenuation"
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    cme_mcp_endpoint: ""
+    cvss_vector: ""
+    cve_id: "CVE-UNKNOWN"
+    cwe_ids: []
+    cme_report_dir: "{{ playbook_dir }}/../../reports"
+
+  tasks:
+    - name: Collect PRE active control IDs across all hosts
+      ansible.builtin.set_fact:
+        all_pre_active: >-
+          {{ groups['all'] | map('extract', hostvars, 'cme_pre_passed')
+             | select('defined') | flatten
+             | map(attribute='cme_id') | unique | list }}
+
+    - name: Collect POST active control IDs across all hosts
+      ansible.builtin.set_fact:
+        all_post_active: >-
+          {{ groups['all'] | map('extract', hostvars, 'cme_post_passed')
+             | select('defined') | flatten
+             | map(attribute='cme_id') | unique | list }}
+
+    - name: Collect POST failed control IDs
+      ansible.builtin.set_fact:
+        all_post_failed: >-
+          {{ groups['all'] | map('extract', hostvars, 'cme_post_failed')
+             | select('defined') | flatten
+             | map(attribute='cme_id') | unique | list }}
+
+    - name: Collect newly passed controls
+      ansible.builtin.set_fact:
+        all_newly_passed: >-
+          {{ groups['all'] | map('extract', hostvars, 'cme_newly_passed')
+             | select('defined') | flatten | unique | list }}
+
+    - name: Calculate PRE attenuation score
+      cme_score:
+        active_controls: "{{ all_pre_active }}"
+        mcp_endpoint: "{{ cme_mcp_endpoint }}"
+        base_score: 9.8
+        base_vector: "{{ cvss_vector }}"
+      register: pre_score
+      when: cvss_vector | length > 0
+
+    - name: Calculate POST attenuation score
+      cme_score:
+        active_controls: "{{ all_post_active }}"
+        mcp_endpoint: "{{ cme_mcp_endpoint }}"
+        base_score: 9.8
+        base_vector: "{{ cvss_vector }}"
+      register: post_score
+      when: cvss_vector | length > 0
+
+    - name: Display final CVE response summary
+      ansible.builtin.debug:
+        msg: |
+          ═══════════════════════════════════════════════════════════
+                    CVE RESPONSE SUMMARY — {{ cve_id }}
+          ═══════════════════════════════════════════════════════════
+           CVSS:    {{ cvss_vector | default('N/A') }}
+           CWE:     {{ cwe_ids | join(', ') | default('N/A') }}
+           Hosts:   {{ groups['all'] | length }}
+          ───────────────────────────────────────────────────────────
+           POSTURE:
+             PRE:     {{ all_pre_active | length }} controls active
+             POST:    {{ all_post_active | length }} controls active
+             GAINED:  +{{ all_newly_passed | length }} remediated
+          ───────────────────────────────────────────────────────────
+           CVSS ATTENUATION:
+             PRE:  {{ pre_score.attenuation | default([]) | length }} metrics attenuated
+          {% for a in (pre_score.attenuation | default([])) %}
+                    {{ a.metric }}: → {{ a.modified_to }}  ({{ a.contributing_controls | length }} controls)
+          {% endfor %}
+             POST: {{ post_score.attenuation | default([]) | length }} metrics attenuated
+          {% for a in (post_score.attenuation | default([])) %}
+                    {{ a.metric }}: → {{ a.modified_to }}  ({{ a.contributing_controls | length }} controls)
+          {% endfor %}
+          ───────────────────────────────────────────────────────────
+           SIMULATION:
+             Original Score:  {{ cvss_vector }}  ({{ pre_score.simulation.original.score | default('9.8') }})
+             PRE  Modifications: {{ pre_score.simulation.modifications_applied | default(0) }} vector changes
+             POST Modifications: {{ post_score.simulation.modifications_applied | default(0) }} vector changes
+             Modified Vector: {{ post_score.simulation.modified_vector | default('N/A') }}
+          ───────────────────────────────────────────────────────────
+           Newly Passed: {{ all_newly_passed | join(', ') | default('none') }}
+          ═══════════════════════════════════════════════════════════
+           Reports:
+             PRE:  {{ cme_report_dir }}/cve_{{ cve_id }}_*_PRE.html
+             POST: {{ cme_report_dir }}/cve_{{ cve_id }}_*_POST.html
+          ═══════════════════════════════════════════════════════════
