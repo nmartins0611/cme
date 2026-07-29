@@ -1,0 +1,2 @@
+# No additional Python packages required.
+# cme_score and cme_query modules use stdlib urllib.
