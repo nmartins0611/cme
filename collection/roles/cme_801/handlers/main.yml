@@ -1,2 +1,6 @@
 ---
-# Handlers for CME-801
+- name: restart sshd
+  ansible.builtin.service:
+    name: sshd
+    state: restarted
+  listen: restart sshd
