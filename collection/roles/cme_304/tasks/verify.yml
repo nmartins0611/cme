@@ -2,13 +2,17 @@
 # CME-304: AppArmor (Enforcing Profile)
 # Verification: Check AppArmor status and profile enforcement
 
+- name: "CME-304 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_304_skip | default(false)
+
 - name: "CME-304 | Run verification command"
   ansible.builtin.shell:
     cmd: "aa-status --enforced 2>/dev/null | head -5"
   register: cme_304_verify_0
   changed_when: false
   failed_when: false
-  when: ansible_system == 'debian'
+  when: ansible_os_family == 'Debian'
 
 - name: "CME-304 | Assert control is active"
   ansible.builtin.assert:
@@ -18,7 +22,7 @@
     success_msg: "CME-304 PASSED — AppArmor (Enforcing Profile)"
   ignore_errors: true
   register: cme_304_assert_0
-  when: ansible_system == 'debian' and cme_304_verify_0 is not skipped
+  when: ansible_os_family == 'Debian' and cme_304_verify_0 is not skipped
 
 - name: "CME-304 | Record result"
   ansible.builtin.set_fact:

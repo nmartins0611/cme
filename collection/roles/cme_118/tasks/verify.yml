@@ -2,6 +2,10 @@
 # CME-118: Protected File Links (Kernel Symlink/Hardlink Protection)
 # Verification: Verify that all four protected file link sysctls are enabled. Check sysctl runtime values and persistence configuration.
 
+- name: "CME-118 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_118_skip | default(false)
+
 - name: "CME-118 | Run verification command (linux)"
   ansible.builtin.shell:
     cmd: "sysctl fs.protected_symlinks"
@@ -76,4 +80,4 @@
 
 - name: "CME-118 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-118', 'control_name': 'Protected File Links (Kernel Symlink/Hardlink Protection)', 'tactic': 'Harden', 'category': 'Kernel Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_118_assert_0 is defined and cme_118_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_118_assert_0 is defined) | ternary(cme_118_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-118', 'control_name': 'Protected File Links (Kernel Symlink/Hardlink Protection)', 'tactic': 'Harden', 'category': 'Kernel Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((((cme_118_assert_0 is not defined or cme_118_assert_0 is not failed) and (cme_118_assert_1 is not defined or cme_118_assert_1 is not failed) and (cme_118_assert_2 is not defined or cme_118_assert_2 is not failed) and (cme_118_assert_3 is not defined or cme_118_assert_3 is not failed)) and (cme_118_assert_0 is defined or cme_118_assert_1 is defined or cme_118_assert_2 is defined or cme_118_assert_3 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_118_assert_0 is defined and cme_118_assert_0 is failed) | ternary(cme_118_assert_0.msg | default(''), '')), ((cme_118_assert_1 is defined and cme_118_assert_1 is failed) | ternary(cme_118_assert_1.msg | default(''), '')), ((cme_118_assert_2 is defined and cme_118_assert_2 is failed) | ternary(cme_118_assert_2.msg | default(''), '')), ((cme_118_assert_3 is defined and cme_118_assert_3 is failed) | ternary(cme_118_assert_3.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

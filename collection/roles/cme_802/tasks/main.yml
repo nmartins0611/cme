@@ -1,15 +1,44 @@
 ---
 # CME-802: Password Quality Enforcement (pwquality)
-# Remediation strategy: generic (review and customize for your environment)
-# Verification method: Check pwquality configuration
 
-- name: "CME-802 | Remediation requires environment-specific configuration"
-  ansible.builtin.debug:
-    msg: >-
-      CME-802 (Password Quality Enforcement (pwquality)) remediation depends on your
-      environment configuration. Override this role's tasks/main.yml
-      with site-specific remediation steps.
-  when: not (cme_802_custom_remediation | default(false))
+- name: "CME-802 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_802_skip | default(false)
 
-- name: "CME-802 | Verify current state"
+- name: "CME-802 | Configure minlen in /etc/security/pwquality.conf"
+  ansible.builtin.lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: "^#?minlen"
+    line: "minlen = 14"
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-802 | Configure dcredit in /etc/security/pwquality.conf"
+  ansible.builtin.lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: "^#?dcredit"
+    line: "dcredit = -1"
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-802 | Configure ucredit in /etc/security/pwquality.conf"
+  ansible.builtin.lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: "^#?ucredit"
+    line: "ucredit = -1"
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-802 | Configure lcredit in /etc/security/pwquality.conf"
+  ansible.builtin.lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: "^#?lcredit"
+    line: "lcredit = -1"
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-802 | Configure ocredit in /etc/security/pwquality.conf"
+  ansible.builtin.lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: "^#?ocredit"
+    line: "ocredit = -1"
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-802 | Verify after remediation"
   ansible.builtin.include_tasks: verify.yml

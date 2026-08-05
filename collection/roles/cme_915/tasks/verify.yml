@@ -2,6 +2,10 @@
 # CME-915: Cross-Origin Request Restriction (Reverse Proxy Origin Enforcement)
 # Verification: Check reverse proxy configuration for Origin/Referer header validation on state-changing requests. The proxy should reject requests with an Origin not in the trusted allowlist.
 
+- name: "CME-915 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_915_skip | default(false)
+
 - name: "CME-915 | Run verification command (rhel)"
   ansible.builtin.shell:
     cmd: "grep -rE \"valid_referers|map.*\\$http_origin\" /etc/nginx/"
@@ -66,7 +70,7 @@
 - name: "CME-915 | Assert control is active (any)"
   ansible.builtin.assert:
     that:
-      - "cme_915_verify_3.stdout is search('403')"
+      - "cme_915_verify_3.stdout | trim == '403'"
     fail_msg: "CME-915 FAILED — expected '403'"
     success_msg: "CME-915 PASSED — Cross-Origin Request Restriction (Reverse Proxy Origin Enforcement)"
   ignore_errors: true
@@ -75,4 +79,4 @@
 
 - name: "CME-915 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-915', 'control_name': 'Cross-Origin Request Restriction (Reverse Proxy Origin Enforcement)', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_915_assert_0 is defined and cme_915_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_915_assert_0 is defined) | ternary(cme_915_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-915', 'control_name': 'Cross-Origin Request Restriction (Reverse Proxy Origin Enforcement)', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((((cme_915_assert_0 is not defined or cme_915_assert_0 is not failed) and (cme_915_assert_1 is not defined or cme_915_assert_1 is not failed) and (cme_915_assert_2 is not defined or cme_915_assert_2 is not failed) and (cme_915_assert_3 is not defined or cme_915_assert_3 is not failed)) and (cme_915_assert_0 is defined or cme_915_assert_1 is defined or cme_915_assert_2 is defined or cme_915_assert_3 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_915_assert_0 is defined and cme_915_assert_0 is failed) | ternary(cme_915_assert_0.msg | default(''), '')), ((cme_915_assert_1 is defined and cme_915_assert_1 is failed) | ternary(cme_915_assert_1.msg | default(''), '')), ((cme_915_assert_2 is defined and cme_915_assert_2 is failed) | ternary(cme_915_assert_2.msg | default(''), '')), ((cme_915_assert_3 is defined and cme_915_assert_3 is failed) | ternary(cme_915_assert_3.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

@@ -2,6 +2,10 @@
 # CME-916: SameSite Cookie Attribute Enforcement
 # Verification: Verify that all Set-Cookie response headers include SameSite=Lax or SameSite=Strict. Check web server or reverse proxy configuration for cookie attribute enforcement directives.
 
+- name: "CME-916 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_916_skip | default(false)
+
 - name: "CME-916 | Run verification command (rhel)"
   ansible.builtin.shell:
     cmd: "grep -rE \"Header.*(edit|always set).*Set-Cookie.*SameSite\" /etc/httpd/conf.d/"
@@ -57,4 +61,4 @@
 
 - name: "CME-916 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-916', 'control_name': 'SameSite Cookie Attribute Enforcement', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_916_assert_0 is defined and cme_916_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_916_assert_0 is defined) | ternary(cme_916_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-916', 'control_name': 'SameSite Cookie Attribute Enforcement', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((((cme_916_assert_0 is not defined or cme_916_assert_0 is not failed) and (cme_916_assert_1 is not defined or cme_916_assert_1 is not failed) and (cme_916_assert_2 is not defined or cme_916_assert_2 is not failed)) and (cme_916_assert_0 is defined or cme_916_assert_1 is defined or cme_916_assert_2 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_916_assert_0 is defined and cme_916_assert_0 is failed) | ternary(cme_916_assert_0.msg | default(''), '')), ((cme_916_assert_1 is defined and cme_916_assert_1 is failed) | ternary(cme_916_assert_1.msg | default(''), '')), ((cme_916_assert_2 is defined and cme_916_assert_2 is failed) | ternary(cme_916_assert_2.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

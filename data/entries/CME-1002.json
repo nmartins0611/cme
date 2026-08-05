@@ -26,8 +26,8 @@
         "platform": "linux"
       },
       {
-        "command": "auditctl -l | wc -l",
-        "expected": "Non-zero rule count",
+        "command": "test $(auditctl -l 2>/dev/null | wc -l) -gt 0 && echo 'rules_present' || echo 'no_rules'",
+        "expected": "rules_present",
         "platform": "linux"
       }
     ]

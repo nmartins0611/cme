@@ -2,6 +2,10 @@
 # CME-116: FORTIFY_SOURCE (Buffer Overflow Detection)
 # Verification: Check that system packages are compiled with _FORTIFY_SOURCE=2 or higher
 
+- name: "CME-116 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_116_skip | default(false)
+
 - name: "CME-116 | Run verification command (rhel)"
   ansible.builtin.shell:
     cmd: "rpm -q --queryformat \"%{OPTFLAGS}\" redhat-rpm-config 2>/dev/null | grep -o \"_FORTIFY_SOURCE=[0-9]\""
@@ -58,4 +62,4 @@
 
 - name: "CME-116 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-116', 'control_name': 'FORTIFY_SOURCE (Buffer Overflow Detection)', 'tactic': 'Harden', 'category': 'Kernel Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_116_assert_0 is defined and cme_116_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_116_assert_0 is defined) | ternary(cme_116_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-116', 'control_name': 'FORTIFY_SOURCE (Buffer Overflow Detection)', 'tactic': 'Harden', 'category': 'Kernel Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((((cme_116_assert_0 is not defined or cme_116_assert_0 is not failed) and (cme_116_assert_1 is not defined or cme_116_assert_1 is not failed) and (cme_116_assert_2 is not defined or cme_116_assert_2 is not failed)) and (cme_116_assert_0 is defined or cme_116_assert_1 is defined or cme_116_assert_2 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_116_assert_0 is defined and cme_116_assert_0 is failed) | ternary(cme_116_assert_0.msg | default(''), '')), ((cme_116_assert_1 is defined and cme_116_assert_1 is failed) | ternary(cme_116_assert_1.msg | default(''), '')), ((cme_116_assert_2 is defined and cme_116_assert_2 is failed) | ternary(cme_116_assert_2.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

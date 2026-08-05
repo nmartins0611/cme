@@ -2,6 +2,10 @@
 # CME-914: Strict CORS Origin Allowlist Enforcement
 # Verification: Test that the server rejects unapproved origins and does not reflect arbitrary Origin headers in CORS response headers
 
+- name: "CME-914 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_914_skip | default(false)
+
 - name: "CME-914 | Run verification command (any)"
   ansible.builtin.shell:
     cmd: "curl -sI -H 'Origin: https://evil.example.com' http://localhost:8080/api/v1/user | grep -i 'access-control-allow'"
@@ -38,4 +42,4 @@
 
 - name: "CME-914 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-914', 'control_name': 'Strict CORS Origin Allowlist Enforcement', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_914_assert_0 is defined and cme_914_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_914_assert_0 is defined) | ternary(cme_914_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-914', 'control_name': 'Strict CORS Origin Allowlist Enforcement', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((((cme_914_assert_0 is not defined or cme_914_assert_0 is not failed) and (cme_914_assert_1 is not defined or cme_914_assert_1 is not failed)) and (cme_914_assert_0 is defined or cme_914_assert_1 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_914_assert_0 is defined and cme_914_assert_0 is failed) | ternary(cme_914_assert_0.msg | default(''), '')), ((cme_914_assert_1 is defined and cme_914_assert_1 is failed) | ternary(cme_914_assert_1.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

@@ -2,6 +2,10 @@
 # CME-902: Disable Unused Network Services
 # Verification: List listening services and verify only necessary ones are active
 
+- name: "CME-902 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_902_skip | default(false)
+
 - name: "CME-902 | Run verification command (linux)"
   ansible.builtin.shell:
     cmd: "ss -tlnp | grep -v '127.0.0.1\\|::1'"
@@ -21,7 +25,7 @@
   when: ansible_os_family != 'Windows' and cme_902_verify_0 is not skipped
 
 - name: "CME-902 | Run verification command (windows)"
-  ansible.builtin.shell:
+  ansible.windows.win_shell:
     cmd: "Get-NetTCPConnection -State Listen | Where-Object { $_.LocalAddress -ne '127.0.0.1' -and $_.LocalAddress -ne '::1' } | Measure-Object | Select-Object -ExpandProperty Count"
   register: cme_902_verify_1
   changed_when: false
@@ -40,4 +44,4 @@
 
 - name: "CME-902 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-902', 'control_name': 'Disable Unused Network Services', 'tactic': 'Harden', 'category': 'Protocol Hardening', 'control_layer': 'Network', 'confidence': 'High', 'status': ((cme_902_assert_0 is defined and cme_902_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_902_assert_0 is defined) | ternary(cme_902_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-902', 'control_name': 'Disable Unused Network Services', 'tactic': 'Harden', 'category': 'Protocol Hardening', 'control_layer': 'Network', 'confidence': 'High', 'status': ((((cme_902_assert_0 is not defined or cme_902_assert_0 is not failed) and (cme_902_assert_1 is not defined or cme_902_assert_1 is not failed)) and (cme_902_assert_0 is defined or cme_902_assert_1 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_902_assert_0 is defined and cme_902_assert_0 is failed) | ternary(cme_902_assert_0.msg | default(''), '')), ((cme_902_assert_1 is defined and cme_902_assert_1 is failed) | ternary(cme_902_assert_1.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

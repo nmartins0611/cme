@@ -2,6 +2,10 @@
 # CME-201: Zero Trust Gateway / Identity-Aware Proxy
 # Verification: Verify identity-aware proxy or zero trust gateway is in enforcement path
 
+- name: "CME-201 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_201_skip | default(false)
+
 - name: "CME-201 | Run verification command"
   ansible.builtin.shell:
     cmd: "curl -s -o /dev/null -w '%{http_code}' http://service.internal/healthz"
@@ -12,7 +16,7 @@
 - name: "CME-201 | Assert control is active"
   ansible.builtin.assert:
     that:
-      - "cme_201_verify_0.stdout is search('401')"
+      - "cme_201_verify_0.stdout | trim == '401'"
     fail_msg: "CME-201 FAILED — expected '401'"
     success_msg: "CME-201 PASSED — Zero Trust Gateway / Identity-Aware Proxy"
   ignore_errors: true

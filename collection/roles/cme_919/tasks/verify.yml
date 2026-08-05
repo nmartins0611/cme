@@ -2,6 +2,10 @@
 # CME-919: JIT Compiler Hardening (JIT Restriction / V8 Sandbox)
 # Verification: Verify JIT hardening is enabled in browser or runtime configuration. Check for jitless mode, V8 Sandbox flags, or JIT disabling in Firefox preferences.
 
+- name: "CME-919 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_919_skip | default(false)
+
 - name: "CME-919 | Run verification command (linux)"
   ansible.builtin.shell:
     cmd: "grep -r 'jitless\\|--js-flags.*--jitless' /etc/chromium/ /opt/google/chrome/ ~/.config/chromium/ 2>/dev/null"
@@ -56,7 +60,7 @@
   when: cme_919_verify_2 is not skipped
 
 - name: "CME-919 | Run verification command (windows)"
-  ansible.builtin.shell:
+  ansible.windows.win_shell:
     cmd: "reg query \"HKLM\\SOFTWARE\\Policies\\Google\\Chrome\" /v CommandLineFlagSecurityWarningsEnabled 2>nul"
   register: cme_919_verify_3
   changed_when: false
@@ -75,4 +79,4 @@
 
 - name: "CME-919 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-919', 'control_name': 'JIT Compiler Hardening (JIT Restriction / V8 Sandbox)', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_919_assert_0 is defined and cme_919_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_919_assert_0 is defined) | ternary(cme_919_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-919', 'control_name': 'JIT Compiler Hardening (JIT Restriction / V8 Sandbox)', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((((cme_919_assert_0 is not defined or cme_919_assert_0 is not failed) and (cme_919_assert_1 is not defined or cme_919_assert_1 is not failed) and (cme_919_assert_2 is not defined or cme_919_assert_2 is not failed) and (cme_919_assert_3 is not defined or cme_919_assert_3 is not failed)) and (cme_919_assert_0 is defined or cme_919_assert_1 is defined or cme_919_assert_2 is defined or cme_919_assert_3 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_919_assert_0 is defined and cme_919_assert_0 is failed) | ternary(cme_919_assert_0.msg | default(''), '')), ((cme_919_assert_1 is defined and cme_919_assert_1 is failed) | ternary(cme_919_assert_1.msg | default(''), '')), ((cme_919_assert_2 is defined and cme_919_assert_2 is failed) | ternary(cme_919_assert_2.msg | default(''), '')), ((cme_919_assert_3 is defined and cme_919_assert_3 is failed) | ternary(cme_919_assert_3.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

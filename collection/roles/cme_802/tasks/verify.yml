@@ -2,6 +2,10 @@
 # CME-802: Password Quality Enforcement (pwquality)
 # Verification: Check pwquality configuration
 
+- name: "CME-802 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_802_skip | default(false)
+
 - name: "CME-802 | Run verification command (rhel)"
   ansible.builtin.shell:
     cmd: "grep -E 'minlen|minclass|dcredit' /etc/security/pwquality.conf"
@@ -21,7 +25,7 @@
   when: ansible_os_family == 'RedHat' and cme_802_verify_0 is not skipped
 
 - name: "CME-802 | Run verification command (windows)"
-  ansible.builtin.shell:
+  ansible.windows.win_shell:
     cmd: "net accounts | Select-String 'Minimum password length'"
   register: cme_802_verify_1
   changed_when: false
@@ -40,4 +44,4 @@
 
 - name: "CME-802 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-802', 'control_name': 'Password Quality Enforcement (pwquality)', 'tactic': 'Harden', 'category': 'Credential Hardening', 'control_layer': 'Identity', 'confidence': 'Medium', 'status': ((cme_802_assert_0 is defined and cme_802_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_802_assert_0 is defined) | ternary(cme_802_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-802', 'control_name': 'Password Quality Enforcement (pwquality)', 'tactic': 'Harden', 'category': 'Credential Hardening', 'control_layer': 'Identity', 'confidence': 'Medium', 'status': ((((cme_802_assert_0 is not defined or cme_802_assert_0 is not failed) and (cme_802_assert_1 is not defined or cme_802_assert_1 is not failed)) and (cme_802_assert_0 is defined or cme_802_assert_1 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_802_assert_0 is defined and cme_802_assert_0 is failed) | ternary(cme_802_assert_0.msg | default(''), '')), ((cme_802_assert_1 is defined and cme_802_assert_1 is failed) | ternary(cme_802_assert_1.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

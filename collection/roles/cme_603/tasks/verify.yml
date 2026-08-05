@@ -2,6 +2,10 @@
 # CME-603: Unprivileged BPF Disabled
 # Verification: Check unprivileged_bpf_disabled sysctl
 
+- name: "CME-603 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_603_skip | default(false)
+
 - name: "CME-603 | Run verification command"
   ansible.builtin.shell:
     cmd: "cat /proc/sys/kernel/unprivileged_bpf_disabled"
@@ -13,7 +17,7 @@
 - name: "CME-603 | Assert control is active"
   ansible.builtin.assert:
     that:
-      - "cme_603_verify_0.stdout is search('1')"
+      - "cme_603_verify_0.stdout | trim == '1'"
     fail_msg: "CME-603 FAILED — expected '1'"
     success_msg: "CME-603 PASSED — Unprivileged BPF Disabled"
   ignore_errors: true

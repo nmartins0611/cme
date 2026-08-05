@@ -1,15 +1,22 @@
 ---
 # CME-1002: Audit Subsystem (auditd)
-# Remediation strategy: generic (review and customize for your environment)
-# Verification method: Verify auditd is running with rules loaded
 
-- name: "CME-1002 | Remediation requires environment-specific configuration"
-  ansible.builtin.debug:
-    msg: >-
-      CME-1002 (Audit Subsystem (auditd)) remediation depends on your
-      environment configuration. Override this role's tasks/main.yml
-      with site-specific remediation steps.
-  when: not (cme_1002_custom_remediation | default(false))
+- name: "CME-1002 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_1002_skip | default(false)
 
-- name: "CME-1002 | Verify current state"
+- name: "CME-1002 | Ensure audit is installed"
+  ansible.builtin.package:
+    name: audit
+    state: present
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1002 | Ensure auditd is running and enabled"
+  ansible.builtin.systemd:
+    name: auditd
+    state: started
+    enabled: true
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1002 | Verify after remediation"
   ansible.builtin.include_tasks: verify.yml

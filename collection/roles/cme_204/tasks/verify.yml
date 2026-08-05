@@ -2,6 +2,10 @@
 # CME-204: IPsec / WireGuard (Encrypted Transport)
 # Verification: Verify IPsec or WireGuard tunnels are established
 
+- name: "CME-204 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_204_skip | default(false)
+
 - name: "CME-204 | Run verification command"
   ansible.builtin.shell:
     cmd: "ipsec status 2>/dev/null || wg show 2>/dev/null"

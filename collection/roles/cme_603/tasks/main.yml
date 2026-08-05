@@ -1,6 +1,10 @@
 ---
 # CME-603: Unprivileged BPF Disabled
 
+- name: "CME-603 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_603_skip | default(false)
+
 - name: "CME-603 | Set kernel.unprivileged_bpf_disabled"
   ansible.posix.sysctl:
     name: kernel.unprivileged_bpf_disabled

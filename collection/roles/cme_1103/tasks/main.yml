@@ -1,17 +1,43 @@
 ---
 # CME-1103: Automated Container Image Rebuilds
 
-- name: "CME-1103 | Ensure security updates are applied (RedHat)"
+- name: "CME-1103 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_1103_skip | default(false)
+
+- name: "CME-1103 | Install dnf-automatic (RedHat)"
   ansible.builtin.dnf:
-    name: "*"
-    security: true
-    state: latest
+    name: dnf-automatic
+    state: present
   when: ansible_os_family == 'RedHat'
 
-- name: "CME-1103 | Ensure security updates are applied (Debian)"
+- name: "CME-1103 | Configure dnf-automatic to apply updates (RedHat)"
+  ansible.builtin.lineinfile:
+    path: /etc/dnf/automatic.conf
+    regexp: "^#?apply_updates"
+    line: "apply_updates = yes"
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-1103 | Enable dnf-automatic-install.timer (RedHat)"
+  ansible.builtin.systemd:
+    name: dnf-automatic-install.timer
+    state: started
+    enabled: true
+  when: ansible_os_family == 'RedHat'
+
+- name: "CME-1103 | Install unattended-upgrades (Debian)"
   ansible.builtin.apt:
-    upgrade: safe
-    update_cache: true
+    name: unattended-upgrades
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: "CME-1103 | Enable unattended-upgrades (Debian)"
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+    mode: "0644"
   when: ansible_os_family == 'Debian'
 
 - name: "CME-1103 | Verify after remediation"

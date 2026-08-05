@@ -2,6 +2,10 @@
 # CME-1303: Application-Level Filesystem Access Confinement
 # Verification: Verify application restricts filesystem operations to designated directories
 
+- name: "CME-1303 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_1303_skip | default(false)
+
 - name: "CME-1303 | Run verification command"
   ansible.builtin.shell:
     cmd: "grep -rn 'chroot\\|basedir\\|allowed_paths\\|MEDIA_ROOT\\|UPLOAD_DIR' <app_source>/"

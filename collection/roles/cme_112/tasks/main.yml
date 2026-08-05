@@ -3,6 +3,10 @@
 # Remediation strategy: generic (review and customize for your environment)
 # Verification method: Check binary for Full RELRO and PIE
 
+- name: "CME-112 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_112_skip | default(false)
+
 - name: "CME-112 | Remediation requires environment-specific configuration"
   ansible.builtin.debug:
     msg: >-

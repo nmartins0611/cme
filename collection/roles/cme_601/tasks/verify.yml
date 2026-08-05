@@ -2,6 +2,10 @@
 # CME-601: Kernel-Level Syscall Filtering (seccomp)
 # Verification: Check process seccomp status
 
+- name: "CME-601 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_601_skip | default(false)
+
 - name: "CME-601 | Run verification command"
   ansible.builtin.shell:
     cmd: "grep Seccomp /proc/<pid>/status"

@@ -2,6 +2,10 @@
 # CME-909: Default-Deny API Authorization Policy
 # Verification: Verify that unauthenticated requests to non-public endpoints are rejected; inspect framework configuration for default-deny authorization policy
 
+- name: "CME-909 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_909_skip | default(false)
+
 - name: "CME-909 | Run verification command (any)"
   ansible.builtin.shell:
     cmd: "curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/api/v1/admin/users"
@@ -38,4 +42,4 @@
 
 - name: "CME-909 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-909', 'control_name': 'Default-Deny API Authorization Policy', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_909_assert_0 is defined and cme_909_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_909_assert_0 is defined) | ternary(cme_909_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-909', 'control_name': 'Default-Deny API Authorization Policy', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((((cme_909_assert_0 is not defined or cme_909_assert_0 is not failed) and (cme_909_assert_1 is not defined or cme_909_assert_1 is not failed)) and (cme_909_assert_0 is defined or cme_909_assert_1 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_909_assert_0 is defined and cme_909_assert_0 is failed) | ternary(cme_909_assert_0.msg | default(''), '')), ((cme_909_assert_1 is defined and cme_909_assert_1 is failed) | ternary(cme_909_assert_1.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

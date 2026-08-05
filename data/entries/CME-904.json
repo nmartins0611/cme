@@ -24,7 +24,7 @@
     "method": "Verify WAF is in enforcement mode with rules loaded",
     "commands": [
       {
-        "command": "curl -s -o /dev/null -w '%{http_code}' 'http://target/?q=<script>alert(1)</script>'",
+        "command": "curl -s -o /dev/null -w '%{http_code}' \"${CME_904_TARGET_URL:-http://localhost}/?q=<script>alert(1)</script>\"",
         "expected": "403",
         "platform": "any"
       }

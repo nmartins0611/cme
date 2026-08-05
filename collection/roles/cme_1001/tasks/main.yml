@@ -1,15 +1,22 @@
 ---
 # CME-1001: EDR Agent (Endpoint Detection & Response)
-# Remediation strategy: generic (review and customize for your environment)
-# Verification method: Verify EDR agent is running and connected to management console
 
-- name: "CME-1001 | Remediation requires environment-specific configuration"
-  ansible.builtin.debug:
-    msg: >-
-      CME-1001 (EDR Agent (Endpoint Detection & Response)) remediation depends on your
-      environment configuration. Override this role's tasks/main.yml
-      with site-specific remediation steps.
-  when: not (cme_1001_custom_remediation | default(false))
+- name: "CME-1001 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_1001_skip | default(false)
 
-- name: "CME-1001 | Verify current state"
+- name: "CME-1001 | Ensure falco is installed"
+  ansible.builtin.package:
+    name: falco
+    state: present
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1001 | Ensure falco is running and enabled"
+  ansible.builtin.systemd:
+    name: falco
+    state: started
+    enabled: true
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1001 | Verify after remediation"
   ansible.builtin.include_tasks: verify.yml

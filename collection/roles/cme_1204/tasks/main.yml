@@ -1,11 +1,62 @@
 ---
 # CME-1204: Service Watchdog and Automatic Restart (systemd WatchdogSec/Restart)
 
-- name: "CME-1204 | Ensure sshd is running and enabled"
-  ansible.builtin.systemd:
-    name: sshd
-    state: started
-    enabled: true
+- name: "CME-1204 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_1204_skip | default(false)
+
+- name: "CME-1204 | Configure PermitRootLogin"
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?PermitRootLogin"
+    line: "PermitRootLogin no"
+    validate: "sshd -t -f %s"
+  notify: restart sshd
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1204 | Configure X11Forwarding"
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?X11Forwarding"
+    line: "X11Forwarding no"
+    validate: "sshd -t -f %s"
+  notify: restart sshd
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1204 | Configure MaxAuthTries"
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?MaxAuthTries"
+    line: "MaxAuthTries 4"
+    validate: "sshd -t -f %s"
+  notify: restart sshd
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1204 | Configure PermitEmptyPasswords"
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?PermitEmptyPasswords"
+    line: "PermitEmptyPasswords no"
+    validate: "sshd -t -f %s"
+  notify: restart sshd
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1204 | Configure ClientAliveInterval"
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?ClientAliveInterval"
+    line: "ClientAliveInterval 300"
+    validate: "sshd -t -f %s"
+  notify: restart sshd
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1204 | Configure ClientAliveCountMax"
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?ClientAliveCountMax"
+    line: "ClientAliveCountMax 3"
+    validate: "sshd -t -f %s"
+  notify: restart sshd
   when: ansible_os_family != 'Windows'
 
 - name: "CME-1204 | Verify after remediation"

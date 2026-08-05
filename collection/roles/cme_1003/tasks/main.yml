@@ -1,15 +1,22 @@
 ---
 # CME-1003: Falco / eBPF Runtime Security
-# Remediation strategy: generic (review and customize for your environment)
-# Verification method: Verify Falco is running with rules loaded
 
-- name: "CME-1003 | Remediation requires environment-specific configuration"
-  ansible.builtin.debug:
-    msg: >-
-      CME-1003 (Falco / eBPF Runtime Security) remediation depends on your
-      environment configuration. Override this role's tasks/main.yml
-      with site-specific remediation steps.
-  when: not (cme_1003_custom_remediation | default(false))
+- name: "CME-1003 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_1003_skip | default(false)
 
-- name: "CME-1003 | Verify current state"
+- name: "CME-1003 | Ensure falco is installed"
+  ansible.builtin.package:
+    name: falco
+    state: present
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1003 | Ensure falco is running and enabled"
+  ansible.builtin.systemd:
+    name: falco
+    state: started
+    enabled: true
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-1003 | Verify after remediation"
   ansible.builtin.include_tasks: verify.yml

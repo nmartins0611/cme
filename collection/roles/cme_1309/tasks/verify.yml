@@ -2,6 +2,10 @@
 # CME-1309: Script Engine Restriction (Sandbox / Disable)
 # Verification: Verify script consoles are disabled or sandboxed, and expression language evaluation is restricted
 
+- name: "CME-1309 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_1309_skip | default(false)
+
 - name: "CME-1309 | Run verification command (any)"
   ansible.builtin.shell:
     cmd: "curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:8080/jenkins/script --data 'script=println(1)'"
@@ -55,4 +59,4 @@
 
 - name: "CME-1309 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1309', 'control_name': 'Script Engine Restriction (Sandbox / Disable)', 'tactic': 'Harden', 'category': 'Application Input Validation', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_1309_assert_0 is defined and cme_1309_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1309_assert_0 is defined) | ternary(cme_1309_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1309', 'control_name': 'Script Engine Restriction (Sandbox / Disable)', 'tactic': 'Harden', 'category': 'Application Input Validation', 'control_layer': 'Application', 'confidence': 'High', 'status': ((((cme_1309_assert_0 is not defined or cme_1309_assert_0 is not failed) and (cme_1309_assert_1 is not defined or cme_1309_assert_1 is not failed) and (cme_1309_assert_2 is not defined or cme_1309_assert_2 is not failed)) and (cme_1309_assert_0 is defined or cme_1309_assert_1 is defined or cme_1309_assert_2 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_1309_assert_0 is defined and cme_1309_assert_0 is failed) | ternary(cme_1309_assert_0.msg | default(''), '')), ((cme_1309_assert_1 is defined and cme_1309_assert_1 is failed) | ternary(cme_1309_assert_1.msg | default(''), '')), ((cme_1309_assert_2 is defined and cme_1309_assert_2 is failed) | ternary(cme_1309_assert_2.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

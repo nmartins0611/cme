@@ -2,6 +2,10 @@
 # CME-708: Least Privilege sudo Configuration
 # Verification: Audit sudoers for overly permissive rules
 
+- name: "CME-708 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_708_skip | default(false)
+
 - name: "CME-708 | Run verification command"
   ansible.builtin.shell:
     cmd: "grep -r 'ALL=(ALL)' /etc/sudoers /etc/sudoers.d/ 2>/dev/null | grep -v NOPASSWD"

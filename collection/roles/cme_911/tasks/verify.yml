@@ -2,6 +2,10 @@
 # CME-911: Fine-Grained Administrative Permission Scoping
 # Verification: Verify that administrative roles are decomposed into atomic permissions and each admin account holds only the permissions required for their role. Attempt a cross-domain action (e.g., IdP admin trying to assign a realm-admin role) and confirm it is rejected.
 
+- name: "CME-911 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_911_skip | default(false)
+
 - name: "CME-911 | Run verification command"
   ansible.builtin.shell:
     cmd: "kcadm.sh get ui-ext/brute-force/realms/master/admin-permissions"

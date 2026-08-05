@@ -2,6 +2,10 @@
 # CME-1001: EDR Agent (Endpoint Detection & Response)
 # Verification: Verify EDR agent is running and connected to management console
 
+- name: "CME-1001 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_1001_skip | default(false)
+
 - name: "CME-1001 | Run verification command (linux)"
   ansible.builtin.shell:
     cmd: "systemctl is-active falcon-sensor 2>/dev/null || systemctl is-active mdatp 2>/dev/null"
@@ -21,7 +25,7 @@
   when: ansible_os_family != 'Windows' and cme_1001_verify_0 is not skipped
 
 - name: "CME-1001 | Run verification command (windows)"
-  ansible.builtin.shell:
+  ansible.windows.win_shell:
     cmd: "Get-Service 'Sense' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Status"
   register: cme_1001_verify_1
   changed_when: false
@@ -39,7 +43,7 @@
   when: ansible_os_family == 'Windows' and cme_1001_verify_1 is not skipped
 
 - name: "CME-1001 | Run verification command (windows)"
-  ansible.builtin.shell:
+  ansible.windows.win_shell:
     cmd: "(Get-MpComputerStatus).RealTimeProtectionEnabled"
   register: cme_1001_verify_2
   changed_when: false
@@ -58,4 +62,4 @@
 
 - name: "CME-1001 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1001', 'control_name': 'EDR Agent (Endpoint Detection & Response)', 'tactic': 'Detect', 'category': 'Runtime Detection', 'control_layer': 'Application', 'confidence': 'Medium', 'status': ((cme_1001_assert_0 is defined and cme_1001_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1001_assert_0 is defined) | ternary(cme_1001_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1001', 'control_name': 'EDR Agent (Endpoint Detection & Response)', 'tactic': 'Detect', 'category': 'Runtime Detection', 'control_layer': 'Application', 'confidence': 'Medium', 'status': ((((cme_1001_assert_0 is not defined or cme_1001_assert_0 is not failed) and (cme_1001_assert_1 is not defined or cme_1001_assert_1 is not failed) and (cme_1001_assert_2 is not defined or cme_1001_assert_2 is not failed)) and (cme_1001_assert_0 is defined or cme_1001_assert_1 is defined or cme_1001_assert_2 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_1001_assert_0 is defined and cme_1001_assert_0 is failed) | ternary(cme_1001_assert_0.msg | default(''), '')), ((cme_1001_assert_1 is defined and cme_1001_assert_1 is failed) | ternary(cme_1001_assert_1.msg | default(''), '')), ((cme_1001_assert_2 is defined and cme_1001_assert_2 is failed) | ternary(cme_1001_assert_2.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

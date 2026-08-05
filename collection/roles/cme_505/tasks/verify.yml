@@ -2,6 +2,10 @@
 # CME-505: IMA/EVM (Integrity Measurement Architecture)
 # Verification: Check IMA policy is loaded and enforcing
 
+- name: "CME-505 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_505_skip | default(false)
+
 - name: "CME-505 | Run verification command"
   ansible.builtin.shell:
     cmd: "cat /sys/kernel/security/ima/policy | head -5"

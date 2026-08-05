@@ -2,9 +2,13 @@
 # CME-904: WAF (Web Application Firewall)
 # Verification: Verify WAF is in enforcement mode with rules loaded
 
+- name: "CME-904 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_904_skip | default(false)
+
 - name: "CME-904 | Run verification command"
   ansible.builtin.shell:
-    cmd: "curl -s -o /dev/null -w '%{http_code}' 'http://target/?q=<script>alert(1)</script>'"
+    cmd: "curl -s -o /dev/null -w '%{http_code}' \"${CME_904_TARGET_URL:-http://localhost}/?q=<script>alert(1)</script>\""
   register: cme_904_verify_0
   changed_when: false
   failed_when: false
@@ -12,7 +16,7 @@
 - name: "CME-904 | Assert control is active"
   ansible.builtin.assert:
     that:
-      - "cme_904_verify_0.stdout is search('403')"
+      - "cme_904_verify_0.stdout | trim == '403'"
     fail_msg: "CME-904 FAILED — expected '403'"
     success_msg: "CME-904 PASSED — WAF (Web Application Firewall)"
   ignore_errors: true

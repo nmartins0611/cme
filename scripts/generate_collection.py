@@ -30,6 +30,7 @@ SYSCTL_PATTERN = re.compile(
 PLATFORM_MAP = {
     "linux": "ansible_os_family != 'Windows'",
     "rhel": "ansible_os_family == 'RedHat'",
+    "debian": "ansible_os_family == 'Debian'",
     "windows": "ansible_os_family == 'Windows'",
     "any": "true",
     "kubernetes": "cme_kubernetes_host | default(false)",
@@ -73,6 +74,10 @@ def generate_verify_tasks(entry: dict) -> str:
             f"# Verification method: {method}",
             f"# No machine-executable verification commands defined.",
             f"",
+            f'- name: "{entry["cme_id"]} | Skip if disabled"',
+            f"  ansible.builtin.meta: end_role",
+            f"  when: {rname}_skip | default(false)",
+            f"",
             f'- name: "{entry["cme_id"]} | No automated verification available"',
             f"  ansible.builtin.debug:",
             f'    msg: "Manual verification required: {method}"',
@@ -87,6 +92,11 @@ def generate_verify_tasks(entry: dict) -> str:
         lines.append(f"# Verification: {method}")
     lines.append("")
 
+    lines.append(f'- name: "{entry["cme_id"]} | Skip if disabled"')
+    lines.append(f"  ansible.builtin.meta: end_role")
+    lines.append(f"  when: {rname}_skip | default(false)")
+    lines.append("")
+
     for i, cmd in enumerate(commands):
         platform = cmd.get("platform", "linux")
         condition = PLATFORM_MAP.get(platform, f"ansible_system == '{platform}'")
@@ -94,8 +104,9 @@ def generate_verify_tasks(entry: dict) -> str:
         expected = cmd["expected"]
         task_suffix = f" ({platform})" if len(commands) > 1 else ""
 
+        shell_module = "ansible.windows.win_shell" if platform == "windows" else "ansible.builtin.shell"
         lines.append(f'- name: "{entry["cme_id"]} | Run verification command{task_suffix}"')
-        lines.append(f"  ansible.builtin.shell:")
+        lines.append(f"  {shell_module}:")
         lines.append(f"    cmd: {sanitize_yaml_string(command_str)}")
         lines.append(f"  register: {rname}_verify_{i}")
         lines.append(f"  changed_when: false")
@@ -107,7 +118,10 @@ def generate_verify_tasks(entry: dict) -> str:
         lines.append(f'- name: "{entry["cme_id"]} | Assert control is active{task_suffix}"')
         lines.append(f"  ansible.builtin.assert:")
         lines.append(f"    that:")
-        lines.append(f"      - \"{rname}_verify_{i}.stdout is search('{_escape_regex(expected)}')\"")
+        if re.match(r"^\d+$", expected.strip()):
+            lines.append(f"      - \"{rname}_verify_{i}.stdout | trim == '{expected.strip()}'\"")
+        else:
+            lines.append(f"      - \"{rname}_verify_{i}.stdout is search('{_escape_regex(expected)}')\"")
         lines.append(f"    fail_msg: \"{entry['cme_id']} FAILED — expected '{_escape_yaml(expected)}'\"")
         lines.append(f"    success_msg: \"{entry['cme_id']} PASSED — {_escape_yaml(entry['control_name'])}\"")
         lines.append(f"  ignore_errors: true")
@@ -118,8 +132,24 @@ def generate_verify_tasks(entry: dict) -> str:
             lines.append(f"  when: {rname}_verify_{i} is not skipped")
         lines.append("")
 
-    status_expr = f"(({rname}_assert_0 is defined and {rname}_assert_0 is not failed) | ternary('passed', 'failed'))"
-    detail_expr = f"(({rname}_assert_0 is defined) | ternary({rname}_assert_0.msg | default(''), 'not checked'))"
+    num_commands = len(commands)
+    if num_commands <= 1:
+        status_expr = f"(({rname}_assert_0 is defined and {rname}_assert_0 is not failed) | ternary('passed', 'failed'))"
+        detail_expr = f"(({rname}_assert_0 is defined) | ternary({rname}_assert_0.msg | default(''), 'not checked'))"
+    else:
+        pass_checks = " and ".join(
+            f"({rname}_assert_{i} is not defined or {rname}_assert_{i} is not failed)"
+            for i in range(num_commands)
+        )
+        defined_checks = " or ".join(
+            f"{rname}_assert_{i} is defined" for i in range(num_commands)
+        )
+        status_expr = f"((({pass_checks}) and ({defined_checks})) | ternary('passed', 'failed'))"
+        detail_items = ", ".join(
+            f"(({rname}_assert_{i} is defined and {rname}_assert_{i} is failed) | ternary({rname}_assert_{i}.msg | default(''), ''))"
+            for i in range(num_commands)
+        )
+        detail_expr = f"([{detail_items}] | reject('equalto', '') | join(' | ') | default('all checks passed'))"
     lines.append(_record_result_task(entry, status_expr, detail_expr))
 
     return "\n".join(lines)
@@ -177,49 +207,51 @@ def _extract_sysctl_key(command: str) -> str | None:
     return None
 
 
+def _prepend_skip_task(entry: dict, content: str) -> str:
+    rname = role_name(entry["cme_id"])
+    skip_block = (
+        f'- name: "{entry["cme_id"]} | Skip if disabled"\n'
+        f"  ansible.builtin.meta: end_role\n"
+        f"  when: {rname}_skip | default(false)\n"
+    )
+    lines = content.split("\n")
+    result: list[str] = []
+    inserted = False
+    for line in lines:
+        if not inserted and line.startswith("- name:"):
+            result.append(skip_block)
+            inserted = True
+        result.append(line)
+    return "\n".join(result)
+
+
 def generate_remediate_tasks(entry: dict, categories: dict) -> str:
     category_id = entry.get("category_id", "")
     rname = role_name(entry["cme_id"])
     verification = entry.get("verification", {})
     commands = verification.get("commands", [])
 
+    generators = {
+        "kernel-hardening": lambda: _generate_sysctl_remediate(entry, commands),
+        "syscall-bpf-controls": lambda: _generate_sysctl_remediate(entry, commands),
+        "mandatory-access-control": lambda: _generate_mac_remediate(entry, commands),
+        "cryptographic-controls": lambda: _generate_crypto_remediate(entry, commands),
+        "filesystem-hardening": lambda: _generate_filesystem_remediate(entry, commands),
+        "protocol-hardening": lambda: _generate_service_remediate(entry, commands),
+        "credential-hardening": lambda: _generate_service_remediate(entry, commands),
+        "runtime-detection": lambda: _generate_service_remediate(entry, commands),
+        "integrity-detection": lambda: _generate_service_remediate(entry, commands),
+        "patch-management": lambda: _generate_patch_remediate(entry, commands),
+        "recovery-controls": lambda: _generate_service_remediate(entry, commands),
+        "privilege-isolation": lambda: _generate_sysctl_remediate(entry, commands),
+    }
+
     if category_id in VERIFY_ONLY_CATEGORIES:
-        return _generate_verify_only_remediate(entry)
+        return _prepend_skip_task(entry, _generate_verify_only_remediate(entry))
 
-    if category_id == "kernel-hardening":
-        return _generate_sysctl_remediate(entry, commands)
-
-    if category_id == "syscall-bpf-controls":
-        return _generate_sysctl_remediate(entry, commands)
-
-    if category_id == "mandatory-access-control":
-        return _generate_mac_remediate(entry, commands)
-
-    if category_id == "cryptographic-controls":
-        return _generate_crypto_remediate(entry, commands)
-
-    if category_id == "filesystem-hardening":
-        return _generate_filesystem_remediate(entry, commands)
-
-    if category_id == "protocol-hardening":
-        return _generate_service_remediate(entry, commands)
-
-    if category_id == "credential-hardening":
-        return _generate_service_remediate(entry, commands)
-
-    if category_id in ("runtime-detection", "integrity-detection"):
-        return _generate_service_remediate(entry, commands)
-
-    if category_id == "patch-management":
-        return _generate_patch_remediate(entry, commands)
-
-    if category_id == "recovery-controls":
-        return _generate_service_remediate(entry, commands)
-
-    if category_id == "privilege-isolation":
-        return _generate_sysctl_remediate(entry, commands)
-
-    return _generate_generic_remediate(entry, commands)
+    generator = generators.get(category_id)
+    content = generator() if generator else _generate_generic_remediate(entry, commands)
+    return _prepend_skip_task(entry, content)
 
 
 def _generate_verify_only_remediate(entry: dict) -> str:
@@ -345,11 +377,18 @@ def _generate_crypto_remediate(entry: dict, commands: list[dict]) -> str:
             if "crypto-policies" in cmd.get("command", ""):
                 expected = cmd.get("expected", "FUTURE").strip()
                 break
+        lines.append(f'- name: "{cme_id} | Check current crypto policy"')
+        lines.append(f"  ansible.builtin.command:")
+        lines.append(f"    cmd: update-crypto-policies --show")
+        lines.append(f"  register: {rname}_current_policy")
+        lines.append(f"  changed_when: false")
+        lines.append(f"  when: ansible_os_family == 'RedHat'")
+        lines.append("")
         lines.append(f'- name: "{cme_id} | Set system crypto policy"')
         lines.append(f"  ansible.builtin.command:")
         lines.append(f"    cmd: \"update-crypto-policies --set {{{{ {policy_var} | default('{expected}') }}}}\"")
         lines.append(f"  changed_when: true")
-        lines.append(f"  when: ansible_os_family == 'RedHat'")
+        lines.append(f"  when: ansible_os_family == 'RedHat' and ({rname}_current_policy.stdout | default('') | trim) != ({policy_var} | default('{expected}'))")
         lines.append("")
     else:
         return _generate_generic_remediate(entry, commands)
@@ -365,13 +404,84 @@ def _generate_filesystem_remediate(entry: dict, commands: list[dict]) -> str:
     lines = [f"---\n# {cme_id}: {entry['control_name']}"]
     lines.append("")
 
-    has_mount = any("mount" in c.get("command", "") or "findmnt" in c.get("command", "") for c in commands)
-    has_chmod = any("stat" in c.get("command", "") or "chmod" in c.get("command", "") for c in commands)
+    mount_re = re.compile(r"(?:mount|findmnt)\s+.*?(/\S+)")
+    option_re = re.compile(r"(noexec|nosuid|nodev)")
 
-    if has_mount or has_chmod:
+    mount_tasks_generated = False
+    seen_mounts: set[str] = set()
+    for cmd in commands:
+        command_str = cmd.get("command", "")
+        expected = cmd.get("expected", "")
+        if "mount" not in command_str and "findmnt" not in command_str:
+            continue
+        mount_match = mount_re.search(command_str)
+        if not mount_match:
+            continue
+        mount_point = mount_match.group(1).rstrip("'\"")
+        if mount_point in seen_mounts:
+            continue
+        seen_mounts.add(mount_point)
+        options = sorted(set(option_re.findall(expected + " " + command_str)))
+        if not options:
+            options = ["nodev", "noexec", "nosuid"]
+        opts_str = ",".join(["defaults"] + options)
+        device_expr = (
+            f"{{{{ ansible_mounts | selectattr('mount', 'equalto', '{mount_point}')"
+            f" | map(attribute='device') | first | default('tmpfs') }}}}"
+        )
+        fstype_expr = (
+            f"{{{{ ansible_mounts | selectattr('mount', 'equalto', '{mount_point}')"
+            f" | map(attribute='fstype') | first | default('tmpfs') }}}}"
+        )
+        lines.append(f'- name: "{cme_id} | Ensure {mount_point} is mounted with {",".join(options)}"')
+        lines.append(f"  ansible.posix.mount:")
+        lines.append(f"    path: {mount_point}")
+        lines.append(f'    src: "{device_expr}"')
+        lines.append(f'    fstype: "{fstype_expr}"')
+        lines.append(f'    opts: "{opts_str}"')
+        lines.append(f"    state: mounted")
+        lines.append(f"  when: ansible_os_family != 'Windows'")
+        lines.append("")
+        mount_tasks_generated = True
+
+    if not mount_tasks_generated:
         return _generate_generic_remediate(entry, commands)
 
-    return _generate_generic_remediate(entry, commands)
+    lines.append(f'- name: "{cme_id} | Verify after remediation"')
+    lines.append(f"  ansible.builtin.include_tasks: verify.yml")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def _generate_ssh_remediate(entry: dict, commands: list[dict]) -> str:
+    cme_id = entry["cme_id"]
+    lines = [f"---\n# {cme_id}: {entry['control_name']}"]
+    lines.append("")
+
+    ssh_settings = [
+        ("PermitRootLogin", "no"),
+        ("X11Forwarding", "no"),
+        ("MaxAuthTries", "4"),
+        ("PermitEmptyPasswords", "no"),
+        ("ClientAliveInterval", "300"),
+        ("ClientAliveCountMax", "3"),
+    ]
+
+    for setting, value in ssh_settings:
+        lines.append(f'- name: "{cme_id} | Configure {setting}"')
+        lines.append(f"  ansible.builtin.lineinfile:")
+        lines.append(f"    path: /etc/ssh/sshd_config")
+        lines.append(f"    regexp: \"^#?{setting}\"")
+        lines.append(f"    line: \"{setting} {value}\"")
+        lines.append(f"    validate: \"sshd -t -f %s\"")
+        lines.append(f"  notify: restart sshd")
+        lines.append(f"  when: ansible_os_family != 'Windows'")
+        lines.append("")
+
+    lines.append(f'- name: "{cme_id} | Verify after remediation"')
+    lines.append(f"  ansible.builtin.include_tasks: verify.yml")
+    lines.append("")
+    return "\n".join(lines)
 
 
 def _generate_service_remediate(entry: dict, commands: list[dict]) -> str:
@@ -379,7 +489,33 @@ def _generate_service_remediate(entry: dict, commands: list[dict]) -> str:
     lines = [f"---\n# {cme_id}: {entry['control_name']}"]
     lines.append("")
 
+    all_command_strs = " ".join(c.get("command", "") for c in commands)
+
+    has_ssh = "sshd" in all_command_strs or re.search(r"\bssh\b", all_command_strs)
+    if has_ssh:
+        return _generate_ssh_remediate(entry, commands)
+
     service_found = False
+    known_services = {"auditd": "audit", "auditctl": "audit", "falco": "falco", "aide": "aide"}
+    for svc_key, pkg_name in known_services.items():
+        if svc_key in all_command_strs:
+            svc_name = pkg_name if pkg_name != "audit" else "auditd"
+            lines.append(f'- name: "{cme_id} | Ensure {pkg_name} is installed"')
+            lines.append(f"  ansible.builtin.package:")
+            lines.append(f"    name: {pkg_name}")
+            lines.append(f"    state: present")
+            lines.append(f"  when: ansible_os_family != 'Windows'")
+            lines.append("")
+            lines.append(f'- name: "{cme_id} | Ensure {svc_name} is running and enabled"')
+            lines.append(f"  ansible.builtin.systemd:")
+            lines.append(f"    name: {svc_name}")
+            lines.append(f"    state: started")
+            lines.append(f"    enabled: true")
+            lines.append(f"  when: ansible_os_family != 'Windows'")
+            lines.append("")
+            service_found = True
+            break
+
     for cmd in commands:
         command_str = cmd.get("command", "")
         if "systemctl" in command_str:
@@ -398,6 +534,27 @@ def _generate_service_remediate(entry: dict, commands: list[dict]) -> str:
                 lines.append("")
                 service_found = True
 
+    config_settings: dict[str, list[tuple[str, str]]] = {
+        "/etc/security/pwquality.conf": [
+            ("minlen", "14"),
+            ("dcredit", "-1"),
+            ("ucredit", "-1"),
+            ("lcredit", "-1"),
+            ("ocredit", "-1"),
+        ],
+    }
+    for config_path, settings in config_settings.items():
+        if config_path in all_command_strs:
+            for setting_name, setting_value in settings:
+                lines.append(f'- name: "{cme_id} | Configure {setting_name} in {config_path}"')
+                lines.append(f"  ansible.builtin.lineinfile:")
+                lines.append(f"    path: {config_path}")
+                lines.append(f'    regexp: "^#?{setting_name}"')
+                lines.append(f'    line: "{setting_name} = {setting_value}"')
+                lines.append(f"  when: ansible_os_family != 'Windows'")
+                lines.append("")
+            service_found = True
+
     if not service_found:
         return _generate_generic_remediate(entry, commands)
 
@@ -409,20 +566,41 @@ def _generate_service_remediate(entry: dict, commands: list[dict]) -> str:
 
 def _generate_patch_remediate(entry: dict, commands: list[dict]) -> str:
     cme_id = entry["cme_id"]
-    rname = role_name(cme_id)
     lines = [f"---\n# {cme_id}: {entry['control_name']}"]
     lines.append("")
-    lines.append(f'- name: "{cme_id} | Ensure security updates are applied (RedHat)"')
+    lines.append(f'- name: "{cme_id} | Install dnf-automatic (RedHat)"')
     lines.append(f"  ansible.builtin.dnf:")
-    lines.append(f"    name: \"*\"")
-    lines.append(f"    security: true")
-    lines.append(f"    state: latest")
+    lines.append(f"    name: dnf-automatic")
+    lines.append(f"    state: present")
     lines.append(f"  when: ansible_os_family == 'RedHat'")
     lines.append("")
-    lines.append(f'- name: "{cme_id} | Ensure security updates are applied (Debian)"')
+    lines.append(f'- name: "{cme_id} | Configure dnf-automatic to apply updates (RedHat)"')
+    lines.append(f"  ansible.builtin.lineinfile:")
+    lines.append(f"    path: /etc/dnf/automatic.conf")
+    lines.append(f'    regexp: "^#?apply_updates"')
+    lines.append(f'    line: "apply_updates = yes"')
+    lines.append(f"  when: ansible_os_family == 'RedHat'")
+    lines.append("")
+    lines.append(f'- name: "{cme_id} | Enable dnf-automatic-install.timer (RedHat)"')
+    lines.append(f"  ansible.builtin.systemd:")
+    lines.append(f"    name: dnf-automatic-install.timer")
+    lines.append(f"    state: started")
+    lines.append(f"    enabled: true")
+    lines.append(f"  when: ansible_os_family == 'RedHat'")
+    lines.append("")
+    lines.append(f'- name: "{cme_id} | Install unattended-upgrades (Debian)"')
     lines.append(f"  ansible.builtin.apt:")
-    lines.append(f"    upgrade: safe")
-    lines.append(f"    update_cache: true")
+    lines.append(f"    name: unattended-upgrades")
+    lines.append(f"    state: present")
+    lines.append(f"  when: ansible_os_family == 'Debian'")
+    lines.append("")
+    lines.append(f'- name: "{cme_id} | Enable unattended-upgrades (Debian)"')
+    lines.append(f"  ansible.builtin.copy:")
+    lines.append(f"    dest: /etc/apt/apt.conf.d/20auto-upgrades")
+    lines.append(f"    content: |")
+    lines.append(f'      APT::Periodic::Update-Package-Lists "1";')
+    lines.append(f'      APT::Periodic::Unattended-Upgrade "1";')
+    lines.append(f"    mode: \"0644\"")
     lines.append(f"  when: ansible_os_family == 'Debian'")
     lines.append("")
     lines.append(f'- name: "{cme_id} | Verify after remediation"')
@@ -565,7 +743,23 @@ def generate_meta(entry: dict) -> str:
 
 
 def generate_handlers(entry: dict) -> str:
-    return "---\n# Handlers for " + entry["cme_id"] + "\n"
+    category_id = entry.get("category_id", "")
+    commands = entry.get("verification", {}).get("commands", [])
+    all_cmds = " ".join(c.get("command", "") for c in commands)
+    has_ssh = "sshd" in all_cmds or re.search(r"\bssh\b", all_cmds)
+
+    lines = ["---", f"# Handlers for {entry['cme_id']}"]
+
+    if category_id == "protocol-hardening" and has_ssh:
+        lines.append("")
+        lines.append("- name: restart sshd")
+        lines.append("  ansible.builtin.systemd:")
+        lines.append("    name: sshd")
+        lines.append("    state: restarted")
+        lines.append("  when: ansible_os_family != 'Windows'")
+
+    lines.append("")
+    return "\n".join(lines)
 
 
 def generate_role(entry: dict, categories: dict) -> None:

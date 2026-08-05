@@ -1,6 +1,10 @@
 ---
 # CME-107: Kernel Module Loading Restriction
 
+- name: "CME-107 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_107_skip | default(false)
+
 - name: "CME-107 | Set kernel.modules_disabled"
   ansible.posix.sysctl:
     name: kernel.modules_disabled

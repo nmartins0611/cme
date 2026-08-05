@@ -2,6 +2,10 @@
 # CME-1010: cgroup Memory Pressure Monitoring (memory.events / PSI)
 # Verification: Check that cgroup memory.events is accessible and PSI is enabled in the kernel
 
+- name: "CME-1010 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_1010_skip | default(false)
+
 - name: "CME-1010 | Run verification command (linux)"
   ansible.builtin.shell:
     cmd: "cat /sys/fs/cgroup/system.slice/memory.events"
@@ -49,7 +53,7 @@
 - name: "CME-1010 | Assert control is active (linux)"
   ansible.builtin.assert:
     that:
-      - "cme_1010_verify_2.stdout is search('1')"
+      - "cme_1010_verify_2.stdout | trim == '1'"
     fail_msg: "CME-1010 FAILED — expected '1'"
     success_msg: "CME-1010 PASSED — cgroup Memory Pressure Monitoring (memory.events / PSI)"
   ignore_errors: true
@@ -58,4 +62,4 @@
 
 - name: "CME-1010 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1010', 'control_name': 'cgroup Memory Pressure Monitoring (memory.events / PSI)', 'tactic': 'Detect', 'category': 'Integrity Detection', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_1010_assert_0 is defined and cme_1010_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1010_assert_0 is defined) | ternary(cme_1010_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1010', 'control_name': 'cgroup Memory Pressure Monitoring (memory.events / PSI)', 'tactic': 'Detect', 'category': 'Integrity Detection', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((((cme_1010_assert_0 is not defined or cme_1010_assert_0 is not failed) and (cme_1010_assert_1 is not defined or cme_1010_assert_1 is not failed) and (cme_1010_assert_2 is not defined or cme_1010_assert_2 is not failed)) and (cme_1010_assert_0 is defined or cme_1010_assert_1 is defined or cme_1010_assert_2 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_1010_assert_0 is defined and cme_1010_assert_0 is failed) | ternary(cme_1010_assert_0.msg | default(''), '')), ((cme_1010_assert_1 is defined and cme_1010_assert_1 is failed) | ternary(cme_1010_assert_1.msg | default(''), '')), ((cme_1010_assert_2 is defined and cme_1010_assert_2 is failed) | ternary(cme_1010_assert_2.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

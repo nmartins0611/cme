@@ -1,6 +1,10 @@
 ---
 # CME-304: AppArmor (Enforcing Profile)
 
+- name: "CME-304 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_304_skip | default(false)
+
 - name: "CME-304 | Ensure AppArmor is installed and enabled"
   ansible.builtin.package:
     name:

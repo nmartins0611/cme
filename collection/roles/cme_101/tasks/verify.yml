@@ -2,6 +2,10 @@
 # CME-101: ASLR (Address Space Layout Randomization)
 # Verification: Check kernel randomize_va_space sysctl is set to 2 (full randomization)
 
+- name: "CME-101 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_101_skip | default(false)
+
 - name: "CME-101 | Run verification command (linux)"
   ansible.builtin.shell:
     cmd: "cat /proc/sys/kernel/randomize_va_space"
@@ -13,7 +17,7 @@
 - name: "CME-101 | Assert control is active (linux)"
   ansible.builtin.assert:
     that:
-      - "cme_101_verify_0.stdout is search('2')"
+      - "cme_101_verify_0.stdout | trim == '2'"
     fail_msg: "CME-101 FAILED — expected '2'"
     success_msg: "CME-101 PASSED — ASLR (Address Space Layout Randomization)"
   ignore_errors: true
@@ -39,7 +43,7 @@
   when: ansible_os_family != 'Windows' and cme_101_verify_1 is not skipped
 
 - name: "CME-101 | Run verification command (windows)"
-  ansible.builtin.shell:
+  ansible.windows.win_shell:
     cmd: "(Get-ProcessMitigation -System).ASLR.ForceRelocateImages"
   register: cme_101_verify_2
   changed_when: false
@@ -57,7 +61,7 @@
   when: ansible_os_family == 'Windows' and cme_101_verify_2 is not skipped
 
 - name: "CME-101 | Run verification command (windows)"
-  ansible.builtin.shell:
+  ansible.windows.win_shell:
     cmd: "(Get-ProcessMitigation -System).ASLR.BottomUp"
   register: cme_101_verify_3
   changed_when: false
@@ -76,4 +80,4 @@
 
 - name: "CME-101 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-101', 'control_name': 'ASLR (Address Space Layout Randomization)', 'tactic': 'Harden', 'category': 'Kernel Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_101_assert_0 is defined and cme_101_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_101_assert_0 is defined) | ternary(cme_101_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-101', 'control_name': 'ASLR (Address Space Layout Randomization)', 'tactic': 'Harden', 'category': 'Kernel Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((((cme_101_assert_0 is not defined or cme_101_assert_0 is not failed) and (cme_101_assert_1 is not defined or cme_101_assert_1 is not failed) and (cme_101_assert_2 is not defined or cme_101_assert_2 is not failed) and (cme_101_assert_3 is not defined or cme_101_assert_3 is not failed)) and (cme_101_assert_0 is defined or cme_101_assert_1 is defined or cme_101_assert_2 is defined or cme_101_assert_3 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_101_assert_0 is defined and cme_101_assert_0 is failed) | ternary(cme_101_assert_0.msg | default(''), '')), ((cme_101_assert_1 is defined and cme_101_assert_1 is failed) | ternary(cme_101_assert_1.msg | default(''), '')), ((cme_101_assert_2 is defined and cme_101_assert_2 is failed) | ternary(cme_101_assert_2.msg | default(''), '')), ((cme_101_assert_3 is defined and cme_101_assert_3 is failed) | ternary(cme_101_assert_3.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

@@ -2,6 +2,10 @@
 # CME-905: Content Security Policy (CSP) Headers
 # Verification: Check for CSP header in HTTP responses
 
+- name: "CME-905 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_905_skip | default(false)
+
 - name: "CME-905 | Run verification command"
   ansible.builtin.shell:
     cmd: "curl -sI http://target/ | grep -i content-security-policy"

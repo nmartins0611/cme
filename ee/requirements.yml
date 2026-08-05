@@ -4,8 +4,6 @@ collections:
     version: ">=1.5.0"
   - name: community.general
     version: ">=7.0.0"
-  - name: ansible.controller
-    version: ">=4.6.0"
   - name: cme.controls
     type: git
     source: https://github.com/nmartins0611/cme.git#collection/

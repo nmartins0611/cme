@@ -2,6 +2,10 @@
 # CME-1005: Runtime Memory Error Detection (KASAN/HWASan)
 # Verification: Check if KASAN is enabled in kernel config
 
+- name: "CME-1005 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_1005_skip | default(false)
+
 - name: "CME-1005 | Run verification command"
   ansible.builtin.shell:
     cmd: "grep CONFIG_KASAN=y /boot/config-$(uname -r)"

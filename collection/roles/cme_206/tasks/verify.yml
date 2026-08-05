@@ -2,6 +2,10 @@
 # CME-206: Network Policy (Kubernetes)
 # Verification: Check for default-deny NetworkPolicy in namespace
 
+- name: "CME-206 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_206_skip | default(false)
+
 - name: "CME-206 | Run verification command"
   ansible.builtin.shell:
     cmd: "kubectl get networkpolicy -n <namespace> -o name | head -5"

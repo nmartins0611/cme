@@ -2,6 +2,10 @@
 # CME-1314: Input Canonicalization Before Security Decision
 # Verification: Review application source code for canonicalization/normalization calls that execute before security-relevant comparisons (allowlist checks, denylist checks, policy evaluations). Verify that the canonicalized form — not the raw input — is used in all subsequent security decisions.
 
+- name: "CME-1314 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_1314_skip | default(false)
+
 - name: "CME-1314 | Run verification command (any)"
   ansible.builtin.shell:
     cmd: "grep -rn 'urllib.parse\\|urlparse\\|URL.parse\\|new URL\\|InetAddress.getByName\\|normalize\\|canonicalize\\|realpath\\|resolve' <app_source>/"
@@ -38,4 +42,4 @@
 
 - name: "CME-1314 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1314', 'control_name': 'Input Canonicalization Before Security Decision', 'tactic': 'Harden', 'category': 'Application Input Validation', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_1314_assert_0 is defined and cme_1314_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1314_assert_0 is defined) | ternary(cme_1314_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1314', 'control_name': 'Input Canonicalization Before Security Decision', 'tactic': 'Harden', 'category': 'Application Input Validation', 'control_layer': 'Application', 'confidence': 'High', 'status': ((((cme_1314_assert_0 is not defined or cme_1314_assert_0 is not failed) and (cme_1314_assert_1 is not defined or cme_1314_assert_1 is not failed)) and (cme_1314_assert_0 is defined or cme_1314_assert_1 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_1314_assert_0 is defined and cme_1314_assert_0 is failed) | ternary(cme_1314_assert_0.msg | default(''), '')), ((cme_1314_assert_1 is defined and cme_1314_assert_1 is failed) | ternary(cme_1314_assert_1.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

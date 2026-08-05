@@ -2,6 +2,10 @@
 # CME-918: URL Path Authorization Enforcement (Forced Browsing Prevention)
 # Verification: Verify that the web server or reverse proxy enforces URL-pattern-based authorization on restricted paths, and that unauthenticated requests to administrative or internal endpoints are denied
 
+- name: "CME-918 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_918_skip | default(false)
+
 - name: "CME-918 | Run verification command (linux)"
   ansible.builtin.shell:
     cmd: "grep -rn '<Location\\|<Directory\\|Require valid-user\\|Require group\\|AuthType' /etc/httpd/conf.d/ /etc/httpd/conf/httpd.conf"
@@ -56,7 +60,7 @@
   when: cme_918_verify_2 is not skipped
 
 - name: "CME-918 | Run verification command (windows)"
-  ansible.builtin.shell:
+  ansible.windows.win_shell:
     cmd: "Get-WebConfigurationProperty -Filter '/system.webServer/security/authorization' -PSPath 'IIS:\\Sites\\Default Web Site\\admin' -Name 'collection' | Format-Table"
   register: cme_918_verify_3
   changed_when: false
@@ -75,4 +79,4 @@
 
 - name: "CME-918 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-918', 'control_name': 'URL Path Authorization Enforcement (Forced Browsing Prevention)', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_918_assert_0 is defined and cme_918_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_918_assert_0 is defined) | ternary(cme_918_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-918', 'control_name': 'URL Path Authorization Enforcement (Forced Browsing Prevention)', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((((cme_918_assert_0 is not defined or cme_918_assert_0 is not failed) and (cme_918_assert_1 is not defined or cme_918_assert_1 is not failed) and (cme_918_assert_2 is not defined or cme_918_assert_2 is not failed) and (cme_918_assert_3 is not defined or cme_918_assert_3 is not failed)) and (cme_918_assert_0 is defined or cme_918_assert_1 is defined or cme_918_assert_2 is defined or cme_918_assert_3 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_918_assert_0 is defined and cme_918_assert_0 is failed) | ternary(cme_918_assert_0.msg | default(''), '')), ((cme_918_assert_1 is defined and cme_918_assert_1 is failed) | ternary(cme_918_assert_1.msg | default(''), '')), ((cme_918_assert_2 is defined and cme_918_assert_2 is failed) | ternary(cme_918_assert_2.msg | default(''), '')), ((cme_918_assert_3 is defined and cme_918_assert_3 is failed) | ternary(cme_918_assert_3.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

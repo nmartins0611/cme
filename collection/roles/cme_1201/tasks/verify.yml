@@ -3,6 +3,10 @@
 # Verification method: Verify deployment pipeline builds from golden images
 # No machine-executable verification commands defined.
 
+- name: "CME-1201 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_1201_skip | default(false)
+
 - name: "CME-1201 | No automated verification available"
   ansible.builtin.debug:
     msg: "Manual verification required: Verify deployment pipeline builds from golden images"

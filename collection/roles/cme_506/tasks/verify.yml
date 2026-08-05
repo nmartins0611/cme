@@ -2,6 +2,10 @@
 # CME-506: Landlock LSM (Filesystem Sandboxing)
 # Verification: Check if process has active Landlock restrictions
 
+- name: "CME-506 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_506_skip | default(false)
+
 - name: "CME-506 | Run verification command"
   ansible.builtin.shell:
     cmd: "grep Landlock /proc/self/status"

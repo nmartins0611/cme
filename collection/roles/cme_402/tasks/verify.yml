@@ -2,6 +2,10 @@
 # CME-402: FIPS 140-3 Mode
 # Verification: Verify FIPS mode is enabled
 
+- name: "CME-402 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_402_skip | default(false)
+
 - name: "CME-402 | Run verification command (rhel)"
   ansible.builtin.shell:
     cmd: "fips-mode-setup --check"
@@ -31,7 +35,7 @@
 - name: "CME-402 | Assert control is active (linux)"
   ansible.builtin.assert:
     that:
-      - "cme_402_verify_1.stdout is search('1')"
+      - "cme_402_verify_1.stdout | trim == '1'"
     fail_msg: "CME-402 FAILED — expected '1'"
     success_msg: "CME-402 PASSED — FIPS 140-3 Mode"
   ignore_errors: true
@@ -40,4 +44,4 @@
 
 - name: "CME-402 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-402', 'control_name': 'FIPS 140-3 Mode', 'tactic': 'Harden', 'category': 'Cryptographic Controls', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_402_assert_0 is defined and cme_402_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_402_assert_0 is defined) | ternary(cme_402_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-402', 'control_name': 'FIPS 140-3 Mode', 'tactic': 'Harden', 'category': 'Cryptographic Controls', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((((cme_402_assert_0 is not defined or cme_402_assert_0 is not failed) and (cme_402_assert_1 is not defined or cme_402_assert_1 is not failed)) and (cme_402_assert_0 is defined or cme_402_assert_1 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_402_assert_0 is defined and cme_402_assert_0 is failed) | ternary(cme_402_assert_0.msg | default(''), '')), ((cme_402_assert_1 is defined and cme_402_assert_1 is failed) | ternary(cme_402_assert_1.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

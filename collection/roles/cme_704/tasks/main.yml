@@ -3,6 +3,10 @@
 # This control requires manual/context-specific remediation.
 # Running verification only.
 
+- name: "CME-704 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_704_skip | default(false)
+
 - name: "CME-704 | Set manual remediation required"
   ansible.builtin.set_fact:
     cme_704_manual_remediation_required: true

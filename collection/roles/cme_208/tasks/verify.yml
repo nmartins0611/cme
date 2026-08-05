@@ -2,6 +2,10 @@
 # CME-208: Outbound Network Egress Restriction (SSRF Blast Radius Containment)
 # Verification: Verify that application workloads cannot initiate outbound connections to RFC1918 ranges, link-local addresses, or localhost
 
+- name: "CME-208 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_208_skip | default(false)
+
 - name: "CME-208 | Run verification command (linux)"
   ansible.builtin.shell:
     cmd: "nft list ruleset | grep -A5 'chain output' | grep -E '10\\.0\\.0\\.0|172\\.16\\.0\\.0|192\\.168\\.0\\.0|169\\.254'"
@@ -55,7 +59,7 @@
   when: cme_208_verify_2 is not skipped
 
 - name: "CME-208 | Run verification command (windows)"
-  ansible.builtin.shell:
+  ansible.windows.win_shell:
     cmd: "Get-NetFirewallRule -Direction Outbound | Where-Object { $_.Action -eq 'Block' } | Get-NetFirewallAddressFilter | Where-Object { $_.RemoteAddress -match '10\\.|172\\.16|192\\.168|169\\.254' }"
   register: cme_208_verify_3
   changed_when: false
@@ -74,4 +78,4 @@
 
 - name: "CME-208 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-208', 'control_name': 'Outbound Network Egress Restriction (SSRF Blast Radius Containment)', 'tactic': 'Isolate', 'category': 'Network Isolation', 'control_layer': 'Network', 'confidence': 'High', 'status': ((cme_208_assert_0 is defined and cme_208_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_208_assert_0 is defined) | ternary(cme_208_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-208', 'control_name': 'Outbound Network Egress Restriction (SSRF Blast Radius Containment)', 'tactic': 'Isolate', 'category': 'Network Isolation', 'control_layer': 'Network', 'confidence': 'High', 'status': ((((cme_208_assert_0 is not defined or cme_208_assert_0 is not failed) and (cme_208_assert_1 is not defined or cme_208_assert_1 is not failed) and (cme_208_assert_2 is not defined or cme_208_assert_2 is not failed) and (cme_208_assert_3 is not defined or cme_208_assert_3 is not failed)) and (cme_208_assert_0 is defined or cme_208_assert_1 is defined or cme_208_assert_2 is defined or cme_208_assert_3 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_208_assert_0 is defined and cme_208_assert_0 is failed) | ternary(cme_208_assert_0.msg | default(''), '')), ((cme_208_assert_1 is defined and cme_208_assert_1 is failed) | ternary(cme_208_assert_1.msg | default(''), '')), ((cme_208_assert_2 is defined and cme_208_assert_2 is failed) | ternary(cme_208_assert_2.msg | default(''), '')), ((cme_208_assert_3 is defined and cme_208_assert_3 is failed) | ternary(cme_208_assert_3.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

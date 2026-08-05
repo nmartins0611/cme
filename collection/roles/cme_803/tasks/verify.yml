@@ -2,6 +2,10 @@
 # CME-803: Account Lockout Policy (pam_faillock)
 # Verification: Check pam_faillock configuration
 
+- name: "CME-803 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_803_skip | default(false)
+
 - name: "CME-803 | Run verification command (rhel)"
   ansible.builtin.shell:
     cmd: "grep faillock /etc/pam.d/system-auth"
@@ -39,7 +43,7 @@
   when: ansible_os_family == 'RedHat' and cme_803_verify_1 is not skipped
 
 - name: "CME-803 | Run verification command (windows)"
-  ansible.builtin.shell:
+  ansible.windows.win_shell:
     cmd: "net accounts | Select-String 'Lockout threshold'"
   register: cme_803_verify_2
   changed_when: false
@@ -57,7 +61,7 @@
   when: ansible_os_family == 'Windows' and cme_803_verify_2 is not skipped
 
 - name: "CME-803 | Run verification command (windows)"
-  ansible.builtin.shell:
+  ansible.windows.win_shell:
     cmd: "net accounts | Select-String 'Lockout duration'"
   register: cme_803_verify_3
   changed_when: false
@@ -76,4 +80,4 @@
 
 - name: "CME-803 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-803', 'control_name': 'Account Lockout Policy (pam_faillock)', 'tactic': 'Harden', 'category': 'Credential Hardening', 'control_layer': 'Identity', 'confidence': 'High', 'status': ((cme_803_assert_0 is defined and cme_803_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_803_assert_0 is defined) | ternary(cme_803_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-803', 'control_name': 'Account Lockout Policy (pam_faillock)', 'tactic': 'Harden', 'category': 'Credential Hardening', 'control_layer': 'Identity', 'confidence': 'High', 'status': ((((cme_803_assert_0 is not defined or cme_803_assert_0 is not failed) and (cme_803_assert_1 is not defined or cme_803_assert_1 is not failed) and (cme_803_assert_2 is not defined or cme_803_assert_2 is not failed) and (cme_803_assert_3 is not defined or cme_803_assert_3 is not failed)) and (cme_803_assert_0 is defined or cme_803_assert_1 is defined or cme_803_assert_2 is defined or cme_803_assert_3 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_803_assert_0 is defined and cme_803_assert_0 is failed) | ternary(cme_803_assert_0.msg | default(''), '')), ((cme_803_assert_1 is defined and cme_803_assert_1 is failed) | ternary(cme_803_assert_1.msg | default(''), '')), ((cme_803_assert_2 is defined and cme_803_assert_2 is failed) | ternary(cme_803_assert_2.msg | default(''), '')), ((cme_803_assert_3 is defined and cme_803_assert_3 is failed) | ternary(cme_803_assert_3.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

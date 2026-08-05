@@ -1,15 +1,27 @@
 ---
 # CME-502: noexec on /tmp and /dev/shm
-# Remediation strategy: generic (review and customize for your environment)
-# Verification method: Check mount options for /tmp and /dev/shm
 
-- name: "CME-502 | Remediation requires environment-specific configuration"
-  ansible.builtin.debug:
-    msg: >-
-      CME-502 (noexec on /tmp and /dev/shm) remediation depends on your
-      environment configuration. Override this role's tasks/main.yml
-      with site-specific remediation steps.
-  when: not (cme_502_custom_remediation | default(false))
+- name: "CME-502 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_502_skip | default(false)
 
-- name: "CME-502 | Verify current state"
+- name: "CME-502 | Ensure /tmp is mounted with noexec"
+  ansible.posix.mount:
+    path: /tmp
+    src: "{{ ansible_mounts | selectattr('mount', 'equalto', '/tmp') | map(attribute='device') | first | default('tmpfs') }}"
+    fstype: "{{ ansible_mounts | selectattr('mount', 'equalto', '/tmp') | map(attribute='fstype') | first | default('tmpfs') }}"
+    opts: "defaults,noexec"
+    state: mounted
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-502 | Ensure /dev/shm is mounted with noexec"
+  ansible.posix.mount:
+    path: /dev/shm
+    src: "{{ ansible_mounts | selectattr('mount', 'equalto', '/dev/shm') | map(attribute='device') | first | default('tmpfs') }}"
+    fstype: "{{ ansible_mounts | selectattr('mount', 'equalto', '/dev/shm') | map(attribute='fstype') | first | default('tmpfs') }}"
+    opts: "defaults,noexec"
+    state: mounted
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-502 | Verify after remediation"
   ansible.builtin.include_tasks: verify.yml

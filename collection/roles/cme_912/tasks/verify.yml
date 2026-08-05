@@ -2,6 +2,10 @@
 # CME-912: HTTP Header Normalization and Request Smuggling Prevention
 # Verification: Verify that HTTP intermediaries enforce strict header parsing: reject requests with both Content-Length and Transfer-Encoding, reject duplicate Content-Length headers, and disable relaxed parsing modes
 
+- name: "CME-912 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_912_skip | default(false)
+
 - name: "CME-912 | Run verification command (linux)"
   ansible.builtin.shell:
     cmd: "grep -i 'relaxed_header_parser' /etc/squid/squid.conf"
@@ -76,4 +80,4 @@
 
 - name: "CME-912 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-912', 'control_name': 'HTTP Header Normalization and Request Smuggling Prevention', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_912_assert_0 is defined and cme_912_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_912_assert_0 is defined) | ternary(cme_912_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-912', 'control_name': 'HTTP Header Normalization and Request Smuggling Prevention', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((((cme_912_assert_0 is not defined or cme_912_assert_0 is not failed) and (cme_912_assert_1 is not defined or cme_912_assert_1 is not failed) and (cme_912_assert_2 is not defined or cme_912_assert_2 is not failed) and (cme_912_assert_3 is not defined or cme_912_assert_3 is not failed)) and (cme_912_assert_0 is defined or cme_912_assert_1 is defined or cme_912_assert_2 is defined or cme_912_assert_3 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_912_assert_0 is defined and cme_912_assert_0 is failed) | ternary(cme_912_assert_0.msg | default(''), '')), ((cme_912_assert_1 is defined and cme_912_assert_1 is failed) | ternary(cme_912_assert_1.msg | default(''), '')), ((cme_912_assert_2 is defined and cme_912_assert_2 is failed) | ternary(cme_912_assert_2.msg | default(''), '')), ((cme_912_assert_3 is defined and cme_912_assert_3 is failed) | ternary(cme_912_assert_3.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

@@ -2,6 +2,10 @@
 # CME-1004: AIDE / File Integrity Monitoring
 # Verification: Verify AIDE is installed and database is initialized
 
+- name: "CME-1004 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_1004_skip | default(false)
+
 - name: "CME-1004 | Run verification command"
   ansible.builtin.shell:
     cmd: "aide --check 2>/dev/null; echo $?"
@@ -13,7 +17,7 @@
 - name: "CME-1004 | Assert control is active"
   ansible.builtin.assert:
     that:
-      - "cme_1004_verify_0.stdout is search('0')"
+      - "cme_1004_verify_0.stdout | trim == '0'"
     fail_msg: "CME-1004 FAILED — expected '0'"
     success_msg: "CME-1004 PASSED — AIDE / File Integrity Monitoring"
   ignore_errors: true

@@ -2,6 +2,10 @@
 # CME-1307: Command Injection Prevention (No Shell Invocation)
 # Verification: Verify no shell=True with user-controlled input; no os.system() or os.popen() calls
 
+- name: "CME-1307 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_1307_skip | default(false)
+
 - name: "CME-1307 | Run verification command"
   ansible.builtin.shell:
     cmd: "grep -rn 'shell=True\\|os.system\\|os.popen' <app_source>/"

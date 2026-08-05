@@ -3,6 +3,10 @@
 # Remediation strategy: generic (review and customize for your environment)
 # Verification method: Verify minimum TLS version is 1.3
 
+- name: "CME-403 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_403_skip | default(false)
+
 - name: "CME-403 | Remediation requires environment-specific configuration"
   ansible.builtin.debug:
     msg: >-

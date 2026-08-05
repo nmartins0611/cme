@@ -2,6 +2,10 @@
 # CME-1302: Deserialization Allowlist (Safe Loading)
 # Verification: Verify deserialization uses safe loading or allowlist enforcement across all application languages
 
+- name: "CME-1302 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_1302_skip | default(false)
+
 - name: "CME-1302 | Run verification command (any)"
   ansible.builtin.shell:
     cmd: "grep -rn 'yaml.safe_load\\|SafeLoader\\|json.loads' <app_source>/"
@@ -72,4 +76,4 @@
 
 - name: "CME-1302 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1302', 'control_name': 'Deserialization Allowlist (Safe Loading)', 'tactic': 'Harden', 'category': 'Application Input Validation', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_1302_assert_0 is defined and cme_1302_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1302_assert_0 is defined) | ternary(cme_1302_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1302', 'control_name': 'Deserialization Allowlist (Safe Loading)', 'tactic': 'Harden', 'category': 'Application Input Validation', 'control_layer': 'Application', 'confidence': 'High', 'status': ((((cme_1302_assert_0 is not defined or cme_1302_assert_0 is not failed) and (cme_1302_assert_1 is not defined or cme_1302_assert_1 is not failed) and (cme_1302_assert_2 is not defined or cme_1302_assert_2 is not failed) and (cme_1302_assert_3 is not defined or cme_1302_assert_3 is not failed)) and (cme_1302_assert_0 is defined or cme_1302_assert_1 is defined or cme_1302_assert_2 is defined or cme_1302_assert_3 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_1302_assert_0 is defined and cme_1302_assert_0 is failed) | ternary(cme_1302_assert_0.msg | default(''), '')), ((cme_1302_assert_1 is defined and cme_1302_assert_1 is failed) | ternary(cme_1302_assert_1.msg | default(''), '')), ((cme_1302_assert_2 is defined and cme_1302_assert_2 is failed) | ternary(cme_1302_assert_2.msg | default(''), '')), ((cme_1302_assert_3 is defined and cme_1302_assert_3 is failed) | ternary(cme_1302_assert_3.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

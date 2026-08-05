@@ -2,6 +2,10 @@
 # CME-807: Session Lifetime and Idle Timeout Enforcement
 # Verification: Verify that authenticated sessions have both absolute lifetime limits and idle timeouts configured, and that logout explicitly invalidates the server-side session
 
+- name: "CME-807 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_807_skip | default(false)
+
 - name: "CME-807 | Run verification command (any)"
   ansible.builtin.shell:
     cmd: "grep -rn 'session-timeout\\|<session-config>' <app_source>/WEB-INF/web.xml"
@@ -71,7 +75,7 @@
   when: cme_807_verify_3 is not skipped
 
 - name: "CME-807 | Run verification command (windows)"
-  ansible.builtin.shell:
+  ansible.windows.win_shell:
     cmd: "Get-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name InactivityTimeoutSecs -ErrorAction SilentlyContinue | Select-Object InactivityTimeoutSecs"
   register: cme_807_verify_4
   changed_when: false
@@ -90,4 +94,4 @@
 
 - name: "CME-807 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-807', 'control_name': 'Session Lifetime and Idle Timeout Enforcement', 'tactic': 'Harden', 'category': 'Credential Hardening', 'control_layer': 'Identity', 'confidence': 'High', 'status': ((cme_807_assert_0 is defined and cme_807_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_807_assert_0 is defined) | ternary(cme_807_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-807', 'control_name': 'Session Lifetime and Idle Timeout Enforcement', 'tactic': 'Harden', 'category': 'Credential Hardening', 'control_layer': 'Identity', 'confidence': 'High', 'status': ((((cme_807_assert_0 is not defined or cme_807_assert_0 is not failed) and (cme_807_assert_1 is not defined or cme_807_assert_1 is not failed) and (cme_807_assert_2 is not defined or cme_807_assert_2 is not failed) and (cme_807_assert_3 is not defined or cme_807_assert_3 is not failed) and (cme_807_assert_4 is not defined or cme_807_assert_4 is not failed)) and (cme_807_assert_0 is defined or cme_807_assert_1 is defined or cme_807_assert_2 is defined or cme_807_assert_3 is defined or cme_807_assert_4 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_807_assert_0 is defined and cme_807_assert_0 is failed) | ternary(cme_807_assert_0.msg | default(''), '')), ((cme_807_assert_1 is defined and cme_807_assert_1 is failed) | ternary(cme_807_assert_1.msg | default(''), '')), ((cme_807_assert_2 is defined and cme_807_assert_2 is failed) | ternary(cme_807_assert_2.msg | default(''), '')), ((cme_807_assert_3 is defined and cme_807_assert_3 is failed) | ternary(cme_807_assert_3.msg | default(''), '')), ((cme_807_assert_4 is defined and cme_807_assert_4 is failed) | ternary(cme_807_assert_4.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

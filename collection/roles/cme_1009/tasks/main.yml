@@ -3,6 +3,10 @@
 # Remediation strategy: generic (review and customize for your environment)
 # Verification method: Verify that a scheduled job or event-driven monitor tracks high-privilege role membership and alerts on unauthorized additions. Grant a test user a high-privilege role and confirm an alert fires within the expected interval.
 
+- name: "CME-1009 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_1009_skip | default(false)
+
 - name: "CME-1009 | Remediation requires environment-specific configuration"
   ansible.builtin.debug:
     msg: >-

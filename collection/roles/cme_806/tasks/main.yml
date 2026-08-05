@@ -1,15 +1,63 @@
 ---
 # CME-806: Kerberos Authentication (GSSAPI)
-# Remediation strategy: generic (review and customize for your environment)
-# Verification method: Check Kerberos authentication is configured
 
-- name: "CME-806 | Remediation requires environment-specific configuration"
-  ansible.builtin.debug:
-    msg: >-
-      CME-806 (Kerberos Authentication (GSSAPI)) remediation depends on your
-      environment configuration. Override this role's tasks/main.yml
-      with site-specific remediation steps.
-  when: not (cme_806_custom_remediation | default(false))
+- name: "CME-806 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_806_skip | default(false)
 
-- name: "CME-806 | Verify current state"
+- name: "CME-806 | Configure PermitRootLogin"
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?PermitRootLogin"
+    line: "PermitRootLogin no"
+    validate: "sshd -t -f %s"
+  notify: restart sshd
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-806 | Configure X11Forwarding"
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?X11Forwarding"
+    line: "X11Forwarding no"
+    validate: "sshd -t -f %s"
+  notify: restart sshd
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-806 | Configure MaxAuthTries"
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?MaxAuthTries"
+    line: "MaxAuthTries 4"
+    validate: "sshd -t -f %s"
+  notify: restart sshd
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-806 | Configure PermitEmptyPasswords"
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?PermitEmptyPasswords"
+    line: "PermitEmptyPasswords no"
+    validate: "sshd -t -f %s"
+  notify: restart sshd
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-806 | Configure ClientAliveInterval"
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?ClientAliveInterval"
+    line: "ClientAliveInterval 300"
+    validate: "sshd -t -f %s"
+  notify: restart sshd
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-806 | Configure ClientAliveCountMax"
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?ClientAliveCountMax"
+    line: "ClientAliveCountMax 3"
+    validate: "sshd -t -f %s"
+  notify: restart sshd
+  when: ansible_os_family != 'Windows'
+
+- name: "CME-806 | Verify after remediation"
   ansible.builtin.include_tasks: verify.yml

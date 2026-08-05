@@ -2,6 +2,10 @@
 # CME-507: Secure Dynamic Linker Configuration (LD_PRELOAD/PATH Hardening)
 # Verification: Verify that the dynamic linker search path only references trusted directories, LD_PRELOAD/LD_LIBRARY_PATH are cleared for services, and no world-writable directories appear in library search paths.
 
+- name: "CME-507 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_507_skip | default(false)
+
 - name: "CME-507 | Run verification command (linux)"
   ansible.builtin.shell:
     cmd: "grep -rn \".\" /etc/ld.so.conf.d/"
@@ -76,4 +80,4 @@
 
 - name: "CME-507 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-507', 'control_name': 'Secure Dynamic Linker Configuration (LD_PRELOAD/PATH Hardening)', 'tactic': 'Harden', 'category': 'Filesystem Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'Medium', 'status': ((cme_507_assert_0 is defined and cme_507_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_507_assert_0 is defined) | ternary(cme_507_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-507', 'control_name': 'Secure Dynamic Linker Configuration (LD_PRELOAD/PATH Hardening)', 'tactic': 'Harden', 'category': 'Filesystem Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'Medium', 'status': ((((cme_507_assert_0 is not defined or cme_507_assert_0 is not failed) and (cme_507_assert_1 is not defined or cme_507_assert_1 is not failed) and (cme_507_assert_2 is not defined or cme_507_assert_2 is not failed) and (cme_507_assert_3 is not defined or cme_507_assert_3 is not failed)) and (cme_507_assert_0 is defined or cme_507_assert_1 is defined or cme_507_assert_2 is defined or cme_507_assert_3 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_507_assert_0 is defined and cme_507_assert_0 is failed) | ternary(cme_507_assert_0.msg | default(''), '')), ((cme_507_assert_1 is defined and cme_507_assert_1 is failed) | ternary(cme_507_assert_1.msg | default(''), '')), ((cme_507_assert_2 is defined and cme_507_assert_2 is failed) | ternary(cme_507_assert_2.msg | default(''), '')), ((cme_507_assert_3 is defined and cme_507_assert_3 is failed) | ternary(cme_507_assert_3.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

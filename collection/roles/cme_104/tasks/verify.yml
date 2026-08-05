@@ -2,6 +2,10 @@
 # CME-104: KASLR (Kernel Address Space Layout Randomization)
 # Verification: Verify KASLR is not disabled in boot parameters
 
+- name: "CME-104 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_104_skip | default(false)
+
 - name: "CME-104 | Run verification command (linux)"
   ansible.builtin.shell:
     cmd: "cat /proc/cmdline | grep -v nokaslr && echo 'KASLR active'"
@@ -40,4 +44,4 @@
 
 - name: "CME-104 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-104', 'control_name': 'KASLR (Kernel Address Space Layout Randomization)', 'tactic': 'Harden', 'category': 'Kernel Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_104_assert_0 is defined and cme_104_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_104_assert_0 is defined) | ternary(cme_104_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-104', 'control_name': 'KASLR (Kernel Address Space Layout Randomization)', 'tactic': 'Harden', 'category': 'Kernel Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((((cme_104_assert_0 is not defined or cme_104_assert_0 is not failed) and (cme_104_assert_1 is not defined or cme_104_assert_1 is not failed)) and (cme_104_assert_0 is defined or cme_104_assert_1 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_104_assert_0 is defined and cme_104_assert_0 is failed) | ternary(cme_104_assert_0.msg | default(''), '')), ((cme_104_assert_1 is defined and cme_104_assert_1 is failed) | ternary(cme_104_assert_1.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

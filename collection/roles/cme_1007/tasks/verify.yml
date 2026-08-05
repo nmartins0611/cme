@@ -2,6 +2,10 @@
 # CME-1007: Application Configuration Drift Detection (IaC Enforcement)
 # Verification: Verify that application configuration is managed via IaC and that drift detection runs on a schedule. Introduce a test configuration change via the application admin API and confirm it is detected or reverted within the expected interval.
 
+- name: "CME-1007 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_1007_skip | default(false)
+
 - name: "CME-1007 | Run verification command (any)"
   ansible.builtin.shell:
     cmd: "terraform plan -detailed-exitcode"
@@ -38,4 +42,4 @@
 
 - name: "CME-1007 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1007', 'control_name': 'Application Configuration Drift Detection (IaC Enforcement)', 'tactic': 'Detect', 'category': 'Integrity Detection', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_1007_assert_0 is defined and cme_1007_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_1007_assert_0 is defined) | ternary(cme_1007_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-1007', 'control_name': 'Application Configuration Drift Detection (IaC Enforcement)', 'tactic': 'Detect', 'category': 'Integrity Detection', 'control_layer': 'Application', 'confidence': 'High', 'status': ((((cme_1007_assert_0 is not defined or cme_1007_assert_0 is not failed) and (cme_1007_assert_1 is not defined or cme_1007_assert_1 is not failed)) and (cme_1007_assert_0 is defined or cme_1007_assert_1 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_1007_assert_0 is defined and cme_1007_assert_0 is failed) | ternary(cme_1007_assert_0.msg | default(''), '')), ((cme_1007_assert_1 is defined and cme_1007_assert_1 is failed) | ternary(cme_1007_assert_1.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

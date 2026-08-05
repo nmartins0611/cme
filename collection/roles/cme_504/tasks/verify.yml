@@ -2,6 +2,10 @@
 # CME-504: dm-verity (Verified Boot)
 # Verification: Check dm-verity status on root device
 
+- name: "CME-504 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_504_skip | default(false)
+
 - name: "CME-504 | Run verification command"
   ansible.builtin.shell:
     cmd: "veritysetup status root"

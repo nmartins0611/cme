@@ -2,6 +2,10 @@
 # CME-301: SELinux (Enforcing Mode)
 # Verification: Verify SELinux is in enforcing mode
 
+- name: "CME-301 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_301_skip | default(false)
+
 - name: "CME-301 | Run verification command (rhel)"
   ansible.builtin.shell:
     cmd: "getenforce"
@@ -40,4 +44,4 @@
 
 - name: "CME-301 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-301', 'control_name': 'SELinux (Enforcing Mode)', 'tactic': 'Harden', 'category': 'Mandatory Access Control', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((cme_301_assert_0 is defined and cme_301_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_301_assert_0 is defined) | ternary(cme_301_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-301', 'control_name': 'SELinux (Enforcing Mode)', 'tactic': 'Harden', 'category': 'Mandatory Access Control', 'control_layer': 'OS/Kernel', 'confidence': 'High', 'status': ((((cme_301_assert_0 is not defined or cme_301_assert_0 is not failed) and (cme_301_assert_1 is not defined or cme_301_assert_1 is not failed)) and (cme_301_assert_0 is defined or cme_301_assert_1 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_301_assert_0 is defined and cme_301_assert_0 is failed) | ternary(cme_301_assert_0.msg | default(''), '')), ((cme_301_assert_1 is defined and cme_301_assert_1 is failed) | ternary(cme_301_assert_1.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

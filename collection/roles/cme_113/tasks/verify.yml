@@ -2,6 +2,10 @@
 # CME-113: Control Flow Integrity (CFI / Shadow Call Stack)
 # Verification: Check kernel config for CFI or Shadow Call Stack
 
+- name: "CME-113 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_113_skip | default(false)
+
 - name: "CME-113 | Run verification command (linux)"
   ansible.builtin.shell:
     cmd: "grep CONFIG_CFI_CLANG /boot/config-$(uname -r)"
@@ -39,7 +43,7 @@
   when: ansible_os_family != 'Windows' and cme_113_verify_1 is not skipped
 
 - name: "CME-113 | Run verification command (windows)"
-  ansible.builtin.shell:
+  ansible.windows.win_shell:
     cmd: "(Get-ProcessMitigation -System).CFG.Enable"
   register: cme_113_verify_2
   changed_when: false
@@ -58,4 +62,4 @@
 
 - name: "CME-113 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-113', 'control_name': 'Control Flow Integrity (CFI / Shadow Call Stack)', 'tactic': 'Harden', 'category': 'Kernel Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'Medium', 'status': ((cme_113_assert_0 is defined and cme_113_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_113_assert_0 is defined) | ternary(cme_113_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-113', 'control_name': 'Control Flow Integrity (CFI / Shadow Call Stack)', 'tactic': 'Harden', 'category': 'Kernel Hardening', 'control_layer': 'OS/Kernel', 'confidence': 'Medium', 'status': ((((cme_113_assert_0 is not defined or cme_113_assert_0 is not failed) and (cme_113_assert_1 is not defined or cme_113_assert_1 is not failed) and (cme_113_assert_2 is not defined or cme_113_assert_2 is not failed)) and (cme_113_assert_0 is defined or cme_113_assert_1 is defined or cme_113_assert_2 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_113_assert_0 is defined and cme_113_assert_0 is failed) | ternary(cme_113_assert_0.msg | default(''), '')), ((cme_113_assert_1 is defined and cme_113_assert_1 is failed) | ternary(cme_113_assert_1.msg | default(''), '')), ((cme_113_assert_2 is defined and cme_113_assert_2 is failed) | ternary(cme_113_assert_2.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

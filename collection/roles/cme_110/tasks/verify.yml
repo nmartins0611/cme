@@ -2,6 +2,10 @@
 # CME-110: KEXEC Restriction
 # Verification: Check kexec_load_disabled sysctl
 
+- name: "CME-110 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_110_skip | default(false)
+
 - name: "CME-110 | Run verification command"
   ansible.builtin.shell:
     cmd: "cat /proc/sys/kernel/kexec_load_disabled"
@@ -13,7 +17,7 @@
 - name: "CME-110 | Assert control is active"
   ansible.builtin.assert:
     that:
-      - "cme_110_verify_0.stdout is search('1')"
+      - "cme_110_verify_0.stdout | trim == '1'"
     fail_msg: "CME-110 FAILED — expected '1'"
     success_msg: "CME-110 PASSED — KEXEC Restriction"
   ignore_errors: true

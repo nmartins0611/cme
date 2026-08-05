@@ -3,6 +3,10 @@
 # Remediation strategy: generic (review and customize for your environment)
 # Verification method: Verify that the dynamic linker search path only references trusted directories, LD_PRELOAD/LD_LIBRARY_PATH are cleared for services, and no world-writable directories appear in library search paths.
 
+- name: "CME-507 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_507_skip | default(false)
+
 - name: "CME-507 | Remediation requires environment-specific configuration"
   ansible.builtin.debug:
     msg: >-

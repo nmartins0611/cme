@@ -2,6 +2,10 @@
 # CME-203: Network Segmentation (VLANs/Subnets)
 # Verification: Verify network topology shows segmentation between trust zones
 
+- name: "CME-203 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_203_skip | default(false)
+
 - name: "CME-203 | Run verification command"
   ansible.builtin.shell:
     cmd: "ip addr show | grep -c 'inet '"

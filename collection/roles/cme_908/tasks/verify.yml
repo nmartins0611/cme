@@ -2,6 +2,10 @@
 # CME-908: Object-Level Authorization Checks (IDOR Prevention)
 # Verification: Inspect application source for object-level ownership checks; test that authenticated users cannot access resources belonging to other users by manipulating object identifiers
 
+- name: "CME-908 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_908_skip | default(false)
+
 - name: "CME-908 | Run verification command (any)"
   ansible.builtin.shell:
     cmd: "grep -rn 'owner_id.*==.*current_user\\|belongs_to.*user\\|authorize_resource\\|object_permission\\|get_object_or_403\\|filter.*user=' <app_source>/"
@@ -38,4 +42,4 @@
 
 - name: "CME-908 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-908', 'control_name': 'Object-Level Authorization Checks (IDOR Prevention)', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_908_assert_0 is defined and cme_908_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_908_assert_0 is defined) | ternary(cme_908_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-908', 'control_name': 'Object-Level Authorization Checks (IDOR Prevention)', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((((cme_908_assert_0 is not defined or cme_908_assert_0 is not failed) and (cme_908_assert_1 is not defined or cme_908_assert_1 is not failed)) and (cme_908_assert_0 is defined or cme_908_assert_1 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_908_assert_0 is defined and cme_908_assert_0 is failed) | ternary(cme_908_assert_0.msg | default(''), '')), ((cme_908_assert_1 is defined and cme_908_assert_1 is failed) | ternary(cme_908_assert_1.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

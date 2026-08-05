@@ -2,6 +2,10 @@
 # CME-913: CSRF Protection (Anti-CSRF Token & SameSite Cookie Enforcement)
 # Verification: Check that the application framework's CSRF middleware is enabled and that session cookies carry the SameSite attribute
 
+- name: "CME-913 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_913_skip | default(false)
+
 - name: "CME-913 | Run verification command (any)"
   ansible.builtin.shell:
     cmd: "grep -rn 'csrf\\|CsrfViewMiddleware\\|csrf_protect\\|@csrf_exempt\\|antiforgery\\|ValidateAntiForgeryToken\\|csrftoken' <app_source>/"
@@ -38,4 +42,4 @@
 
 - name: "CME-913 | Record result"
   ansible.builtin.set_fact:
-    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-913', 'control_name': 'CSRF Protection (Anti-CSRF Token & SameSite Cookie Enforcement)', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((cme_913_assert_0 is defined and cme_913_assert_0 is not failed) | ternary('passed', 'failed')), 'detail': ((cme_913_assert_0 is defined) | ternary(cme_913_assert_0.msg | default(''), 'not checked'))}] }}"
+    cme_results: "{{ (cme_results | default([])) + [{'cme_id': 'CME-913', 'control_name': 'CSRF Protection (Anti-CSRF Token & SameSite Cookie Enforcement)', 'tactic': 'Harden', 'category': 'Application Controls', 'control_layer': 'Application', 'confidence': 'High', 'status': ((((cme_913_assert_0 is not defined or cme_913_assert_0 is not failed) and (cme_913_assert_1 is not defined or cme_913_assert_1 is not failed)) and (cme_913_assert_0 is defined or cme_913_assert_1 is defined)) | ternary('passed', 'failed')), 'detail': ([((cme_913_assert_0 is defined and cme_913_assert_0 is failed) | ternary(cme_913_assert_0.msg | default(''), '')), ((cme_913_assert_1 is defined and cme_913_assert_1 is failed) | ternary(cme_913_assert_1.msg | default(''), ''))] | reject('equalto', '') | join(' | ') | default('all checks passed'))}] }}"

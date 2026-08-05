@@ -2,6 +2,10 @@
 # CME-205: Service Binding to Localhost
 # Verification: Check service listen address is localhost only
 
+- name: "CME-205 | Skip if disabled"
+  ansible.builtin.meta: end_role
+  when: cme_205_skip | default(false)
+
 - name: "CME-205 | Run verification command"
   ansible.builtin.shell:
     cmd: "ss -tlnp | grep ':8080'"
