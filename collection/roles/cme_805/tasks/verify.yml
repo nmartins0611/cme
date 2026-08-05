@@ -2,9 +2,6 @@
 # CME-805: Credential Rotation Policy
 # Verification: Check password aging and secret rotation policies
 
-- name: "CME-805 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_805_skip | default(false)
 
 - name: "CME-805 | Run verification command (linux)"
   ansible.builtin.shell:

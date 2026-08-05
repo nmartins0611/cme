@@ -2,9 +2,6 @@
 # CME-803: Account Lockout Policy (pam_faillock)
 # Verification: Check pam_faillock configuration
 
-- name: "CME-803 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_803_skip | default(false)
 
 - name: "CME-803 | Run verification command (rhel)"
   ansible.builtin.shell:

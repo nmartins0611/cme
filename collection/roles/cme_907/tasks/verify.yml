@@ -2,9 +2,6 @@
 # CME-907: Application-Layer RBAC Enforcement
 # Verification: Inspect application source for role-based authorization checks on privileged endpoints; test that unprivileged authenticated users receive 403 on admin endpoints
 
-- name: "CME-907 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_907_skip | default(false)
 
 - name: "CME-907 | Run verification command (any)"
   ansible.builtin.shell:

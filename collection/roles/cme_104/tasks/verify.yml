@@ -2,9 +2,6 @@
 # CME-104: KASLR (Kernel Address Space Layout Randomization)
 # Verification: Verify KASLR is not disabled in boot parameters
 
-- name: "CME-104 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_104_skip | default(false)
 
 - name: "CME-104 | Run verification command (linux)"
   ansible.builtin.shell:

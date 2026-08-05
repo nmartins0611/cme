@@ -1,9 +1,6 @@
 ---
 # CME-101: ASLR (Address Space Layout Randomization)
 
-- name: "CME-101 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_101_skip | default(false)
 
 - name: "CME-101 | Set kernel.randomize_va_space"
   ansible.posix.sysctl:

@@ -2,9 +2,6 @@
 # CME-903: Kernel Network Hardening (sysctl)
 # Verification: Check network hardening sysctls
 
-- name: "CME-903 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_903_skip | default(false)
 
 - name: "CME-903 | Run verification command (linux)"
   ansible.builtin.shell:

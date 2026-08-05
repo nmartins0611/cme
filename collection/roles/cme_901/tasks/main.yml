@@ -1,9 +1,6 @@
 ---
 # CME-901: SSH Hardening (Comprehensive)
 
-- name: "CME-901 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_901_skip | default(false)
 
 - name: "CME-901 | Configure PermitRootLogin"
   ansible.builtin.lineinfile:

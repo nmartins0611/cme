@@ -3,9 +3,6 @@
 # Remediation strategy: generic (review and customize for your environment)
 # Verification method: Check kernel config for CFI or Shadow Call Stack
 
-- name: "CME-113 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_113_skip | default(false)
 
 - name: "CME-113 | Remediation requires environment-specific configuration"
   ansible.builtin.debug:

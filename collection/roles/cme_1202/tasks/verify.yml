@@ -3,9 +3,6 @@
 # Verification method: Verify backup schedule and last successful restore test
 # No machine-executable verification commands defined.
 
-- name: "CME-1202 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_1202_skip | default(false)
 
 - name: "CME-1202 | No automated verification available"
   ansible.builtin.debug:

@@ -1,9 +1,6 @@
 ---
 # CME-1101: Automated Patch Management (dnf-automatic)
 
-- name: "CME-1101 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_1101_skip | default(false)
 
 - name: "CME-1101 | Install dnf-automatic (RedHat)"
   ansible.builtin.dnf:

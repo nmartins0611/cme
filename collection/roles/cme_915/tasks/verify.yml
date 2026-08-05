@@ -2,9 +2,6 @@
 # CME-915: Cross-Origin Request Restriction (Reverse Proxy Origin Enforcement)
 # Verification: Check reverse proxy configuration for Origin/Referer header validation on state-changing requests. The proxy should reject requests with an Origin not in the trusted allowlist.
 
-- name: "CME-915 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_915_skip | default(false)
 
 - name: "CME-915 | Run verification command (rhel)"
   ansible.builtin.shell:

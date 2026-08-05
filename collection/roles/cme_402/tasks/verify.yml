@@ -2,9 +2,6 @@
 # CME-402: FIPS 140-3 Mode
 # Verification: Verify FIPS mode is enabled
 
-- name: "CME-402 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_402_skip | default(false)
 
 - name: "CME-402 | Run verification command (rhel)"
   ansible.builtin.shell:

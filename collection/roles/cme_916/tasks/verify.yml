@@ -2,9 +2,6 @@
 # CME-916: SameSite Cookie Attribute Enforcement
 # Verification: Verify that all Set-Cookie response headers include SameSite=Lax or SameSite=Strict. Check web server or reverse proxy configuration for cookie attribute enforcement directives.
 
-- name: "CME-916 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_916_skip | default(false)
 
 - name: "CME-916 | Run verification command (rhel)"
   ansible.builtin.shell:

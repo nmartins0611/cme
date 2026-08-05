@@ -2,9 +2,6 @@
 # CME-107: Kernel Module Loading Restriction
 # Verification: Check modules_disabled sysctl
 
-- name: "CME-107 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_107_skip | default(false)
 
 - name: "CME-107 | Run verification command"
   ansible.builtin.shell:

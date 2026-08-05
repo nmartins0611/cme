@@ -2,9 +2,6 @@
 # CME-302: SELinux Confined User Mapping
 # Verification: Verify no regular users mapped to unconfined_u
 
-- name: "CME-302 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_302_skip | default(false)
 
 - name: "CME-302 | Run verification command"
   ansible.builtin.shell:

@@ -2,9 +2,6 @@
 # CME-117: Heap Allocator Hardening (glibc Safe-Linking and Metadata Protection)
 # Verification: Verify glibc version includes safe-linking (2.32+) and tcache key verification; on older systems, verify MALLOC_PERTURB_ is set
 
-- name: "CME-117 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_117_skip | default(false)
 
 - name: "CME-117 | Run verification command (rhel)"
   ansible.builtin.shell:

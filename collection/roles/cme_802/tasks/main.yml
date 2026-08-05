@@ -1,9 +1,6 @@
 ---
 # CME-802: Password Quality Enforcement (pwquality)
 
-- name: "CME-802 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_802_skip | default(false)
 
 - name: "CME-802 | Configure minlen in /etc/security/pwquality.conf"
   ansible.builtin.lineinfile:

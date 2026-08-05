@@ -2,9 +2,6 @@
 # CME-702: Linux Namespaces (User, PID, Network, Mount)
 # Verification: Check process namespace isolation
 
-- name: "CME-702 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_702_skip | default(false)
 
 - name: "CME-702 | Run verification command"
   ansible.builtin.shell:

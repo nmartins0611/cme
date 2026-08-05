@@ -2,9 +2,6 @@
 # CME-701: Sandboxing / gVisor Runtime
 # Verification: Check container runtime class
 
-- name: "CME-701 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_701_skip | default(false)
 
 - name: "CME-701 | Run verification command (kubernetes)"
   ansible.builtin.shell:

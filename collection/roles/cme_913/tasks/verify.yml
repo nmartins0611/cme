@@ -2,9 +2,6 @@
 # CME-913: CSRF Protection (Anti-CSRF Token & SameSite Cookie Enforcement)
 # Verification: Check that the application framework's CSRF middleware is enabled and that session cookies carry the SameSite attribute
 
-- name: "CME-913 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_913_skip | default(false)
 
 - name: "CME-913 | Run verification command (any)"
   ansible.builtin.shell:

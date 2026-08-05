@@ -2,9 +2,6 @@
 # CME-503: nosuid on Non-Root Partitions
 # Verification: Check nosuid on non-root partitions
 
-- name: "CME-503 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_503_skip | default(false)
 
 - name: "CME-503 | Run verification command (linux)"
   ansible.builtin.shell:

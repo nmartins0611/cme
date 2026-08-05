@@ -2,9 +2,6 @@
 # CME-807: Session Lifetime and Idle Timeout Enforcement
 # Verification: Verify that authenticated sessions have both absolute lifetime limits and idle timeouts configured, and that logout explicitly invalidates the server-side session
 
-- name: "CME-807 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_807_skip | default(false)
 
 - name: "CME-807 | Run verification command (any)"
   ansible.builtin.shell:

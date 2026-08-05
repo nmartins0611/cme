@@ -2,9 +2,6 @@
 # CME-508: Quoted Service Path Enforcement (Windows)
 # Verification: Enumerate all Windows services and scheduled tasks with unquoted paths containing spaces, and verify filesystem ACLs on path prefix directories
 
-- name: "CME-508 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_508_skip | default(false)
 
 - name: "CME-508 | Run verification command (windows)"
   ansible.windows.win_shell:

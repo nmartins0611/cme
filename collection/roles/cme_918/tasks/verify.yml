@@ -2,9 +2,6 @@
 # CME-918: URL Path Authorization Enforcement (Forced Browsing Prevention)
 # Verification: Verify that the web server or reverse proxy enforces URL-pattern-based authorization on restricted paths, and that unauthenticated requests to administrative or internal endpoints are denied
 
-- name: "CME-918 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_918_skip | default(false)
 
 - name: "CME-918 | Run verification command (linux)"
   ansible.builtin.shell:

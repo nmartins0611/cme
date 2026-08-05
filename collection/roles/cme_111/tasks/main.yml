@@ -3,9 +3,6 @@
 # Remediation strategy: generic (review and customize for your environment)
 # Verification method: Check UEFI Secure Boot state
 
-- name: "CME-111 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_111_skip | default(false)
 
 - name: "CME-111 | Remediation requires environment-specific configuration"
   ansible.builtin.debug:

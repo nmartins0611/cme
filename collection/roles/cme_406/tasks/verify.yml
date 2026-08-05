@@ -2,9 +2,6 @@
 # CME-406: Signed Package Enforcement (GPG)
 # Verification: Verify gpgcheck enabled for all repos
 
-- name: "CME-406 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_406_skip | default(false)
 
 - name: "CME-406 | Run verification command (rhel)"
   ansible.builtin.shell:

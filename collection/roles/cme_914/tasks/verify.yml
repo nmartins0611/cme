@@ -2,9 +2,6 @@
 # CME-914: Strict CORS Origin Allowlist Enforcement
 # Verification: Test that the server rejects unapproved origins and does not reflect arbitrary Origin headers in CORS response headers
 
-- name: "CME-914 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_914_skip | default(false)
 
 - name: "CME-914 | Run verification command (any)"
   ansible.builtin.shell:

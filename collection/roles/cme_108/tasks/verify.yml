@@ -2,9 +2,6 @@
 # CME-108: kptr_restrict (Kernel Pointer Restriction)
 # Verification: Check kptr_restrict sysctl is 1 or 2
 
-- name: "CME-108 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_108_skip | default(false)
 
 - name: "CME-108 | Run verification command"
   ansible.builtin.shell:

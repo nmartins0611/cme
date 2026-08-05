@@ -1,9 +1,6 @@
 ---
 # CME-801: Multi-Factor Authentication (MFA)
 
-- name: "CME-801 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_801_skip | default(false)
 
 - name: "CME-801 | Configure PermitRootLogin"
   ansible.builtin.lineinfile:

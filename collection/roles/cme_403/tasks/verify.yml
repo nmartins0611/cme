@@ -2,9 +2,6 @@
 # CME-403: TLS 1.3 Enforcement
 # Verification: Verify minimum TLS version is 1.3
 
-- name: "CME-403 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_403_skip | default(false)
 
 - name: "CME-403 | Run verification command (any)"
   ansible.builtin.shell:

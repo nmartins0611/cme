@@ -2,9 +2,6 @@
 # CME-401: System-wide Crypto Policy (FUTURE)
 # Verification: Check system crypto policy level
 
-- name: "CME-401 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_401_skip | default(false)
 
 - name: "CME-401 | Run verification command"
   ansible.builtin.shell:

@@ -1,9 +1,6 @@
 ---
 # CME-118: Protected File Links (Kernel Symlink/Hardlink Protection)
 
-- name: "CME-118 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_118_skip | default(false)
 
 - name: "CME-118 | Set fs.protected_symlinks"
   ansible.posix.sysctl:

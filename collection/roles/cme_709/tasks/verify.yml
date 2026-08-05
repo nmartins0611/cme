@@ -2,9 +2,6 @@
 # CME-709: systemd Service Sandboxing (PrivateDevices, PrivateTmp, ProtectSystem)
 # Verification: Check systemd unit for sandbox directives
 
-- name: "CME-709 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_709_skip | default(false)
 
 - name: "CME-709 | Run verification command"
   ansible.builtin.shell:

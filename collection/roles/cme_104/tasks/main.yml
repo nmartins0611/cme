@@ -3,9 +3,6 @@
 # Remediation strategy: generic (review and customize for your environment)
 # Verification method: Verify KASLR is not disabled in boot parameters
 
-- name: "CME-104 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_104_skip | default(false)
 
 - name: "CME-104 | Remediation requires environment-specific configuration"
   ansible.builtin.debug:

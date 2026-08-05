@@ -2,9 +2,6 @@
 # CME-501: Read-Only Root Filesystem
 # Verification: Check mount options for root filesystem
 
-- name: "CME-501 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_501_skip | default(false)
 
 - name: "CME-501 | Run verification command"
   ansible.builtin.shell:

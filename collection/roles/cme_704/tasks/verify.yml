@@ -2,9 +2,6 @@
 # CME-704: cgroups v2 Resource Limits
 # Verification: Check cgroup v2 is mounted and limits are set
 
-- name: "CME-704 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_704_skip | default(false)
 
 - name: "CME-704 | Run verification command (linux)"
   ansible.builtin.shell:

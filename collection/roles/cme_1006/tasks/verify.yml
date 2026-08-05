@@ -2,9 +2,6 @@
 # CME-1006: Privilege Change Audit Logging
 # Verification: Inspect application source for audit logging on role/permission change operations; verify log entries are generated on privilege modifications
 
-- name: "CME-1006 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_1006_skip | default(false)
 
 - name: "CME-1006 | Run verification command (any)"
   ansible.builtin.shell:

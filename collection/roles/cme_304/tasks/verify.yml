@@ -2,9 +2,6 @@
 # CME-304: AppArmor (Enforcing Profile)
 # Verification: Check AppArmor status and profile enforcement
 
-- name: "CME-304 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_304_skip | default(false)
 
 - name: "CME-304 | Run verification command"
   ansible.builtin.shell:

@@ -2,9 +2,6 @@
 # CME-801: Multi-Factor Authentication (MFA)
 # Verification: Verify MFA enforcement in PAM or IdP
 
-- name: "CME-801 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_801_skip | default(false)
 
 - name: "CME-801 | Run verification command (linux)"
   ansible.builtin.shell:

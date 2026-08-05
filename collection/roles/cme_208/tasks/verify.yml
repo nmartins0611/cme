@@ -2,9 +2,6 @@
 # CME-208: Outbound Network Egress Restriction (SSRF Blast Radius Containment)
 # Verification: Verify that application workloads cannot initiate outbound connections to RFC1918 ranges, link-local addresses, or localhost
 
-- name: "CME-208 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_208_skip | default(false)
 
 - name: "CME-208 | Run verification command (linux)"
   ansible.builtin.shell:

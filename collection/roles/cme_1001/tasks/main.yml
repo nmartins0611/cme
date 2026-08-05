@@ -1,9 +1,6 @@
 ---
 # CME-1001: EDR Agent (Endpoint Detection & Response)
 
-- name: "CME-1001 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_1001_skip | default(false)
 
 - name: "CME-1001 | Ensure falco is installed"
   ansible.builtin.package:

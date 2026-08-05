@@ -2,9 +2,6 @@
 # CME-201: Zero Trust Gateway / Identity-Aware Proxy
 # Verification: Verify identity-aware proxy or zero trust gateway is in enforcement path
 
-- name: "CME-201 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_201_skip | default(false)
 
 - name: "CME-201 | Run verification command"
   ansible.builtin.shell:

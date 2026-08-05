@@ -1,9 +1,6 @@
 ---
 # CME-806: Kerberos Authentication (GSSAPI)
 
-- name: "CME-806 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_806_skip | default(false)
 
 - name: "CME-806 | Configure PermitRootLogin"
   ansible.builtin.lineinfile:

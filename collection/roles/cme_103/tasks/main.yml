@@ -3,9 +3,6 @@
 # Remediation strategy: generic (review and customize for your environment)
 # Verification method: Verify binaries compiled with -fstack-protector-strong
 
-- name: "CME-103 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_103_skip | default(false)
 
 - name: "CME-103 | Remediation requires environment-specific configuration"
   ansible.builtin.debug:

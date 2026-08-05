@@ -2,9 +2,6 @@
 # CME-602: seccomp-bpf Profile (Container Default)
 # Verification: Verify container runtime has seccomp profile applied
 
-- name: "CME-602 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_602_skip | default(false)
 
 - name: "CME-602 | Run verification command (linux)"
   ansible.builtin.shell:

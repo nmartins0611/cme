@@ -2,9 +2,6 @@
 # CME-1317: XML External Entity Prevention (Secure XML Parser Configuration)
 # Verification: Verify that XML parsers are configured to disable external entities and DTD processing across all application languages in use
 
-- name: "CME-1317 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_1317_skip | default(false)
 
 - name: "CME-1317 | Run verification command (any)"
   ansible.builtin.shell:

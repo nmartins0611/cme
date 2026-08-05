@@ -3,9 +3,6 @@
 # Remediation strategy: generic (review and customize for your environment)
 # Verification method: Check NoNewPrivs flag on process
 
-- name: "CME-707 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_707_skip | default(false)
 
 - name: "CME-707 | Remediation requires environment-specific configuration"
   ansible.builtin.debug:

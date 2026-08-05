@@ -1,9 +1,6 @@
 ---
 # CME-301: SELinux (Enforcing Mode)
 
-- name: "CME-301 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_301_skip | default(false)
 
 - name: "CME-301 | Ensure SELinux packages are installed"
   ansible.builtin.package:

@@ -2,9 +2,6 @@
 # CME-917: Worker Process Recycling (MaxConnectionsPerChild / max_requests)
 # Verification: Check that application server worker recycling is configured with a finite request limit
 
-- name: "CME-917 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_917_skip | default(false)
 
 - name: "CME-917 | Run verification command (linux)"
   ansible.builtin.shell:

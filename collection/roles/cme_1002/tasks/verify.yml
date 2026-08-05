@@ -2,9 +2,6 @@
 # CME-1002: Audit Subsystem (auditd)
 # Verification: Verify auditd is running with rules loaded
 
-- name: "CME-1002 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_1002_skip | default(false)
 
 - name: "CME-1002 | Run verification command (linux)"
   ansible.builtin.shell:

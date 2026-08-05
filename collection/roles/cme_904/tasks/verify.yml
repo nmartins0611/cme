@@ -2,9 +2,6 @@
 # CME-904: WAF (Web Application Firewall)
 # Verification: Verify WAF is in enforcement mode with rules loaded
 
-- name: "CME-904 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_904_skip | default(false)
 
 - name: "CME-904 | Run verification command"
   ansible.builtin.shell:

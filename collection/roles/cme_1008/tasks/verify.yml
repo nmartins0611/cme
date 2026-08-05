@@ -2,9 +2,6 @@
 # CME-1008: Application Admin Event Logging (SIEM Integration)
 # Verification: Verify that application admin event logging is enabled and events are forwarded to the SIEM. Perform a sensitive administrative action and confirm the event appears in the SIEM within the expected latency.
 
-- name: "CME-1008 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_1008_skip | default(false)
 
 - name: "CME-1008 | Run verification command"
   ansible.builtin.shell:

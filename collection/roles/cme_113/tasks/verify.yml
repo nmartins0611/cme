@@ -2,9 +2,6 @@
 # CME-113: Control Flow Integrity (CFI / Shadow Call Stack)
 # Verification: Check kernel config for CFI or Shadow Call Stack
 
-- name: "CME-113 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_113_skip | default(false)
 
 - name: "CME-113 | Run verification command (linux)"
   ansible.builtin.shell:

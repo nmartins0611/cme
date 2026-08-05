@@ -2,9 +2,6 @@
 # CME-114: Process Resource Limits (ulimit/prlimit)
 # Verification: Check that CPU time limits are set for processes
 
-- name: "CME-114 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_114_skip | default(false)
 
 - name: "CME-114 | Run verification command"
   ansible.builtin.shell:

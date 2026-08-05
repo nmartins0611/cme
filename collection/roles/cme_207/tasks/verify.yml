@@ -2,9 +2,6 @@
 # CME-207: DNS Rebinding Protection
 # Verification: Verify that DNS resolvers are configured to block private IP resolution from public domains, and that firewall rules inspect DNS responses for private address answers.
 
-- name: "CME-207 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_207_skip | default(false)
 
 - name: "CME-207 | Run verification command (linux)"
   ansible.builtin.shell:

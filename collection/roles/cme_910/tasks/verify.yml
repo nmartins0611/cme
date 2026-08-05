@@ -2,9 +2,6 @@
 # CME-910: Role Separation / Duty Segregation
 # Verification: Inspect application role definitions for single-responsibility scoping; verify that no role can modify its own permission grants; test that token scopes are operation-bounded
 
-- name: "CME-910 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_910_skip | default(false)
 
 - name: "CME-910 | Run verification command (any)"
   ansible.builtin.shell:

@@ -2,9 +2,6 @@
 # CME-112: RELRO and PIE (Full)
 # Verification: Check binary for Full RELRO and PIE
 
-- name: "CME-112 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_112_skip | default(false)
 
 - name: "CME-112 | Run verification command (linux)"
   ansible.builtin.shell:

@@ -2,9 +2,6 @@
 # CME-912: HTTP Header Normalization and Request Smuggling Prevention
 # Verification: Verify that HTTP intermediaries enforce strict header parsing: reject requests with both Content-Length and Transfer-Encoding, reject duplicate Content-Length headers, and disable relaxed parsing modes
 
-- name: "CME-912 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_912_skip | default(false)
 
 - name: "CME-912 | Run verification command (linux)"
   ansible.builtin.shell:

@@ -2,9 +2,6 @@
 # CME-116: FORTIFY_SOURCE (Buffer Overflow Detection)
 # Verification: Check that system packages are compiled with _FORTIFY_SOURCE=2 or higher
 
-- name: "CME-116 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_116_skip | default(false)
 
 - name: "CME-116 | Run verification command (rhel)"
   ansible.builtin.shell:

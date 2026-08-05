@@ -1,9 +1,6 @@
 ---
 # CME-804: SSH Key-Only Authentication
 
-- name: "CME-804 | Skip if disabled"
-  ansible.builtin.meta: end_role
-  when: cme_804_skip | default(false)
 
 - name: "CME-804 | Configure PermitRootLogin"
   ansible.builtin.lineinfile:
