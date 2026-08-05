@@ -293,6 +293,71 @@ def query_sqlite_attenuation(db_path: str, active_ids: list) -> dict:
     }
 
 
+def _cvss31_score(vector: str) -> tuple:
+    """Calculate CVSS 3.1 base score from a vector string.
+
+    Returns (score: float, severity: str).
+    Implements the CVSS v3.1 specification scoring equations.
+    """
+    metrics = {}
+    for part in vector.split("/"):
+        if ":" in part:
+            k, v = part.split(":", 1)
+            metrics[k] = v
+
+    if "CVSS" in metrics:
+        del metrics["CVSS"]
+
+    weight = {
+        "AV": {"N": 0.85, "A": 0.62, "L": 0.55, "P": 0.20},
+        "AC": {"L": 0.77, "H": 0.44},
+        "PR": {
+            "U": {"N": 0.85, "L": 0.62, "H": 0.27},
+            "C": {"N": 0.85, "L": 0.68, "H": 0.50},
+        },
+        "UI": {"N": 0.85, "R": 0.62},
+        "C": {"H": 0.56, "L": 0.22, "N": 0.0},
+        "I": {"H": 0.56, "L": 0.22, "N": 0.0},
+        "A": {"H": 0.56, "L": 0.22, "N": 0.0},
+    }
+
+    scope = metrics.get("S", "U")
+    av = weight["AV"].get(metrics.get("AV", "N"), 0.85)
+    ac = weight["AC"].get(metrics.get("AC", "L"), 0.77)
+    pr = weight["PR"].get(scope, weight["PR"]["U"]).get(metrics.get("PR", "N"), 0.85)
+    ui = weight["UI"].get(metrics.get("UI", "N"), 0.85)
+
+    c_val = weight["C"].get(metrics.get("C", "N"), 0.0)
+    i_val = weight["I"].get(metrics.get("I", "N"), 0.0)
+    a_val = weight["A"].get(metrics.get("A", "N"), 0.0)
+
+    iss = 1.0 - ((1.0 - c_val) * (1.0 - i_val) * (1.0 - a_val))
+    exploitability = 8.22 * av * ac * pr * ui
+
+    if iss <= 0:
+        return 0.0, "None"
+
+    if scope == "U":
+        import math
+        score = min(10.0, math.ceil((iss * 6.42 + exploitability) * 10) / 10)
+    else:
+        import math
+        score = min(10.0, math.ceil((1.08 * (iss * 7.52 + exploitability - 0.029) - 3.25 * (iss * 0.9731 - 0.02) ** 13) * 10) / 10)
+
+    if score <= 0:
+        severity = "None"
+    elif score <= 3.9:
+        severity = "Low"
+    elif score <= 6.9:
+        severity = "Medium"
+    elif score <= 8.9:
+        severity = "High"
+    else:
+        severity = "Critical"
+
+    return round(score, 1), severity
+
+
 def run_module():
     module_args = dict(
         active_controls=dict(type="list", elements="str", required=True),
@@ -325,6 +390,14 @@ def run_module():
 
             if base_score is not None and base_vector is not None:
                 simulation = query_http_simulation(mcp_endpoint, active_controls, base_score, base_vector)
+                mod_vector = simulation.get("modified_vector", "")
+                if mod_vector:
+                    mod_score, mod_severity = _cvss31_score(mod_vector)
+                    simulation["modified"] = {
+                        "score": mod_score,
+                        "vector": mod_vector,
+                        "severity": mod_severity,
+                    }
                 result["simulation"] = simulation
         else:
             if not HAS_SQLITE:
