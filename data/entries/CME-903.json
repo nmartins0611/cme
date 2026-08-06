@@ -12,6 +12,12 @@
       "from": "L",
       "to": "H",
       "rationale": "Network-level attacks (SYN flood, source routing, ICMP redirect) are blocked"
+    },
+    {
+      "metric": "A",
+      "from": "H",
+      "to": "L",
+      "rationale": "SYN flood and network-layer DoS attacks are mitigated by syncookies and source validation, reducing availability impact"
     }
   ],
   "cwe_relationships": [

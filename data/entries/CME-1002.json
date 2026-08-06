@@ -12,6 +12,12 @@
       "from": "L",
       "to": "H",
       "rationale": "Compensating control: attacker actions are logged and may trigger alerting"
+    },
+    {
+      "metric": "A",
+      "from": "H",
+      "to": "L",
+      "rationale": "Comprehensive audit logging enables rapid detection and containment of exploitation, reducing the duration and scope of availability impact"
     }
   ],
   "cwe_relationships": [

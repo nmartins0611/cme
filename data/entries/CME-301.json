@@ -24,6 +24,12 @@
       "from": "H",
       "to": "L",
       "rationale": "Process cannot modify files or resources outside its domain"
+    },
+    {
+      "metric": "PR",
+      "from": "N",
+      "to": "L",
+      "rationale": "SELinux mandatory access control confines network-facing processes; even unauthenticated access is restricted to the labelled domain, effectively requiring privilege escalation to cause broader impact"
     }
   ],
   "cwe_relationships": [
