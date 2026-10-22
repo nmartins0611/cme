@@ -11,3 +11,8 @@ inventory.yml
 inventory/
 reports/
 collections/
+
+# Local demo collateral
+CME_Mitigations_AAP.pptx
+docs/blog-draft-cme-with-ansible.md
+scripts/generate_slide.py
