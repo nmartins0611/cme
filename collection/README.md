@@ -41,6 +41,35 @@ ansible-playbook cme.controls.report -i inventory.yml \
   -e cme_mcp_endpoint=http://cme-server:8000
 ```
 
+### Recommend controls for a CVE
+
+Looks up the CVE, queries CME for matching controls, and writes HTML, Markdown, and JSON reports. Does not change hosts.
+
+Lookup order when the vector or CWE list is omitted: shipped demo data, then NVD, then the Red Hat CSAF VEX feed, then the CVE.org CVE Services API. The first source with a CVSS vector or a CWE ID wins. Demo data covers `CVE-2026-109618` and `CVE-2026-109619` (PHP request-memory remote code execution), so those IDs resolve with no network.
+
+```bash
+ansible-playbook cme.controls.cve_recommend \
+  -e cve_id=CVE-2026-109618 \
+  -e cme_mcp_endpoint=http://cme-server:8000
+
+# Air-gapped: pass vector and CWEs so remote sources are not contacted
+ansible-playbook cme.controls.cve_recommend \
+  -e cve_id=CVE-2024-38476 \
+  -e cvss_vector="CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H" \
+  -e '{"cwe_ids": ["CWE-829"]}' \
+  -e cme_mcp_endpoint=http://cme-server:8000 \
+  -e cme_report_dir=./reports
+```
+
+Optional: `-e nvd_api_key=...` if you hit NVD rate limits. A failed NVD call continues to Red Hat, then CVE.org.
+
+Reports land in `cme_report_dir` (default `./reports`):
+
+- `cve_CVE_2024_38476_recommended_controls.html`
+- `cve_CVE_2024_38476_recommended_controls.md`
+- `cve_CVE_2024_38476_recommended_controls.json`
+- `cve_profile_CVE_2024_38476.yml` — feed this to `cme.controls.remediate` or `cme.controls.verify`
+
 ### Detect drift from baseline
 
 ```bash
@@ -170,6 +199,7 @@ Supports two backends:
 | `cme_attenuation_summary` | Format attenuation results as compact summary |
 | `cme_controls_by_tactic` | Group controls by D3FEND tactic |
 | `cme_controls_by_category` | Group controls by CME category |
+| `cme_recommend_enrich` | Add role ID, match label, and Ansible vs manual remediability to CVE query results |
 
 ## Regenerating Roles
 

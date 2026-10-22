@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CME Recommended Controls — {{ cme_resolved_cve_id }}</title>
+<style>
+  :root {
+    --rh-red: #ee0000;
+    --rh-red-dark: #a30000;
+    --rh-red-light: #ff442b;
+    --bg: #151515;
+    --surface: #1f1f1f;
+    --surface-raised: #292929;
+    --border: #3c3f42;
+    --text: #e0e0e0;
+    --text-secondary: #a3a3a3;
+    --pass: #3e8635;
+    --pass-light: #5ba352;
+    --pass-bg: rgba(62, 134, 53, 0.12);
+    --fail: #c9190b;
+    --fail-light: #f56e6e;
+    --fail-bg: rgba(201, 25, 11, 0.10);
+    --warn: #f0ab00;
+    --warn-bg: rgba(240, 171, 0, 0.10);
+    --info: #06c;
+    --info-bg: rgba(0, 102, 204, 0.10);
+    --accent: #73bcf7;
+    --font: 'Red Hat Display', 'Red Hat Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  .container { max-width: 1280px; margin: 0 auto; }
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 3px solid var(--rh-red);
+  }
+  .logo {
+    width: 40px;
+    height: 40px;
+    background: var(--rh-red);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: white;
+    flex-shrink: 0;
+  }
+  .header-text h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .header-meta {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-top: 0.2rem;
+  }
+  .header-meta strong { color: var(--text); }
+  .phase-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-left: auto;
+    background: var(--info-bg);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+  }
+
+  .cve-hero {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+  }
+  .cve-hero h2 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 0.5rem;
+  }
+  .cve-desc {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+  .cve-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .chip {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .chip code { color: var(--accent); font-size: 0.75rem; }
+  .chip.critical { background: var(--fail-bg); color: var(--fail-light); border-color: var(--fail); }
+  .chip.high { background: rgba(240, 171, 0, 0.12); color: var(--warn); border-color: var(--warn); }
+  .chip.medium { background: var(--info-bg); color: var(--accent); border-color: var(--info); }
+  .chip.low { background: var(--pass-bg); color: var(--pass-light); border-color: var(--pass); }
+
+  .score-hero {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+  .score-ring {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    flex-shrink: 0;
+  }
+  .score-ring svg {
+    width: 140px;
+    height: 140px;
+    transform: rotate(-90deg);
+  }
+  .score-ring .ring-bg {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 10;
+  }
+  .score-ring .ring-fill {
+    fill: none;
+    stroke-width: 10;
+    stroke-linecap: round;
+  }
+  .score-ring .score-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .score-ring .score-number {
+    font-size: 2.5rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .score-ring .score-unit {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .score-details { flex: 1; }
+  .score-details h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.75rem;
+  }
+  .score-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.5rem;
+  }
+  .score-metric {
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.6rem 0.75rem;
+    text-align: center;
+  }
+  .score-metric .sm-value {
+    font-size: 1.1rem;
+    font-weight: 800;
+  }
+  .score-metric .sm-label {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: 0.15rem;
+  }
+  .score-metric.sm-pass .sm-value { color: var(--pass-light); }
+  .score-metric.sm-fail .sm-value { color: var(--fail-light); }
+  .score-metric.sm-cvss .sm-value { color: var(--rh-red-light); }
+  .score-metric.sm-total .sm-value { color: var(--accent); }
+  .score-metric.sm-warn .sm-value { color: var(--warn); }
+
+  .section-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 2.5rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border);
+    color: #fff;
+  }
+  .section-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    margin-bottom: 1rem;
+  }
+  th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    background: var(--surface-raised);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.875rem;
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr.ansible { background: var(--pass-bg); }
+  tr.manual { background: var(--warn-bg); }
+
+  .badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .badge.ansible { background: rgba(62, 134, 53, 0.2); color: var(--pass-light); }
+  .badge.manual { background: rgba(240, 171, 0, 0.2); color: var(--warn); }
+
+  .tactic-tag {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: rgba(115, 188, 247, 0.1);
+    color: var(--accent);
+  }
+  .metric-tag {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: rgba(238, 0, 0, 0.12);
+    color: var(--rh-red-light);
+    margin: 0.1rem 0.15rem 0.1rem 0;
+  }
+
+  .attenuation-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .attenuation-card .metric-name {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--rh-red-light);
+    min-width: 2.5rem;
+  }
+  .attenuation-card .arrow { color: var(--text-secondary); font-size: 1.2rem; }
+  .attenuation-card .value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--pass-light);
+  }
+  .attenuation-card .controls {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin-left: auto;
+  }
+
+  .apply-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .apply-box h3 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.5rem;
+  }
+  .apply-box pre {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.9rem 1rem;
+    overflow-x: auto;
+    font-size: 0.8rem;
+    color: var(--accent);
+  }
+  .empty {
+    color: var(--text-secondary);
+    padding: 1rem 0;
+  }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 2px solid var(--rh-red);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  footer .powered {
+    color: var(--rh-red-light);
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+{% set total = cme_recommended_ids | length %}
+{% set sev = (cme_resolved_severity | default('') | lower) %}
+{% set orig_score = cme_display_original_score %}
+{% set proj_score = cme_display_projected_score %}
+{% set ring_pct = ((cme_auto_count | float) / (total | float) * 100) if total > 0 else 0 %}
+{% set score_color = '--accent' %}
+
+  <header>
+    <div class="logo">CME</div>
+    <div class="header-text">
+      <h1>Recommended Controls</h1>
+      <div class="header-meta">
+        CVE: <strong>{{ cme_resolved_cve_id }}</strong>
+        &nbsp;|&nbsp; {{ ansible_date_time.iso8601 }}
+      </div>
+    </div>
+    <span class="phase-badge">Recommendation</span>
+  </header>
+
+  <div class="cve-hero">
+    <h2>{{ cme_resolved_cve_id }}</h2>
+    {% if cme_cve_description | length > 0 %}
+    <p class="cve-desc">{{ cme_cve_description | e }}</p>
+    {% endif %}
+    <div class="cve-chips">
+      {% if cme_resolved_severity | length > 0 %}
+      <span class="chip {{ sev }}">{{ cme_resolved_severity }}{% if cme_resolved_base_score | default('') | string | length > 0 %} {{ cme_resolved_base_score }}{% endif %}</span>
+      {% endif %}
+      {% if cme_resolved_cvss_vector | length > 0 %}
+      <span class="chip"><code>{{ cme_resolved_cvss_vector }}</code></span>
+      {% endif %}
+      {% for cwe in cme_resolved_cwe_ids %}
+      <span class="chip">{{ cwe }}</span>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="score-hero">
+    <div class="score-ring">
+      <svg viewBox="0 0 140 140">
+        <circle class="ring-bg" cx="70" cy="70" r="58"></circle>
+        <circle class="ring-fill" cx="70" cy="70" r="58"
+          stroke="var({{ score_color }})"
+          stroke-dasharray="364.4"
+          stroke-dashoffset="{{ 364.4 - (364.4 * ring_pct / 100) }}">
+        </circle>
+      </svg>
+      <div class="score-label">
+        <div class="score-number" style="color: var({{ score_color }})">{{ total }}</div>
+        <div class="score-unit">Controls</div>
+      </div>
+    </div>
+    <div class="score-details">
+      <h2>Recommended CME Controls</h2>
+      <div class="score-metrics">
+        <div class="score-metric sm-total">
+          <div class="sm-value">{{ total }}</div>
+          <div class="sm-label">Recommended</div>
+        </div>
+        <div class="score-metric sm-pass">
+          <div class="sm-value">{{ cme_auto_count }}</div>
+          <div class="sm-label">Ansible Apply</div>
+        </div>
+        <div class="score-metric sm-warn">
+          <div class="sm-value">{{ cme_manual_count }}</div>
+          <div class="sm-label">Manual</div>
+        </div>
+        <div class="score-metric sm-cvss">
+          <div class="sm-value">{{ cme_query_result.query_summary.matched_by_vector }}</div>
+          <div class="sm-label">Matched by CVSS</div>
+        </div>
+        <div class="score-metric sm-total">
+          <div class="sm-value">{{ cme_query_result.query_summary.matched_by_cwe }}</div>
+          <div class="sm-label">Matched by CWE</div>
+        </div>
+        {% if proj_score | string | length > 0 %}
+        <div class="score-metric sm-cvss">
+          <div class="sm-value">{{ orig_score }} → {{ proj_score }}</div>
+          <div class="sm-label">Projected CVSS</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+{% if cme_projected_attenuation | length > 0 %}
+  <div class="section-title">Projected CVSS Attenuation</div>
+  <div class="section-subtitle">Metric shifts if every recommended control is active on the target.</div>
+
+{% for item in cme_projected_attenuation %}
+  <div class="attenuation-card">
+    <span class="metric-name">{{ item.metric }}</span>
+    <span class="arrow">→</span>
+    <span class="value">{{ item.modified_to }}</span>
+    <span class="controls">{{ item.contributing_controls | length }} control{{ 's' if item.contributing_controls | length != 1 else '' }}: {{ item.contributing_controls | join(', ') }}</span>
+  </div>
+{% endfor %}
+{% endif %}
+
+  <div class="section-title">Recommended Controls to Apply</div>
+{% if total == 0 %}
+  <p class="empty">No CME controls matched this CVE. Manual triage is required.</p>
+{% else %}
+{% for tactic, items in cme_recommended_controls | sort(attribute='tactic') | groupby('tactic') %}
+  <div class="section-subtitle">{{ tactic }} — {{ items | length }} control{{ 's' if items | length != 1 else '' }}</div>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Control</th>
+        <th>Category</th>
+        <th>Layer</th>
+        <th>Matched via</th>
+        <th>Metrics</th>
+        <th>Apply</th>
+      </tr>
+    </thead>
+    <tbody>
+{% for c in items %}
+      <tr class="{{ c.remediation_mode }}">
+        <td><strong>{{ c.cme_id }}</strong></td>
+        <td>
+          {{ c.control_name }}
+          {% if c.rationale | default('') | length > 0 %}
+          <div style="color: var(--text-secondary); font-size: 0.78rem; margin-top: 0.2rem;">{{ c.rationale | e }}</div>
+          {% endif %}
+        </td>
+        <td>{{ c.category | default('—') }}</td>
+        <td>{{ c.control_layer | default('—') }}</td>
+        <td><span class="tactic-tag">{{ c.matched_via_label }}</span></td>
+        <td>
+          {% for m in c.matched_metrics | default([]) %}
+          <span class="metric-tag">{{ m }}</span>
+          {% endfor %}
+        </td>
+        <td><span class="badge {{ c.remediation_mode }}">{{ 'Ansible' if c.auto_remediable else 'Manual' }}</span></td>
+      </tr>
+{% endfor %}
+    </tbody>
+  </table>
+{% endfor %}
+{% endif %}
+
+{% if cme_projected_detail | length > 0 %}
+  <div class="section-title">Per-Control Impact</div>
+  <table>
+    <thead>
+      <tr>
+        <th>CME ID</th>
+        <th>Control</th>
+        <th>Metric</th>
+        <th>Shift</th>
+        <th>Rationale</th>
+      </tr>
+    </thead>
+    <tbody>
+{% for d in cme_projected_detail %}
+      <tr>
+        <td><strong>{{ d.cme_id }}</strong></td>
+        <td>{{ d.control_name }}</td>
+        <td><span class="metric-tag">{{ d.metric }}</span></td>
+        <td>{{ d.from_value }} → <strong>{{ d.to_value }}</strong></td>
+        <td>{{ d.rationale | e }}</td>
+      </tr>
+{% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+
+{% if total > 0 %}
+  <div class="section-title">How to Apply</div>
+  <div class="apply-box">
+    <h3>Remediate auto-applicable controls</h3>
+    <pre>ansible-playbook cme.controls.remediate -i inventory.yml \
+  -e cme_profile_path={{ cme_report_dir }}/cve_profile_{{ cme_resolved_cve_id | replace('-', '_') }}.yml</pre>
+  </div>
+  <div class="apply-box">
+    <h3>Verify current posture (no changes)</h3>
+    <pre>ansible-playbook cme.controls.verify -i inventory.yml \
+  -e cme_profile_path={{ cme_report_dir }}/cve_profile_{{ cme_resolved_cve_id | replace('-', '_') }}.yml</pre>
+  </div>
+{% endif %}
+
+  <footer>
+    <span>CME Ansible Collection (cme.controls) v1.0.0 &nbsp;|&nbsp; MCP: {{ cme_mcp_endpoint }}</span>
+    <span class="powered">Powered by Common Mitigation Enumeration</span>
+  </footer>
+</div>
+</body>
+</html>

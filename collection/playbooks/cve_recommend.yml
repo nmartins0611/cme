@@ -1,0 +1,243 @@
+---
+# CME CVE Recommended Controls Report
+#
+# Looks up a CVE, queries the CME MCP server for matching defensive controls,
+# and writes HTML, Markdown, and JSON reports of what to apply.
+# Does not change target hosts.
+#
+# Usage:
+#   ansible-playbook cme.controls.cve_recommend \
+#     -e cve_id=CVE-2026-109618 \
+#     -e cme_mcp_endpoint=http://cme-server:8000
+#
+#   ansible-playbook cme.controls.cve_recommend \
+#     -e cve_id=CVE-2024-38476 \
+#     -e cvss_vector="CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H" \
+#     -e '{"cwe_ids": ["CWE-829"]}' \
+#     -e cme_mcp_endpoint=http://cme-server:8000 \
+#     -e cme_report_dir=./reports
+#
+# Lookup order when vector or CWE IDs are omitted: shipped demo data
+# (CVE-2026-109618, CVE-2026-109619), then NVD, then Red Hat VEX, then CVE.org.
+# Air-gapped: pass both cvss_vector and cwe_ids so no remote source is contacted.
+# The two PHP demo CVEs resolve from local data with no network.
+
+- name: CME CVE Recommended Controls Report
+  hosts: localhost
+  connection: local
+  become: false
+  gather_facts: true
+  vars:
+    cve_id: "CVE-UNKNOWN"
+    cvss_vector: ""
+    cwe_ids: []
+    cwe_ids_csv: ""
+    cme_mcp_endpoint: ""
+    cme_report_dir: "{{ playbook_dir }}/../../reports"
+    nvd_endpoint: "https://services.nvd.nist.gov/rest/json/cves/2.0"
+    nvd_api_key: ""
+    rhsa_endpoint: "https://security.access.redhat.com/data/csaf/v2/vex"
+    cve_org_endpoint: "https://cveawg.mitre.org/api/cve"
+    nvd_timeout_seconds: 30
+    nvd_retries: 3
+
+  tasks:
+    - name: Normalize CWE IDs from list or CSV extra vars
+      ansible.builtin.set_fact:
+        cme_provided_cwe_ids: "{{ (cme_cwe_from_list + cme_cwe_from_csv) | unique | list }}"
+      vars:
+        cme_cwe_from_csv: "{{ (cwe_ids_csv | default('') | string).split(',') | map('trim') | reject('equalto', '') | list }}"
+        cme_cwe_from_list: "{{ cwe_ids if (cwe_ids is iterable and cwe_ids is not string) else ((cwe_ids | default('') | string).split(',') | map('trim') | reject('equalto', '') | list) }}"
+
+    - name: Validate query inputs
+      ansible.builtin.assert:
+        that:
+          - ((cve_id | upper) is match('^CVE-[0-9]{4}-[0-9]+')) or (cvss_vector | length > 0) or (cme_provided_cwe_ids | length > 0)
+        fail_msg: "Provide cve_id (e.g. CVE-2026-109618), cvss_vector, cwe_ids, or a combination"
+
+    - name: Validate MCP endpoint is provided
+      ansible.builtin.assert:
+        that:
+          - cme_mcp_endpoint | length > 0
+        fail_msg: "cme_mcp_endpoint is required — set it to the CME MCP server URL"
+
+    - name: Decide whether CVE metadata lookup is required
+      ansible.builtin.set_fact:
+        cme_need_cve_lookup: "{{ ((cve_id | upper) is match('^CVE-[0-9]{4}-[0-9]+')) and ((cvss_vector | default('') | length == 0) or (cme_provided_cwe_ids | length == 0)) }}"
+
+    - name: Look up CVE metadata
+      cme.controls.cme_cve_lookup:
+        cve_id: "{{ cve_id }}"
+        nvd_endpoint: "{{ nvd_endpoint }}"
+        nvd_api_key: "{{ nvd_api_key }}"
+        rhsa_endpoint: "{{ rhsa_endpoint }}"
+        cve_org_endpoint: "{{ cve_org_endpoint }}"
+        timeout_seconds: "{{ nvd_timeout_seconds }}"
+        retries: "{{ nvd_retries }}"
+      register: cme_cve_lookup_result
+      when: cme_need_cve_lookup | bool
+
+    - name: Resolve CVE parameters after optional lookup
+      ansible.builtin.set_fact:
+        cme_resolved_cve_id: "{{ (cve_id | upper) if ((cve_id | upper) is match('^CVE-')) else 'CVE-UNKNOWN' }}"
+        cme_resolved_cvss_vector: "{{ cvss_vector if (cvss_vector | default('') | length > 0) else (cme_cve_lookup_result.cvss_vector | default('')) }}"
+        cme_resolved_cwe_ids: "{{ cme_provided_cwe_ids if (cme_provided_cwe_ids | length > 0) else (cme_cve_lookup_result.cwe_ids | default([])) }}"
+        cme_resolved_base_score: "{{ cme_cve_lookup_result.base_score | default('') }}"
+        cme_resolved_severity: "{{ cme_cve_lookup_result.severity | default('') }}"
+        cme_cve_description: "{{ cme_cve_lookup_result.description | default('') }}"
+        cme_cve_source: "{{ cme_cve_lookup_result.source | default('provided extra vars') }}"
+
+    - name: Validate resolved query parameters
+      ansible.builtin.assert:
+        that:
+          - (cme_resolved_cvss_vector | length > 0) or (cme_resolved_cwe_ids | length > 0)
+        fail_msg: "Could not resolve a CVSS vector or CWE IDs for this CVE. Pass cvss_vector and/or cwe_ids."
+
+    - name: Query CME MCP for recommended controls
+      cme.controls.cme_query:
+        cvss_vector: "{{ cme_resolved_cvss_vector }}"
+        cwe_ids: "{{ cme_resolved_cwe_ids }}"
+        mcp_endpoint: "{{ cme_mcp_endpoint }}"
+        include_verification: true
+      register: cme_query_result
+
+    - name: Enrich recommended controls
+      ansible.builtin.set_fact:
+        cme_recommended_controls: "{{ cme_query_result.controls | cme_recommend_enrich }}"
+        cme_recommended_ids: "{{ cme_query_result.cme_ids }}"
+
+    - name: Count remediable versus manual controls
+      ansible.builtin.set_fact:
+        cme_auto_count: "{{ cme_recommended_controls | selectattr('auto_remediable') | list | length }}"
+        cme_manual_count: "{{ cme_recommended_controls | rejectattr('auto_remediable') | list | length }}"
+
+    - name: Calculate projected attenuation if recommended controls are applied
+      cme.controls.cme_score:
+        active_controls: "{{ cme_recommended_ids }}"
+        mcp_endpoint: "{{ cme_mcp_endpoint }}"
+        base_score: "{{ cme_resolved_base_score if (cme_resolved_base_score | default('') | string | length > 0) else omit }}"
+        base_vector: "{{ cme_resolved_cvss_vector if (cme_resolved_cvss_vector | length > 0) else omit }}"
+      register: cme_projected_score
+      when: cme_recommended_ids | length > 0
+
+    - name: Record empty projection when scoring was skipped
+      ansible.builtin.set_fact:
+        cme_projected_attenuation: []
+        cme_projected_detail: []
+        cme_projected_simulation: {}
+        cme_display_original_score: "{{ cme_resolved_base_score }}"
+        cme_display_projected_score: ""
+        cme_display_projected_severity: ""
+        cme_display_projected_vector: ""
+      when: cme_projected_score is skipped
+
+    - name: Record projection fields for templates
+      ansible.builtin.set_fact:
+        cme_projected_attenuation: "{{ cme_projected_score.attenuation | default([]) }}"
+        cme_projected_detail: "{{ cme_projected_score.detail | default([]) }}"
+        cme_projected_simulation: "{{ cme_projected_score.simulation | default({}) }}"
+        cme_display_original_score: "{{ cme_projected_score.simulation.original.score | default(cme_resolved_base_score) }}"
+        cme_display_projected_score: "{{ cme_projected_score.simulation.modified.score | default('') }}"
+        cme_display_projected_severity: "{{ cme_projected_score.simulation.modified.severity | default('') }}"
+        cme_display_projected_vector: "{{ cme_projected_score.simulation.modified.vector | default(cme_projected_score.simulation.modified_vector | default('')) }}"
+      when: cme_projected_score is not skipped
+
+    - name: Ensure report directory exists
+      ansible.builtin.file:
+        path: "{{ cme_report_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Write dynamic profile for recommended controls
+      ansible.builtin.copy:
+        content: |
+          ---
+          # Dynamic profile generated for {{ cme_resolved_cve_id }}
+          # CVSS: {{ cme_resolved_cvss_vector | default('N/A') }}
+          # CWE: {{ cme_resolved_cwe_ids | join(', ') | default('N/A') }}
+          # Generated: {{ ansible_date_time.iso8601 }}
+          controls:
+          {% for cid in cme_recommended_controls %}
+            - {{ cid.role_id }}
+          {% endfor %}
+        dest: "{{ cme_report_dir }}/cve_profile_{{ cme_resolved_cve_id | replace('-', '_') }}.yml"
+        mode: "0644"
+      when: cme_recommended_ids | length > 0
+
+    - name: Generate JSON report
+      ansible.builtin.copy:
+        content: "{{ cme_json_report | to_nice_json }}"
+        dest: "{{ cme_report_dir }}/cve_{{ cme_resolved_cve_id | replace('-', '_') }}_recommended_controls.json"
+        mode: "0644"
+      vars:
+        cme_json_report:
+          report_metadata:
+            generated_at: "{{ ansible_date_time.iso8601 }}"
+            report_type: "cve_recommended_controls"
+            mcp_endpoint: "{{ cme_mcp_endpoint }}"
+            cve_source: "{{ cme_cve_source }}"
+          cve:
+            id: "{{ cme_resolved_cve_id }}"
+            description: "{{ cme_cve_description }}"
+            cvss_vector: "{{ cme_resolved_cvss_vector }}"
+            base_score: "{{ cme_resolved_base_score if (cme_resolved_base_score | string | length > 0) else none }}"
+            severity: "{{ cme_resolved_severity }}"
+            cwe_ids: "{{ cme_resolved_cwe_ids }}"
+          query_summary: "{{ cme_query_result.query_summary }}"
+          recommended_controls: "{{ cme_recommended_controls }}"
+          projected_attenuation: "{{ cme_projected_attenuation }}"
+          projected_detail: "{{ cme_projected_detail }}"
+          projected_simulation: "{{ cme_projected_simulation }}"
+
+    - name: Generate Markdown report
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/../templates/cve_recommend_report.md.j2"
+        dest: "{{ cme_report_dir }}/cve_{{ cme_resolved_cve_id | replace('-', '_') }}_recommended_controls.md"
+        mode: "0644"
+
+    - name: Generate HTML report
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/../templates/cve_recommend_report.html.j2"
+        dest: "{{ cme_report_dir }}/cve_{{ cme_resolved_cve_id | replace('-', '_') }}_recommended_controls.html"
+        mode: "0644"
+
+    - name: Display report locations
+      ansible.builtin.debug:
+        msg:
+          - "HTML:     {{ cme_report_dir }}/cve_{{ cme_resolved_cve_id | replace('-', '_') }}_recommended_controls.html"
+          - "Markdown: {{ cme_report_dir }}/cve_{{ cme_resolved_cve_id | replace('-', '_') }}_recommended_controls.md"
+          - "JSON:     {{ cme_report_dir }}/cve_{{ cme_resolved_cve_id | replace('-', '_') }}_recommended_controls.json"
+          - "Profile:  {{ cme_report_dir }}/cve_profile_{{ cme_resolved_cve_id | replace('-', '_') }}.yml"
+
+    - name: Display recommendation summary
+      ansible.builtin.debug:
+        msg: |
+          ═══════════════════════════════════════════════════════════
+           CVE RECOMMENDED CONTROLS — {{ cme_resolved_cve_id }}
+          ═══════════════════════════════════════════════════════════
+           CVSS:     {{ cme_resolved_cvss_vector | default('N/A') }}
+           Score:    {{ cme_resolved_base_score | default('N/A') }} {{ cme_resolved_severity }}
+           CWE:      {{ cme_resolved_cwe_ids | join(', ') if cme_resolved_cwe_ids | length > 0 else 'N/A' }}
+           Source:   {{ cme_cve_source }}
+          ───────────────────────────────────────────────────────────
+           RECOMMENDED: {{ cme_recommended_ids | length }} controls
+             Ansible:  {{ cme_auto_count }}
+             Manual:   {{ cme_manual_count }}
+             By CVSS:  {{ cme_query_result.query_summary.matched_by_vector }}
+             By CWE:   {{ cme_query_result.query_summary.matched_by_cwe }}
+          ───────────────────────────────────────────────────────────
+          {% for c in cme_recommended_controls %}
+           {{ c.cme_id }}  {{ c.control_name }}  [{{ c.matched_via_label }}] ({{ c.remediation_mode }})
+          {% endfor %}
+          {% if cme_display_projected_score | string | length > 0 %}
+          ───────────────────────────────────────────────────────────
+           PROJECTED ATTENUATION (if all recommended controls are active):
+             Original: {{ cme_display_original_score }}
+             Modified: {{ cme_display_projected_score }} {{ cme_display_projected_severity }}
+             Vector:   {{ cme_display_projected_vector | default('N/A') }}
+          {% endif %}
+          ═══════════════════════════════════════════════════════════
+            Apply auto-remediable controls:
+              ansible-playbook cme.controls.remediate -i inventory.yml \
+                -e cme_profile_path={{ cme_report_dir }}/cve_profile_{{ cme_resolved_cve_id | replace('-', '_') }}.yml
+          ═══════════════════════════════════════════════════════════

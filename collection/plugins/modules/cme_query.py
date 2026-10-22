@@ -101,8 +101,17 @@ controls:
     category:
       description: CME sub-category.
       type: str
+    category_id:
+      description: CME category slug.
+      type: str
     control_layer:
       description: Technology layer.
+      type: str
+    description:
+      description: Control description from the CME entry.
+      type: str
+    confidence:
+      description: CME confidence rating.
       type: str
     matched_via:
       description: How this control was matched (cvss_vector, cwe, or both).
@@ -267,8 +276,10 @@ def query_mitigations(endpoint: str, cvss_vector: str, cwe_ids: list, include_ve
             if "error" not in detail:
                 ctrl["tactic"] = detail.get("tactic", ctrl.get("tactic", ""))
                 ctrl["category"] = detail.get("category", ctrl.get("category", ""))
+                ctrl["category_id"] = detail.get("category_id", ctrl.get("category_id", ""))
                 ctrl["control_layer"] = detail.get("control_layer", ctrl.get("control_layer", ""))
                 ctrl["confidence"] = detail.get("confidence", "Medium")
+                ctrl["description"] = detail.get("description", ctrl.get("description", ""))
                 if include_verification:
                     ctrl["verification"] = detail.get("verification", {})
 

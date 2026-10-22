@@ -182,6 +182,46 @@
         description: "Verify + CVSS attenuation scoring + Markdown/JSON reports"
         state: present
 
+    - name: Create CVE Recommended Controls job template
+      ansible.controller.job_template:
+        name: "CME — CVE Recommended Controls"
+        organization: "{{ cme_org_name }}"
+        project: "{{ cme_project_name }}"
+        playbook: "collection/playbooks/cve_recommend.yml"
+        inventory: "{{ cme_inventory_name }}"
+        execution_environment: "{{ cme_ee_name }}"
+        ask_variables_on_launch: true
+        extra_vars:
+          cme_mcp_endpoint: "{{ cme_mcp_endpoint }}"
+          cvss_vector: ""
+          cwe_ids: []
+          cve_id: "CVE-UNKNOWN"
+        survey_enabled: true
+        survey_spec:
+          name: "CVE Details"
+          description: "CVE to map to recommended CME controls"
+          spec:
+            - question_name: "CVE ID"
+              question_description: "The CVE identifier (e.g. CVE-2026-109618). Vector and CWE are looked up from demo data, then NVD, Red Hat, and CVE.org when omitted."
+              variable: cve_id
+              type: text
+              required: true
+              default: ""
+            - question_name: "CVSS Vector"
+              question_description: "Optional. Full CVSS 3.1 vector. Leave empty to look it up."
+              variable: cvss_vector
+              type: text
+              required: false
+              default: ""
+            - question_name: "CWE IDs"
+              question_description: "Optional. Comma-separated CWE IDs (e.g. CWE-416,CWE-824). Leave empty to look them up."
+              variable: cwe_ids_csv
+              type: text
+              required: false
+              default: ""
+        description: "Look up a CVE and report recommended CME controls to apply (HTML/Markdown/JSON)"
+        state: present
+
     - name: Create CVE Response job template
       ansible.controller.job_template:
         name: "CME — CVE Response"
@@ -327,6 +367,7 @@
           - "  • CME — Verify Posture"
           - "  • CME — Remediate"
           - "  • CME — Posture Report"
+          - "  • CME — CVE Recommended Controls (with survey)"
           - "  • CME — CVE Response (with survey)"
           - "Workflow:"
           - "  • CME — Full Compliance Cycle"

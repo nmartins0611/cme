@@ -26,6 +26,7 @@ class FilterModule(object):
             "cme_attenuation_summary": self.attenuation_summary,
             "cme_controls_by_tactic": self.controls_by_tactic,
             "cme_controls_by_category": self.controls_by_category,
+            "cme_recommend_enrich": self.recommend_enrich,
         }
 
     @staticmethod
@@ -123,6 +124,47 @@ class FilterModule(object):
             "modifications": metrics,
             "summary": "; ".join(metrics),
         }
+
+    @staticmethod
+    def recommend_enrich(controls: list) -> list:
+        """Add role_id and remediability to CME query results.
+
+        Usage:
+          {{ cme_query_result.controls | cme_recommend_enrich }}
+        """
+        verify_only_categories = frozenset([
+            "network isolation",
+            "container isolation",
+            "application input validation",
+            "application controls",
+            "network-isolation",
+            "container-isolation",
+            "application-input-validation",
+            "application-controls",
+        ])
+        enriched = []
+        for ctrl in controls:
+            item = dict(ctrl)
+            cme_id = ctrl.get("cme_id", "")
+            category = (ctrl.get("category") or "").lower()
+            category_id = (ctrl.get("category_id") or "").lower()
+            auto_remediable = (
+                category not in verify_only_categories
+                and category_id not in verify_only_categories
+            )
+            item["tactic"] = ctrl.get("tactic") or "Unspecified"
+            item["role_id"] = cme_id.lower().replace("-", "_")
+            item["auto_remediable"] = auto_remediable
+            item["remediation_mode"] = "ansible" if auto_remediable else "manual"
+            matched_via = ctrl.get("matched_via", "")
+            matched_labels = {
+                "cvss_vector": "CVSS",
+                "cwe": "CWE",
+                "both": "CVSS + CWE",
+            }
+            item["matched_via_label"] = matched_labels.get(matched_via, matched_via)
+            enriched.append(item)
+        return enriched
 
     @staticmethod
     def controls_by_tactic(controls_vars: list) -> dict:
