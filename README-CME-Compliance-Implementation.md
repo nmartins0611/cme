@@ -116,7 +116,7 @@ Set these as extra vars, survey answers, or group vars. Defaults below are the v
 | `cvss_vector` | empty | `cve_recommend.yml`, `cve_response.yml` | Full vector, for example `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H`. The MCP parser keeps metrics `AV`, `AC`, `PR`, `UI`, `S`, `C`, `I`, `A`. |
 | `cwe_ids` | `[]` | `cve_recommend.yml`, `cve_response.yml` | List of CWE IDs. `cve_response.yml` reads this list. |
 | `cwe_ids_csv` | empty | `cve_recommend.yml` and both surveys | Comma-separated CWE IDs. `cve_recommend.yml` merges this into the query. `cve_response.yml` does not read `cwe_ids_csv`. |
-| `nvd_endpoint` | `https://services.nvd.nist.gov/rest/json/cves/2.0` | `cve_recommend.yml` | NVD CVE API 2.0. Second lookup source, after shipped demo data. |
+| `nvd_endpoint` | `https://services.nvd.nist.gov/rest/json/cves/2.0` | `cve_recommend.yml` | NVD CVE API 2.0. First lookup source. |
 | `nvd_api_key` | empty | `cve_recommend.yml` | Optional NVD rate-limit key. Sent only to NVD. |
 | `rhsa_endpoint` | `https://security.access.redhat.com/data/csaf/v2/vex` | `cve_recommend.yml` | Red Hat CSAF VEX base. Third source. Requests `/{year}/{cve_id}.json`. |
 | `cve_org_endpoint` | `https://cveawg.mitre.org/api/cve` | `cve_recommend.yml` | CVE.org CVE Services API. Fourth source. Requests `/{cve_id}`. |
@@ -415,7 +415,7 @@ CVE Recommended Controls survey:
 | CVSS Vector | `cvss_vector` | text | no | empty |
 | CWE IDs | `cwe_ids_csv` | text | no | empty |
 
-Leave vector and CWE empty to look them up. Order is shipped demo data (`CVE-2026-109618`, `CVE-2026-109619`), then NVD, then Red Hat VEX, then CVE.org. The first source with a CVSS vector or a CWE ID wins. CVSS 3.1 is preferred when a source publishes more than one version. The playbook accepts a CVE id matching `CVE-[0-9]{4}-[0-9]+`.
+Leave vector and CWE empty to look them up. Order is NVD, then Red Hat VEX, then CVE.org. The first source with a CVSS vector or a CWE ID wins. CVSS 3.1 is preferred when a source publishes more than one version. The playbook accepts a CVE id matching `CVE-[0-9]{4}-[0-9]+`.
 
 CVE Response survey:
 
@@ -560,7 +560,7 @@ ansible-playbook cme.controls.drift_check \
   -e cme_baseline_path=./cme_baseline.json
 ```
 
-CVE recommendation (demo data for the PHP CVEs, otherwise NVD then Red Hat then CVE.org; no host changes):
+CVE recommendation (NVD then Red Hat then CVE.org; no host changes):
 
 ```bash
 ansible-playbook cme.controls.cve_recommend \
@@ -609,7 +609,7 @@ Phase 5 of `cve_response.yml` sends `base_score: 9.8` with whatever `cvss_vector
 2. Launch `CME — Verify Posture`. Set `cme_profile` to `minimal` for the first run.
 3. Read the job log. Each control prints `CME-XXX PASSED` or `CME-XXX FAILED`.
 4. Launch `CME — Full Compliance Cycle` when the verify log is acceptable. Approve `Approve Remediation` within 3600 seconds.
-5. Launch `CME — CVE Recommended Controls` and enter `CVE-2026-109618` or `CVE-2026-109619`. Leave the vector and CWE fields empty. Those two IDs resolve from demo data on the execution node. Any other CVE needs a path to NVD, Red Hat, or CVE.org.
+5. Launch `CME — CVE Recommended Controls` and enter a valid CVE ID. Leave the vector and CWE fields empty. The ID needs a path to NVD, Red Hat, or CVE.org to resolve.
 6. Launch `CME — CVE Response` only with a vector. To include CWE IDs, launch from the API below so `cwe_ids` is a list.
 
 ### Controller API

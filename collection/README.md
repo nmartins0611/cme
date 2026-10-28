@@ -45,7 +45,7 @@ ansible-playbook cme.controls.report -i inventory.yml \
 
 Looks up the CVE, queries CME for matching controls, and writes HTML, Markdown, and JSON reports. Does not change hosts.
 
-Lookup order when the vector or CWE list is omitted: shipped demo data, then NVD, then the Red Hat CSAF VEX feed, then the CVE.org CVE Services API. The first source with a CVSS vector or a CWE ID wins. Demo data covers `CVE-2026-109618` and `CVE-2026-109619` (PHP request-memory remote code execution), so those IDs resolve with no network.
+Lookup order when the vector or CWE list is omitted: NVD, then the Red Hat CSAF VEX feed, then the CVE.org CVE Services API. The first source with a CVSS vector or a CWE ID wins.
 
 ```bash
 ansible-playbook cme.controls.cve_recommend \

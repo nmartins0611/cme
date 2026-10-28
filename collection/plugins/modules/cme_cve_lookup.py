@@ -14,7 +14,7 @@ short_description: Look up CVSS vector and CWE IDs for a CVE
 version_added: "1.0.0"
 description:
   - Resolves CVE metadata for a CME control query.
-  - Checks shipped demo data first, then NVD, then the Red Hat CSAF VEX feed,
+  - Checks NVD first, then the Red Hat CSAF VEX feed,
     then the CVE.org CVE Services API.
   - Stops at the first source that returns a CVSS vector or at least one CWE ID.
   - Prefers a CVSS 3.1 vector when a source publishes more than one version,
@@ -104,7 +104,7 @@ cwe_ids:
   elements: str
   returned: always
 source:
-  description: Metadata source that answered (demo, nvd, rhsa, or cve.org).
+  description: Metadata source that answered (nvd, rhsa, or cve.org).
   type: str
   returned: always
 """
@@ -114,9 +114,6 @@ import time
 import traceback
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.cme.controls.plugins.module_utils.cve_demo_data import (
-    get_demo_cve,
-)
 
 try:
     from urllib.error import HTTPError, URLError
@@ -528,10 +525,6 @@ def lookup_cve(
     retries: int,
     module: AnsibleModule,
 ) -> dict:
-    demo = get_demo_cve(cve_id)
-    if demo is not None:
-        return demo
-
     misses = []
     try:
         return lookup_cve_from_nvd(
@@ -558,7 +551,7 @@ def lookup_cve(
         _warn_miss(module, "CVE.org", exc)
 
     raise CveLookupMiss(
-        "No CVSS vector or CWE IDs for {0} in demo data, NVD, RHSA, or CVE.org ({1})".format(
+        "No CVSS vector or CWE IDs for {0} in NVD, RHSA, or CVE.org ({1})".format(
             cve_id, "; ".join(misses)
         )
     )

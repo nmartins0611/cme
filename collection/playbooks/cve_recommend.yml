@@ -17,10 +17,8 @@
 #     -e cme_mcp_endpoint=http://cme-server:8000 \
 #     -e cme_report_dir=./reports
 #
-# Lookup order when vector or CWE IDs are omitted: shipped demo data
-# (CVE-2026-109618, CVE-2026-109619), then NVD, then Red Hat VEX, then CVE.org.
+# Lookup order when vector or CWE IDs are omitted: NVD, then Red Hat VEX, then CVE.org.
 # Air-gapped: pass both cvss_vector and cwe_ids so no remote source is contacted.
-# The two PHP demo CVEs resolve from local data with no network.
 
 - name: CME CVE Recommended Controls Report
   hosts: localhost

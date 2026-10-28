@@ -202,7 +202,7 @@
           description: "CVE to map to recommended CME controls"
           spec:
             - question_name: "CVE ID"
-              question_description: "The CVE identifier (e.g. CVE-2026-109618). Vector and CWE are looked up from demo data, then NVD, Red Hat, and CVE.org when omitted."
+              question_description: "The CVE identifier (e.g. CVE-2026-109618). Vector and CWE are looked up from NVD, Red Hat, and CVE.org when omitted."
               variable: cve_id
               type: text
               required: true
