@@ -2,6 +2,14 @@
 
 All notable changes to the CME (Common Mitigation Enumeration) project are documented here.
 
+## 2026-11-20
+
+### Auto-generated changelog
+
+- `3130a1d` Update build_site.py,docs/by-tactic.html,docs/index.html
+- `c699521` ci: serialize main auto-commits to fix push races
+- `4c605a8` Add 1 CME entries (CME-922);Update 2 CME entries (CME-1311,CME-1316);Update docs/api/CME-1311.json,docs/api/CME-1316.json,docs/api/entries.json
+
 ## 2026-11-10
 
 ### Auto-generated changelog
